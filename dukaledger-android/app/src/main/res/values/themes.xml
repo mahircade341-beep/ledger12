@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base app theme -->
+    <style name="Theme.DukaLedger" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#3b82f6</item>
+        <item name="colorPrimaryVariant">#2563eb</item>
+        <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorSecondary">#06b6d4</item>
+        <item name="colorOnSecondary">#ffffff</item>
+        <item name="android:statusBarColor">#020617</item>
+        <item name="android:navigationBarColor">#020617</item>
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.DukaLedger.Splash" parent="Theme.DukaLedger">
+        <item name="android:windowBackground">#020617</item>
+    </style>
+</resources>

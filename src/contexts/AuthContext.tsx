@@ -1,17 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { genId } from '../hooks/useLocalData';
-
-interface StoredAuth {
-  userId: string;
-  email: string;
-  fullName?: string;
-  role: string;
-  passwordHash: string;
-}
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
   userId: string | null;
-  profile: StoredAuth | null;
+  profile: any | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isLocked: boolean;
@@ -24,50 +16,72 @@ interface AuthContextType {
   unlock: (password: string) => boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
   refreshProfile: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function hashPassword(password: string): Promise<string> {
+async function hashSimple(value: string): Promise<string> {
   const enc = new TextEncoder();
-  const data = enc.encode(password + 'dl-salt-v1');
+  const data = enc.encode(value);
   const hash = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function getStoredAuth(): StoredAuth | null {
-  try {
-    const stored = localStorage.getItem('dl-auth');
-    return stored ? JSON.parse(stored) : null;
-  } catch { return null; }
-}
-
-function saveStoredAuth(auth: StoredAuth) {
-  localStorage.setItem('dl-auth', JSON.stringify(auth));
-}
-
-function clearStoredAuth() {
-  localStorage.removeItem('dl-auth');
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [stored, setStored] = useState<StoredAuth | null>(getStoredAuth);
+  const [session, setSession] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(() => localStorage.getItem('dl-locked') === 'true');
   const [appLockEnabled, setAppLockEnabled] = useState(() => !!localStorage.getItem('dl-app-lock-hash'));
 
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      if (s?.user) {
+        setProfile({
+          userId: s.user.id,
+          email: s.user.email,
+          fullName: s.user.user_metadata?.full_name || '',
+          role: s.user.user_metadata?.role || 'user',
+        });
+      }
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      if (s?.user) {
+        setProfile({
+          userId: s.user.id,
+          email: s.user.email,
+          fullName: s.user.user_metadata?.full_name || '',
+          role: s.user.user_metadata?.role || 'user',
+        });
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      const hash = await hashPassword(password);
-      const profiles = JSON.parse(localStorage.getItem('dl-profiles') || '[]');
-      if (profiles.find((p: any) => p.email === email)) return { error: 'Email already registered' };
-      const userId = genId();
-      profiles.push({ _id: userId, email, fullName, passwordHash: hash, role: email === 'fahmanmanka25@gmail.com' ? 'admin' : 'user' });
-      localStorage.setItem('dl-profiles', JSON.stringify(profiles));
-      const auth: StoredAuth = { userId, email, fullName, passwordHash: hash, role: email === 'fahmanmanka25@gmail.com' ? 'admin' : 'user' };
-      saveStoredAuth(auth);
-      setStored(auth);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: email === 'fahmanmanka25@gmail.com' ? 'admin' : 'user',
+          },
+        },
+      });
+      if (error) return { error: error.message };
       return {};
     } catch (err: any) {
       return { error: err?.message || 'Registration failed' };
@@ -76,24 +90,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const hash = await hashPassword(password);
-      const profiles = JSON.parse(localStorage.getItem('dl-profiles') || '[]');
-      const profile = profiles.find((p: any) => p.email === email && p.passwordHash === hash);
-      if (!profile) return { error: 'Invalid email or password' };
-      const auth: StoredAuth = { userId: profile._id, email: profile.email, fullName: profile.fullName, passwordHash: hash, role: profile.role };
-      saveStoredAuth(auth);
-      setStored(auth);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { error: error.message };
       setIsLocked(false);
       localStorage.removeItem('dl-locked');
       return {};
     } catch (err: any) {
-      return { error: err?.message || 'Invalid credentials' };
+      return { error: err?.message || 'Sign in failed' };
     }
   };
 
-  const signOut = () => {
-    clearStoredAuth();
-    setStored(null);
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setProfile(null);
     setIsLocked(false);
     localStorage.removeItem('dl-locked');
   };
@@ -103,25 +113,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('dl-locked', 'true');
   };
 
-  const unlock = (password: string): boolean => {
-    if (!stored?.passwordHash) return false;
-    hashPassword(password).then((hash) => {
-      if (hash === stored.passwordHash) {
-        setIsLocked(false);
-        localStorage.removeItem('dl-locked');
-      }
-    });
-    // Immediately unlock for UX, background verify
+  const unlock = (_password: string): boolean => {
     setIsLocked(false);
     localStorage.removeItem('dl-locked');
     return true;
   };
 
   const setAppPassword = async (password: string, securityQuestion?: string, securityAnswer?: string) => {
-    const hash = await hashPassword(password + '-applock');
+    const hash = await hashSimple(password + '-applock');
     localStorage.setItem('dl-app-lock-hash', hash);
     if (securityQuestion && securityAnswer) {
-      const ansHash = await hashPassword(securityAnswer.toLowerCase().trim() + '-security');
+      const ansHash = await hashSimple(securityAnswer.toLowerCase().trim() + '-security');
       localStorage.setItem('dl-security-q', securityQuestion);
       localStorage.setItem('dl-security-a', ansHash);
     }
@@ -140,28 +142,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifySecurityAnswer = async (answer: string): Promise<boolean> => {
     const storedHash = localStorage.getItem('dl-security-a');
     if (!storedHash) return false;
-    const ansHash = await hashPassword(answer.toLowerCase().trim() + '-security');
+    const ansHash = await hashSimple(answer.toLowerCase().trim() + '-security');
     return ansHash === storedHash;
   };
 
   const verifyAppPassword = async (password: string): Promise<boolean> => {
     const storedHash = localStorage.getItem('dl-app-lock-hash');
     if (!storedHash) return false;
-    const hash = await hashPassword(password + '-applock');
+    const hash = await hashSimple(password + '-applock');
     return hash === storedHash;
   };
 
   const refreshProfile = () => {
-    setStored(getStoredAuth());
+    if (session?.user) {
+      setProfile({
+        userId: session.user.id,
+        email: session.user.email,
+        fullName: session.user.user_metadata?.full_name || '',
+        role: session.user.user_metadata?.role || 'user',
+      });
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
-        userId: stored?.userId ?? null,
-        profile: stored ?? null,
-        isAuthenticated: !!stored,
-        isLoading: false,
+        userId: session?.user?.id ?? null,
+        profile: profile ?? null,
+        isAuthenticated: !!session,
+        isLoading,
         isLocked,
         appLockEnabled,
         setAppPassword,

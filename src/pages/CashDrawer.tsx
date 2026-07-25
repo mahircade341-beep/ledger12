@@ -14,33 +14,9 @@ function setOpeningStorage(val: number) {
 
 export default function CashDrawer() {
   const { userId } = useAuth();
-  const { data: payouts, add, remove: removePayout } = useLocalData('payouts');
-  const { data: transactions, remove: removeTx } = useLocalData('transactions');
+  const { data: payouts, add } = useLocalData('payouts');
 
   const [openingBal, setOpeningBal] = useState(getOpeningBalance());
-  const [showNewDay, setShowNewDay] = useState(false);
-  const [newDayLoading, setNewDayLoading] = useState(false);
-
-  // Calculate today's stats for the new-day modal
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-  const todayTxns = transactions.filter((t: any) => t._creationTime >= todayStart.getTime());
-  const todayPayouts = payouts.filter((p: any) => p._creationTime >= todayStart.getTime());
-  const todayTotal = todayTxns.reduce((s: number, t: any) => s + t.total, 0);
-  const todayPayoutTotal = todayPayouts.reduce((s: number, p: any) => s + p.amount, 0);
-
-  const handleNewDay = () => {
-    setNewDayLoading(true);
-    // Remove today's transactions
-    todayTxns.forEach((t: any) => removeTx(t._id));
-    // Remove today's payouts
-    todayPayouts.forEach((p: any) => removePayout(p._id));
-    // Reset opening balance
-    setOpeningStorage(0);
-    setOpeningBal(0);
-    setOpeningInput(0);
-    setNewDayLoading(false);
-    setShowNewDay(false);
-  };
   const [openingInput, setOpeningInput] = useState(openingBal > 0 ? openingBal : 0);
   const [type, setType] = useState<'drawdown' | 'restock' | 'expense'>('drawdown');
   const [category, setCategory] = useState('');
@@ -111,56 +87,11 @@ export default function CashDrawer() {
             </button>
           </div>
         </div>
-        <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-          <p className="text-xs text-[var(--text-muted)] flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Set each day's starting cash. Used in the Anti-Theft Cash Auditor.
-          </p>
-          {(todayTxns.length > 0 || todayPayouts.length > 0) && (
-            <button onClick={() => setShowNewDay(true)} className="btn-sm bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-xs px-3 py-1.5 hover:bg-red-500/20 transition-all flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.181" /></svg>
-              End Day & Reset
-            </button>
-          )}
-        </div>
+        <p className="text-xs text-[var(--text-muted)] mt-2 flex items-center gap-1">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          Set each day's starting cash. Used in the Anti-Theft Cash Auditor.
+        </p>
       </div>
-
-      {/* New Day Confirmation Modal */}
-      {showNewDay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowNewDay(false)}>
-          <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">End Day & Reset</h2>
-                <p className="text-sm text-[var(--text-secondary)]">This will clear today's data and open a fresh drawer.</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 mb-4 p-3 bg-[var(--bg-surface2)] rounded-lg">
-              <div className="flex justify-between text-sm"><span className="text-[var(--text-secondary)]">Today's Sales</span><span className="text-cyan-400 font-medium">{todayTxns.length} transactions</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[var(--text-secondary)]">Total Revenue</span><span className="text-emerald-400 font-medium">KES {todayTotal.toLocaleString()}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[var(--text-secondary)]">Today's Payouts</span><span className="text-amber-400 font-medium">{todayPayouts.length} entries</span></div>
-              <div className="flex justify-between text-sm"><span className="text-[var(--text-secondary)]">Total Payouts</span><span className="text-red-400 font-medium">KES {todayPayoutTotal.toLocaleString()}</span></div>
-              <div className="border-t border-slate-200/30 dark:border-slate-700/30 pt-2 flex justify-between text-sm font-semibold"><span className="text-[var(--text-primary)]">Opening Balance Reset</span><span className="text-emerald-400">KES {openingBal} → KES 0</span></div>
-            </div>
-
-            <p className="text-xs text-[var(--text-muted)] mb-4 flex items-start gap-1">
-              <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              Previous day's data is still accessible in Insights history. Only today's data is removed from the active view.
-            </p>
-
-            <div className="flex gap-2">
-              <button onClick={() => setShowNewDay(false)} className="btn-secondary flex-1">Cancel</button>
-              <button onClick={handleNewDay} disabled={newDayLoading} className="btn-danger flex-1">
-                {newDayLoading ? 'Resetting...' : 'Yes, Reset & New Day'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="stat-card"><span className="stat-label">Drawdowns</span><span className="stat-value text-cyan-400">KES {totals.drawdown.toLocaleString()}</span></div>

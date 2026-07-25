@@ -16,9 +16,10 @@ interface AuthContextType {
   isLoading: boolean;
   isLocked: boolean;
   appLockEnabled: boolean;
-  setAppPassword: (password: string) => Promise<void>;
+  setAppPassword: (password: string, securityQuestion?: string, securityAnswer?: string) => Promise<void>;
   removeAppPassword: () => void;
   verifyAppPassword: (password: string) => Promise<boolean>;
+  verifySecurityAnswer: (answer: string) => Promise<boolean>;
   lock: () => void;
   unlock: (password: string) => boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
@@ -116,17 +117,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
-  const setAppPassword = async (password: string) => {
+  const setAppPassword = async (password: string, securityQuestion?: string, securityAnswer?: string) => {
     const hash = await hashPassword(password + '-applock');
     localStorage.setItem('dl-app-lock-hash', hash);
+    if (securityQuestion && securityAnswer) {
+      const ansHash = await hashPassword(securityAnswer.toLowerCase().trim() + '-security');
+      localStorage.setItem('dl-security-q', securityQuestion);
+      localStorage.setItem('dl-security-a', ansHash);
+    }
     setAppLockEnabled(true);
   };
 
   const removeAppPassword = () => {
     localStorage.removeItem('dl-app-lock-hash');
     localStorage.removeItem('dl-locked');
+    localStorage.removeItem('dl-security-q');
+    localStorage.removeItem('dl-security-a');
     setIsLocked(false);
     setAppLockEnabled(false);
+  };
+
+  const verifySecurityAnswer = async (answer: string): Promise<boolean> => {
+    const storedHash = localStorage.getItem('dl-security-a');
+    if (!storedHash) return false;
+    const ansHash = await hashPassword(answer.toLowerCase().trim() + '-security');
+    return ansHash === storedHash;
   };
 
   const verifyAppPassword = async (password: string): Promise<boolean> => {
@@ -152,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAppPassword,
         removeAppPassword,
         verifyAppPassword,
+        verifySecurityAnswer,
         lock,
         unlock,
         signUp,

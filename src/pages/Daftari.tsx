@@ -9,6 +9,16 @@ function fmtTime(ts: number) {
   if (pref === '24h') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
+function fmtTimeRelative(ts: number) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  const hrs = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`;
+  if (hrs < 24) return `${hrs} hr${hrs > 1 ? 's' : ''} ago`;
+  return new Date(ts).toLocaleDateString();
+}
 
 export default function Daftari() {
   const { userId } = useAuth();
@@ -137,7 +147,7 @@ export default function Daftari() {
                             .reduce((sum, next) => sum - next.amount, totalOwed);
                           return (
                             <tr key={p._id} className="border-b border-slate-200/20 dark:border-slate-800/20 last:border-0">
-                              <td className="py-1.5 pr-2 text-[var(--text-muted)]">{new Date(p._creationTime).toLocaleDateString()} {fmtTime(p._creationTime)}</td>
+                              <td className="py-1.5 pr-2 text-[var(--text-secondary)]" title={new Date(p._creationTime).toLocaleDateString() + ' ' + fmtTime(p._creationTime)}>{fmtTimeRelative(p._creationTime)}</td>
                               <td className="py-1.5 px-2 text-right text-emerald-400 font-medium">-KES {p.amount.toLocaleString()}</td>
                               <td className="py-1.5 pl-2 text-right text-[var(--text-secondary)] font-medium">KES {remaining.toLocaleString()}</td>
                             </tr>

@@ -1,27 +1,116 @@
 {
-  "name": "DukaLedger Pro",
+  "name": "DukaLedger Pro - POS & Inventory",
   "short_name": "DukaLedger",
-  "description": "Professional retail management system with POS, inventory, debtors, cash drawer, and analytics",
+  "description": "Complete retail management system for Kenyan micro-retail shops. Point of Sale, inventory tracking, debtor ledger (Daftari), cash drawer auditing, M-Pesa tracking, and sales analytics — all offline first.",
   "start_url": "/",
+  "id": "dukaledger-pro-v1",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#020617",
   "theme_color": "#3b82f6",
   "orientation": "any",
-  "icons": [
+  "categories": ["business", "finance", "productivity", "shopping"],
+  "lang": "en-KE",
+  "dir": "ltr",
+  "scope": "/",
+  "edge_side_panel": {},
+  "iarc_rating_id": "",
+  "prefer_related_applications": false,
+  "related_applications": [
     {
-      "src": "/icons/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.dukaledger.pro",
+      "id": "com.dukaledger.pro"
     }
   ],
-  "categories": ["business", "finance", "productivity"],
-  "lang": "en-US",
-  "scope": "/"
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/pos.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Point of Sale — process customer transactions with product search, barcode scanning, and M-Pesa/Debt payment"
+    },
+    {
+      "src": "/screenshots/stock.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Stock Management — track inventory, set wholesale/retail prices, and manage suppliers"
+    },
+    {
+      "src": "/screenshots/insights.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Insights & Audit — sales analytics, profit calculation, and anti-theft cash auditor"
+    },
+    {
+      "src": "/screenshots/daftari.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Daftari Debt Ledger — manage credit customers with partial payment tracking"
+    }
+  ],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "auto"
+  },
+  "shortcuts": [
+    {
+      "name": "New Sale",
+      "short_name": "POS",
+      "description": "Open Point of Sale to process transactions",
+      "url": "/pos",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Inventory",
+      "short_name": "Stock",
+      "description": "Manage products, stock levels, and suppliers",
+      "url": "/stock",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Debtors",
+      "short_name": "Daftari",
+      "description": "View debtor ledger and record payments",
+      "url": "/daftari",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Insights",
+      "short_name": "Reports",
+      "description": "Sales reports, profit analysis, and cash audit",
+      "url": "/insights",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
 }

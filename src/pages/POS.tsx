@@ -6,6 +6,7 @@ interface ReceiptData {
   id: string;
   items: { name: string; quantity: number; price: number; subtotal: number }[];
   total: number; subtotal: number; discount: number; paymentMethod: string; date: Date; pricing: 'retail' | 'wholesale';
+  debtorName?: string;
 }
 
 function useVoiceInput(onResult: (text: string) => void) {
@@ -30,6 +31,7 @@ export default function POS() {
   const { add: addTx, remove: removeTx } = useLocalData('transactions');
   const { updateQuantity } = useLocalData('products');
   const { data: categories } = useLocalData('categories');
+  const { data: debtors, add: addDebtor, update: updateDebtor } = useLocalData('debtors');
 
   const [cart, setCart] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -50,12 +52,29 @@ export default function POS() {
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showRecentSales, setShowRecentSales] = useState(false);
+  const [debtorSearch, setDebtorSearch] = useState('');
+  const [selectedDebtor, setSelectedDebtor] = useState<any>(null);
+  const [showDebtorDropdown, setShowDebtorDropdown] = useState(false);
+  const [showNewDebtor, setShowNewDebtor] = useState(false);
+  const [newDebtorName, setNewDebtorName] = useState('');
+  const [newDebtorPhone, setNewDebtorPhone] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+  const debtorRef = useRef<HTMLInputElement>(null);
 
   function fmtTime(ts: number) {
     const pref = localStorage.getItem('dl-time-format') || '12h';
     if (pref === '24h') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  function fmtTimeRelative(ts: number) {
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(mins / 60);
+    const days = Math.floor(hrs / 24);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`;
+    if (hrs < 24) return `${hrs} hr${hrs > 1 ? 's' : ''} ago`;
+    return new Date(ts).toLocaleDateString();
   }
 
   // #1: Keyboard shortcuts
@@ -173,8 +192,37 @@ export default function POS() {
   const subtotal = cart.reduce((s: number, i: any) => s + i.subtotal, 0);
   const total = Math.max(0, subtotal - discount);
 
+  const handleAddDebtor = () => {
+    if (!newDebtorName.trim() || !userId) return;
+    const existing = debtors.find((d: any) => d.name.toLowerCase() === newDebtorName.trim().toLowerCase());
+    if (existing) {
+      setSelectedDebtor(existing);
+      setNewDebtorName('');
+      setNewDebtorPhone('');
+      setShowNewDebtor(false);
+      return;
+    }
+    const id = addDebtor({
+      userId: userId as any,
+      name: newDebtorName.trim(),
+      phone: newDebtorPhone,
+      amount: 0,
+      notes: '',
+      status: 'active'
+    } as any);
+    setSelectedDebtor({ _id: id, name: newDebtorName.trim(), phone: newDebtorPhone, amount: 0 });
+    setNewDebtorName('');
+    setNewDebtorPhone('');
+    setShowNewDebtor(false);
+  };
+
   const finalizeSale = () => {
     if (cart.length === 0 || !userId) return;
+    if (paymentMethod === 'debt' && !selectedDebtor) {
+      alert('Select a debtor or add a new one for debt sales');
+      debtorRef.current?.focus();
+      return;
+    }
     setLoading(true); setSuccessMsg(''); setReceipt(null);
     const items = cart.map((c: any) => ({
       productId: c.product._id, name: c.product.name, quantity: c.quantity,
@@ -182,15 +230,28 @@ export default function POS() {
       wholesalePrice: c.product.wholesalePrice,
       subtotal: c.subtotal,
     }));
-    const txId = addTx({ userId: userId as any, items, total, paymentMethod, discount, pricing: pricingMode } as any);
+    const extraData: any = {};
+    if (paymentMethod === 'debt' && selectedDebtor) {
+      extraData.debtorId = selectedDebtor._id;
+      extraData.debtorName = selectedDebtor.name;
+      // Also add to the debtor's outstanding balance
+      const currentDebtor = debtors.find((d: any) => d._id === selectedDebtor._id);
+      if (currentDebtor) {
+        updateDebtor(selectedDebtor._id, {
+          amount: (currentDebtor.amount || 0) + total,
+          status: 'active'
+        } as any);
+      }
+    }
+    const txId = addTx({ userId: userId as any, items, total, paymentMethod, discount, pricing: pricingMode, ...extraData } as any);
     cart.forEach((c: any) => {
       const p = products.find((x: any) => x._id === c.product._id);
       if (p) updateQuantity(p._id, Math.max(0, p.quantity - c.quantity));
     });
-    setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), pricing: pricingMode });
+    setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), pricing: pricingMode, debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined });
     setSuccessMsg(`Sale finalized! KES ${total.toLocaleString()}`);
     window.dispatchEvent(new Event('salecompleted'));
-    setCart([]); setDiscount(0); setLoading(false);
+    setCart([]); setDiscount(0); setSelectedDebtor(null); setDebtorSearch(''); setLoading(false);
   };
 
   // Void a transaction
@@ -285,11 +346,18 @@ export default function POS() {
                 {receipt.discount > 0 && <div className="flex justify-between text-sm text-red-500"><span>Discount</span><span>-KES {receipt.discount.toLocaleString()}</span></div>}
                 <div className="flex justify-between text-base font-bold text-gray-900 pt-1 border-t border-gray-100"><span>Total</span><span>KES {receipt.total.toLocaleString()}</span></div>
               </div>
-              <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200"><div className="flex justify-between text-sm text-gray-600"><span>Payment</span><span className="font-medium capitalize">{receipt.paymentMethod}</span></div></div>
+              <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200">
+                <div className="flex justify-between text-sm text-gray-600"><span>Payment</span><span className="font-medium capitalize">{receipt.paymentMethod}</span></div>
+                {receipt.debtorName && <div className="flex justify-between text-sm text-gray-600 mt-1"><span>Debtor</span><span className="font-medium">{receipt.debtorName}</span></div>}
+              </div>
               <div className="text-center mt-4 pt-3 border-t-2 border-dashed border-gray-200"><p className="text-xs text-gray-400">Thank you for your business!</p></div>
             </div>
             <div className="flex gap-2 p-4 bg-gray-50 border-t border-gray-200 print:hidden">
-              <button onClick={() => window.print()} className="btn-primary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Print Receipt</button>
+              <button onClick={() => window.print()} className="btn-primary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> {window.innerWidth > 480 ? 'Print Receipt' : 'Print'}</button>
+              <button onClick={() => {
+                const text = `DukaLedger Pro\n${receipt.date.toLocaleDateString()} ${fmtTime(receipt.date.getTime())}\n#${receipt.id.slice(-8).toUpperCase()}\n\n${receipt.items.map(i => `${i.name} ×${i.quantity} = KES ${i.subtotal.toLocaleString()}`).join('\n')}\n\nTotal: KES ${receipt.total.toLocaleString()}\nPayment: ${receipt.paymentMethod}${receipt.debtorName ? '\nDebtor: ' + receipt.debtorName : ''}\n\nThank you for your business!`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+              }} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> WhatsApp</button>
               <button onClick={() => setReceipt(null)} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Close</button>
             </div>
           </div>
@@ -488,10 +556,79 @@ export default function POS() {
               <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Payment Method</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['cash', 'mpesa', 'debt'] as const).map((m) => (
-                    <button key={m} onClick={() => setPaymentMethod(m)} className={`py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${paymentMethod === m ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-[var(--bg-surface2)] text-[var(--text-secondary)] border border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50'}`}>{m === 'cash' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Cash</> : m === 'mpesa' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> M-Pesa</> : <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Debt</>}</button>
+                    <button key={m} onClick={() => {
+                      setPaymentMethod(m);
+                      if (m !== 'debt') { setSelectedDebtor(null); setDebtorSearch(''); setShowNewDebtor(false); }
+                    }} className={`py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${paymentMethod === m ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-[var(--bg-surface2)] text-[var(--text-secondary)] border border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50'}`}>{m === 'cash' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Cash</> : m === 'mpesa' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> M-Pesa</> : <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Debt</>}</button>
                   ))}
                 </div>
               </div>
+
+              {/* Debtor selection — shown only when payment method is Debt */}
+              {paymentMethod === 'debt' && (
+                <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Assign to Debtor</label>
+
+                  {selectedDebtor ? (
+                    <div className="flex items-center justify-between p-2 bg-[var(--bg-surface2)] rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                        <div>
+                          <p className="text-sm font-medium text-[var(--text-primary)]">{selectedDebtor.name}</p>
+                          <p className="text-xs text-amber-400">Outstanding: KES {((debtors.find((d: any) => d._id === selectedDebtor._id)?.amount || 0) + total).toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => { setSelectedDebtor(null); setDebtorSearch(''); }} className="btn-ghost p-1 text-xs text-red-400">Change</button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <input ref={debtorRef} type="text" value={debtorSearch} onChange={(e) => { setDebtorSearch(e.target.value); setShowDebtorDropdown(true); }}
+                          className="input-field text-sm" placeholder="Search existing debtors..."
+                          onFocus={() => setShowDebtorDropdown(true)}
+                          onBlur={() => setTimeout(() => setShowDebtorDropdown(false), 200)} />
+                        {showDebtorDropdown && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-xl z-20 max-h-48 overflow-y-auto">
+                            {debtors
+                              .filter((d: any) => d.name.toLowerCase().includes(debtorSearch.toLowerCase()) || (d.phone || '').includes(debtorSearch))
+                              .map((d: any) => (
+                                <button key={d._id} type="button" onMouseDown={() => { setSelectedDebtor(d); setDebtorSearch(''); setShowDebtorDropdown(false); }}
+                                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left hover:bg-[var(--bg-surface2)] transition-colors border-b border-slate-200/30 dark:border-slate-700/30 last:border-0">
+                                  <span className="flex-1 text-[var(--text-primary)] font-medium">{d.name}</span>
+                                  <span className={`text-xs ${d.status === 'active' ? 'text-amber-400' : 'text-emerald-400'}`}>KES {d.amount.toLocaleString()}</span>
+                                </button>
+                              ))}
+                            {debtors.filter((d: any) => d.name.toLowerCase().includes(debtorSearch.toLowerCase())).length === 0 && (
+                              <div className="p-2">
+                                <p className="text-xs text-[var(--text-muted)] text-center py-2">No debtors match "{debtorSearch}"</p>
+                                <button type="button" onMouseDown={() => { setNewDebtorName(debtorSearch); setShowNewDebtor(true); setShowDebtorDropdown(false); }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-cyan-400 hover:bg-[var(--bg-surface2)] rounded-lg transition-colors">
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                  Add "{debtorSearch}" as new debtor
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {showNewDebtor && (
+                        <div className="mt-2 p-2 bg-[var(--bg-surface2)] rounded-lg border border-cyan-500/20">
+                          <p className="text-xs font-medium text-cyan-400 mb-2">New Debtor</p>
+                          <div className="flex gap-2 mb-2">
+                            <input type="text" value={newDebtorName} onChange={(e) => setNewDebtorName(e.target.value)} className="input-field text-sm flex-1" placeholder="Full name" />
+                            <input type="tel" value={newDebtorPhone} onChange={(e) => setNewDebtorPhone(e.target.value)} className="input-field text-sm w-[130px]" placeholder="Phone" />
+                          </div>
+                          <div className="flex gap-2">
+                            <button type="button" onClick={handleAddDebtor} className="btn-primary btn-sm" disabled={!newDebtorName.trim()}>Add & Select</button>
+                            <button type="button" onClick={() => setShowNewDebtor(false)} className="btn-ghost text-xs">Cancel</button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
             <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-4 space-y-2">
               <div className="flex justify-between text-sm text-[var(--text-secondary)]"><span>Subtotal</span><span>KES {subtotal.toLocaleString()}</span></div>

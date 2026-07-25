@@ -111,17 +111,23 @@ export default function Stock() {
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">{editId ? 'Edit Product' : 'Add Product'}</h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2"><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Product Name *</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="e.g. Cooking Oil 1L" required /></div>
+                <div className="col-span-2"><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Product Name *</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="e.g. Cooking Oil 1L" required /></div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Category</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
                   <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="input-field" placeholder="e.g. Food" list="cat-list" />
                   <datalist id="cat-list">{uniqueCategories.map((c) => <option key={c} value={c} />)}</datalist>
                 </div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Barcode</label><input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field" placeholder="Scan or type" /></div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Quantity</label><input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-field" /></div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Wholesale (KES)</label><input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className="input-field" /></div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Retail Price (KES) *</label><input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-field" required /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode</label><input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field" placeholder="Scan or type" /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity</label><input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-field" /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES)</label><input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className={`input-field ${wholesalePrice <= 0 ? 'border-amber-500/40' : ''}`} /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail Price (KES) *</label><input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-field" required /></div>
               </div>
+              {wholesalePrice <= 0 && retailPrice > 0 && (
+                <div className="flex items-start gap-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                  <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                  <p className="text-xs text-amber-400/90">No wholesale price set — profit tracking will be incomplete for this product.</p>
+                </div>
+              )}
               {/* Product Image */}
               <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-3 mt-1">
                 <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Product Image</p>

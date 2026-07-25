@@ -1,9 +1,10 @@
-const CACHE_NAME = 'dukaledger-v2';
+const CACHE_NAME = 'dukaledger-v3';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/favicon.png',
 ];
 
 // Install: cache static assets
@@ -39,6 +40,8 @@ self.addEventListener('fetch', (event) => {
   if (
     url.pathname.startsWith('/src/') ||
     url.pathname.startsWith('/assets/') ||
+    url.pathname.startsWith('/icons/') ||
+    url.pathname === '/favicon.png' ||
     STATIC_ASSETS.includes(url.pathname)
   ) {
     event.respondWith(
@@ -51,6 +54,23 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         }).catch(() => new Response('Offline', { status: 503 }));
+      })
+    );
+    return;
+  }
+
+  // For screenshots: cache-first with a dedicated cache
+  if (url.pathname.startsWith('/screenshots/')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open('dukaledger-screenshots').then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        }).catch(() => new Response(null, { status: 404 }));
       })
     );
     return;

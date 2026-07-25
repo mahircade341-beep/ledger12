@@ -11,13 +11,27 @@ function fmtTime(ts: number) {
   }
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
+function fmtTimeRelative(ts: number) {
+  const now = Date.now();
+  const diff = now - ts;
+  const mins = Math.floor(diff / 60000);
+  const hrs = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`;
+  if (hrs < 24) return `${hrs} hr${hrs > 1 ? 's' : ''} ago`;
+  if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+  return new Date(ts).toLocaleDateString();
+}
 
 export default function Insights() {
   const { userId } = useAuth();
   const { data: transactions } = useLocalData('transactions');
   const { data: products } = useLocalData('products');
   const { data: payouts } = useLocalData('payouts');
-  const { data: debtors } = useLocalData('debtors');
+  const { data: debtors, update: updateDebtor } = useLocalData('debtors');
+  const { add: addPayment } = useLocalData('debtPayments');
+  const { remove: removeTx, update: updateTx } = useLocalData('transactions');
   const [period, setPeriod] = useState<ViewPeriod>('daily');
 
   const getDateRange = () => {
@@ -60,11 +74,19 @@ export default function Insights() {
     return { totalProfit, totalCost, margin: grossSales > 0 ? (totalProfit / grossSales) * 100 : 0, itemsMissingWholesale, totalItems };
   }, [filteredTransactions, products, grossSales]);
 
+  // Opening balance (from Cash Drawer, per-day)
+  const openingBalance = (() => {
+    const key = `dl-opening-${new Date().toISOString().slice(0, 10)}`;
+    try { return parseInt(localStorage.getItem(key) || '0'); }
+    catch { return 0; }
+  })();
+
   const cashTransactions = filteredTransactions.filter((t: any) => t.paymentMethod === 'cash');
   const mpesaTransactions = filteredTransactions.filter((t: any) => t.paymentMethod === 'mpesa');
   const debtTransactions = filteredTransactions.filter((t: any) => t.paymentMethod === 'debt');
 
   const expectedCash = cashTransactions.reduce((sum: number, t: any) => sum + t.total, 0);
+  const totalExpectedCash = openingBalance + expectedCash;
   const mpesaTotal = mpesaTransactions.reduce((sum: number, t: any) => sum + t.total, 0);
 
   // Accounts Receivable (separate from cash audit)
@@ -172,11 +194,13 @@ export default function Insights() {
           <div className="flex items-center justify-between mb-4"><div className="flex items-center gap-2"><svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg><h2 className="text-lg font-semibold text-[var(--text-primary)]">Anti-Theft Cash Auditor</h2></div><span className="badge-amber">Audit</span></div>
           <p className="text-xs text-[var(--text-muted)] mb-3">Tracks physical cash and mobile money only. Credit/debt is tracked separately below.</p>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><span className="text-sm text-[var(--text-secondary)]">Expected Cash in Drawer</span><span className="text-sm font-bold text-emerald-400">KES {expectedCash.toLocaleString()}</span></div>
+            {openingBalance > 0 && <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><span className="text-sm text-[var(--text-secondary)]">Opening Balance</span><span className="text-sm font-bold text-emerald-400">KES {openingBalance.toLocaleString()}</span></div>}
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><span className="text-sm text-[var(--text-secondary)]">Cash Sales (today)</span><span className="text-sm font-bold text-emerald-400">KES {expectedCash.toLocaleString()}</span></div>
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg border-l-2 border-emerald-500"><div><span className="text-sm text-[var(--text-secondary)]">Expected Cash in Drawer</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Opening + Cash Sales</p></div><span className="text-sm font-bold text-emerald-400">KES {totalExpectedCash.toLocaleString()}</span></div>
             <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><span className="text-sm text-[var(--text-secondary)]">M-Pesa Collected</span><span className="text-sm font-bold text-cyan-400">KES {mpesaTotal.toLocaleString()}</span></div>
             <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><span className="text-sm text-[var(--text-secondary)]">Cash Out (Payouts)</span><span className="text-sm font-bold text-red-400">-KES {totalPayoutsAmt.toLocaleString()}</span></div>
-            <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-3"><div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><div><span className="text-sm font-semibold text-[var(--text-primary)]">Net Cash Position</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Expected cash − Payouts</p></div><span className={`text-lg font-bold ${expectedCash - totalPayoutsAmt >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {(expectedCash - totalPayoutsAmt).toLocaleString()}</span></div></div>
-            {expectedCash - totalPayoutsAmt < 0 ? (
+            <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-3"><div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg"><div><span className="text-sm font-semibold text-[var(--text-primary)]">Net Cash Position</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Expected cash in drawer − Payouts</p></div><span className={`text-lg font-bold ${totalExpectedCash - totalPayoutsAmt >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {(totalExpectedCash - totalPayoutsAmt).toLocaleString()}</span></div></div>
+            {totalExpectedCash - totalPayoutsAmt < 0 ? (
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-2"><svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-red-400">Discrepancy Detected</p><p className="text-xs text-red-400/70 mt-0.5">Payouts exceed expected cash. Review entries.</p></div></div>
             ) : numTransactions > 0 && (
               <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-start gap-2"><svg className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div><p className="text-sm font-medium text-emerald-400">All Clear</p><p className="text-xs text-emerald-400/70 mt-0.5">Physical cash and M-Pesa reconcile.</p></div></div>
@@ -212,7 +236,7 @@ export default function Insights() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="text-[var(--text-muted)] border-b border-slate-200/60 dark:border-slate-800/60">
-              <th className="text-left py-2 pr-2">Date</th><th className="text-right py-2 px-2">Items</th><th className="text-right py-2 px-2">Payment</th><th className="text-right py-2 px-2">Discount</th><th className="text-right py-2 px-2">Profit</th><th className="text-right py-2 pl-2">Total</th>
+              <th className="text-left py-2 pr-2">Date</th><th className="text-right py-2 px-2">Items</th><th className="text-right py-2 px-2">Payment</th><th className="text-right py-2 px-2">Discount</th><th className="text-right py-2 px-2">Profit</th><th className="text-right py-2 px-2">Total</th><th className="text-right py-2 pl-2">Action</th>
             </tr></thead>
             <tbody>
               {filteredTransactions.slice(0, 20).map((t: any) => {
@@ -226,16 +250,32 @@ export default function Insights() {
                 });
                 return (
                   <tr key={t._id} className="border-b border-slate-200/30 dark:border-slate-800/30 hover:bg-[var(--bg-surface2)]/50 transition-colors">
-                    <td className="py-2 pr-2 text-[var(--text-muted)] text-xs">{new Date(t._creationTime).toLocaleDateString()} {fmtTime(t._creationTime)}</td>
+                    <td className="py-2 pr-2 text-[var(--text-secondary)] text-xs" title={new Date(t._creationTime).toLocaleDateString() + ' ' + fmtTime(t._creationTime)}>{fmtTimeRelative(t._creationTime)}{t.debtorName && <span className="block text-[10px] text-amber-400/70">{t.debtorName}</span>}</td>
                     <td className="py-2 px-2 text-right text-[var(--text-secondary)]">{t.items.length}{txMissing > 0 && <span className="text-[10px] text-amber-400 ml-1" title="Missing wholesale price">⚠</span>}</td>
-                    <td className="py-2 px-2 text-right capitalize"><span className={`badge ${t.paymentMethod === 'cash' ? 'badge-emerald' : t.paymentMethod === 'mpesa' ? 'badge-cyan' : 'badge-amber'}`}>{t.paymentMethod}</span></td>
+                    <td className="py-2 px-2 text-right capitalize"><span className={`badge ${t.paymentMethod === 'cash' ? 'badge-emerald' : t.paymentMethod === 'mpesa' ? 'badge-cyan' : t.paymentMethod === 'debt' && t.debtorName ? 'badge-amber' : 'badge-amber'}`}>{t.paymentMethod === 'debt' && t.debtorName ? `${t.debtorName.slice(0, 8)}…` : t.paymentMethod}</span></td>
                     <td className="py-2 px-2 text-right text-amber-400">{t.discount > 0 ? `KES ${t.discount.toLocaleString()}` : '—'}</td>
                     <td className={`py-2 px-2 text-right ${txProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {txProfit.toLocaleString()}{txMissing > 0 && <span className="text-[10px] text-amber-400 ml-1">*</span>}</td>
-                    <td className="py-2 pl-2 text-right text-cyan-400 font-medium">KES {t.total.toLocaleString()}</td>
+                    <td className="py-2 px-2 text-right text-cyan-400 font-medium">KES {t.total.toLocaleString()}</td>
+                    <td className="py-2 pl-2 text-right">
+                      {t.paymentMethod === 'debt' && t.debtorId && (
+                        <button
+                          onClick={() => {
+                            const debtor = debtors.find((d: any) => d._id === t.debtorId);
+                            if (!debtor || !confirm(`Mark KES ${t.total.toLocaleString()} debt from ${t.debtorName || 'debtor'} as paid?`)) return;
+                            addPayment({ debtorId: t.debtorId, amount: t.total } as any);
+                            updateDebtor(t.debtorId, { amount: Math.max(0, (debtor.amount || 0) - t.total), status: (debtor.amount - t.total) <= 0 ? 'cleared' : 'active' } as any);
+                            updateTx(t._id, { paymentMethod: 'cash', debtorId: undefined, debtorName: undefined } as any);
+                          }}
+                          className="btn-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs px-2 py-1 hover:bg-emerald-500/20 transition-all whitespace-nowrap"
+                        >
+                          Pay Now
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
-              {filteredTransactions.length === 0 && <tr><td colSpan={6} className="text-center py-8 text-[var(--text-muted)] text-sm">No transactions in this period</td></tr>}
+              {filteredTransactions.length === 0 && <tr><td colSpan={7} className="text-center py-8 text-[var(--text-muted)] text-sm">No transactions in this period</td></tr>}
             </tbody>
           </table>
         </div>

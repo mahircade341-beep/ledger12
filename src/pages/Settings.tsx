@@ -23,6 +23,8 @@ export default function Settings() {
   const [confirmAppPass, setConfirmAppPass] = useState('');
   const [appPassError, setAppPassError] = useState('');
   const [appPassLoading, setAppPassLoading] = useState(false);
+  const [securityQ, setSecurityQ] = useState('');
+  const [securityA, setSecurityA] = useState('');
 
   const handleTimeFormat = (fmt: string) => {
     setTimeFormat(fmt);
@@ -57,18 +59,19 @@ export default function Settings() {
     setAppPassError('');
     if (newAppPass.length < 4) { setAppPassError('Password must be at least 4 characters'); return; }
     if (newAppPass !== confirmAppPass) { setAppPassError('Passwords do not match'); return; }
+    if (!securityQ.trim() || !securityA.trim()) { setAppPassError('Please set a security question and answer for password recovery'); return; }
     setAppPassLoading(true);
     try {
-      await setAppPassword(newAppPass);
-      // Lock the app immediately so user can test it
+      await setAppPassword(newAppPass, securityQ.trim(), securityA.trim());
       localStorage.setItem('dl-locked', 'true');
       setNewAppPass('');
       setConfirmAppPass('');
+      setSecurityQ('');
+      setSecurityA('');
       setShowAppPass(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      // Show info that app will lock on next visit
-      alert('App lock password set! Close and reopen the app to test it, or lock it from the lock screen after 5 min of inactivity.');
+      alert('App lock password set with recovery question! Close and reopen the app to test it.');
     } catch (err: any) {
       setAppPassError(err?.message || 'Failed to set password');
     }
@@ -257,6 +260,35 @@ export default function Settings() {
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Confirm Password *</label>
                   <input type="password" value={confirmAppPass} onChange={(e) => setConfirmAppPass(e.target.value)} className="input-field" placeholder="Re-enter password" required />
+                </div>
+              </div>
+              <div className="border-t border-slate-200/30 dark:border-slate-700/30 pt-3">
+                <p className="text-xs font-semibold text-cyan-400 mb-2">Password Recovery (Required)</p>
+                <p className="text-xs text-[var(--text-muted)] mb-3">Set a security question so you can recover your password if you forget it. Your answer is stored securely (hashed).</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Security Question *</label>
+                    <select value={securityQ} onChange={(e) => setSecurityQ(e.target.value)} className="select-field" required>
+                      <option value="">Choose a question...</option>
+                      <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                      <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                      <option value="What city were you born in?">What city were you born in?</option>
+                      <option value="What is your favorite book?">What is your favorite book?</option>
+                      <option value="What was the make of your first car?">What was the make of your first car?</option>
+                      <option value="What primary school did you attend?">What primary school did you attend?</option>
+                      <option value="Custom question">Custom question...</option>
+                    </select>
+                  </div>
+                  {securityQ === 'Custom question' && (
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Your custom question *</label>
+                      <input type="text" value={securityQ === 'Custom question' ? '' : securityQ} onChange={(e) => setSecurityQ(e.target.value)} className="input-field" placeholder="e.g. What is my shop's name?" />
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Security Answer *</label>
+                    <input type="text" value={securityA} onChange={(e) => setSecurityA(e.target.value)} className="input-field" placeholder="Your answer (case-insensitive)" required />
+                  </div>
                 </div>
               </div>
               {appPassError && <p className="text-xs text-red-400">{appPassError}</p>}

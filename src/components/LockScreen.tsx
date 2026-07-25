@@ -2,10 +2,27 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LockScreen({ children }: { children: React.ReactNode }) {
-  const { isLocked, unlock, lock } = useAuth();
+  const { isLocked, appLockEnabled, verifyAppPassword, lock } = useAuth();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showContent, setShowContent] = useState(!isLocked);
+  const [showForgot, setShowForgot] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+
+  // Check if app lock is enabled on mount
+  useEffect(() => {
+    if (appLockEnabled) {
+      const shouldLock = localStorage.getItem('dl-locked') === 'true';
+      if (shouldLock) {
+        setShowContent(false);
+      } else {
+        setShowContent(true);
+      }
+    } else {
+      setShowContent(true);
+    }
+  }, [appLockEnabled]);
 
   // Inactivity timer
   useEffect(() => {
@@ -13,9 +30,7 @@ export default function LockScreen({ children }: { children: React.ReactNode }) 
     let timer: any;
     const resetTimer = () => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        lock();
-      }, 5 * 60 * 1000); // 5 minutes
+      timer = setTimeout(() => { lock(); }, 5 * 60 * 1000);
     };
     const events = ['mousedown', 'keydown', 'touchstart', 'scroll'];
     events.forEach((e) => window.addEventListener(e, resetTimer));
@@ -26,51 +41,153 @@ export default function LockScreen({ children }: { children: React.ReactNode }) 
     };
   }, [isLocked]);
 
-  useEffect(() => {
-    if (isLocked) {
-      setShowContent(false);
-    }
-  }, [isLocked]);
-
-  const handleUnlock = (e: React.FormEvent) => {
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) { setError('Enter your password'); return; }
-    const success = unlock(password);
-    if (success) {
+    if (!password.trim()) { setError('Enter your app lock password'); return; }
+    const valid = await verifyAppPassword(password);
+    if (valid) {
       setShowContent(true);
       setPassword('');
       setError('');
+      localStorage.removeItem('dl-locked');
     } else {
       setError('Incorrect password');
     }
   };
 
+  const handleForgot = () => {
+    // Generate a one-time recovery code
+    const code = Array.from(crypto.getRandomValues(new Uint8Array(4)))
+      .map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    setGeneratedCode(code);
+
+    // Store hashed recovery code
+    const encoder = new TextEncoder();
+    crypto.subtle.digest('SHA-256', encoder.encode(code + '-recovery-v1')).then((hash) => {
+      const hashStr = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      localStorage.setItem('dl-recovery-hash', hashStr);
+    });
+
+    // Try to get user email from stored auth
+    let userEmail = '';
+    try {
+      const auth = JSON.parse(localStorage.getItem('dl-auth') || '{}');
+      userEmail = auth.email || '';
+    } catch {}
+
+    setShowForgot(true);
+    setError('');
+
+    // Try mailto: to send recovery code
+    if (userEmail) {
+      const subject = encodeURIComponent('DukaLedger Pro - App Lock Recovery Code');
+      const body = encodeURIComponent(
+        `Your recovery code is: ${code}\n\n` +
+        `Open DukaLedger Pro and enter this code to unlock.\n\n` +
+        `After unlocking, go to Settings to reset your app lock password.\n\n` +
+        `If you didn't request this, please ignore this email.`
+      );
+      window.open(`mailto:${userEmail}?subject=${subject}&body=${body}`, '_blank');
+    }
+  };
+
+  const handleRecoveryUnlock = () => {
+    const storedHash = localStorage.getItem('dl-recovery-hash');
+    if (!storedHash) { setError('No recovery request found. Request a new code.'); return; }
+
+    const encoder = new TextEncoder();
+    crypto.subtle.digest('SHA-256', encoder.encode(recoveryCode.trim().toUpperCase() + '-recovery-v1')).then((hash) => {
+      const hashStr = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hashStr === storedHash) {
+        // Recovery successful - remove lock and app password
+        localStorage.removeItem('dl-app-lock-hash');
+        localStorage.removeItem('dl-locked');
+        localStorage.removeItem('dl-recovery-hash');
+        setShowContent(true);
+        setPassword('');
+        setError('');
+        setShowForgot(false);
+        setRecoveryCode('');
+      } else {
+        setError('Invalid recovery code');
+      }
+    });
+  };
+
   if (!showContent) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--bg-primary)]">
-        <div className="w-full max-w-sm p-6">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--bg-primary)] p-4">
+        <div className="w-full max-w-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-4xl shadow-2xl shadow-cyan-500/20 mb-4">
-              🔒
+              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
             </div>
             <h1 className="text-2xl font-bold text-[var(--text-primary)]">DukaLedger</h1>
-            <p className="text-sm text-[var(--text-muted)] mt-1">Session Locked — Enter password to unlock</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">App is locked — enter your password</p>
           </div>
-          <form onSubmit={handleUnlock} className="space-y-4">
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field text-center text-lg py-3"
-                placeholder="Your password"
-                autoFocus
-              />
+
+          {!showForgot ? (
+            <form onSubmit={handleUnlock} className="space-y-4">
+              <div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input-field text-center text-lg py-3"
+                  placeholder="App lock password"
+                  autoFocus
+                />
+              </div>
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">{error}</div>
+              )}
+              <button type="submit" className="btn-primary w-full text-base py-3">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a1.5 1.5 0 10-3 0v3.75m-2.25 8.25h7.5a2.25 2.25 0 002.25-2.25v-6a2.25 2.25 0 00-2.25-2.25h-7.5a2.25 2.25 0 00-2.25 2.25v6a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                Unlock
+              </button>
+              <button type="button" onClick={handleForgot} className="w-full text-xs text-[var(--text-muted)] hover:text-cyan-400 transition-colors py-1">
+                Forgot password?
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
+                <p className="text-xs text-cyan-400/80 text-center mb-2">
+                  A recovery code has been sent to your email.
+                </p>
+                <p className="text-xs text-[var(--text-muted)] text-center">
+                  If the email didn't open, your recovery code is: <strong className="text-cyan-400 font-mono">{generatedCode}</strong>
+                </p>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={recoveryCode}
+                  onChange={(e) => setRecoveryCode(e.target.value)}
+                  className="input-field text-center text-lg py-3 font-mono uppercase"
+                  placeholder="Enter recovery code"
+                  autoFocus
+                />
+              </div>
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">{error}</div>
+              )}
+              <button onClick={handleRecoveryUnlock} className="btn-primary w-full text-base py-3" disabled={!recoveryCode.trim()}>
+                Verify & Unlock
+              </button>
+              <button type="button" onClick={() => { setShowForgot(false); setError(''); setRecoveryCode(''); }} className="w-full text-xs text-[var(--text-muted)] hover:text-cyan-400 transition-colors py-1">
+                Back to password
+              </button>
             </div>
-            {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">{error}</div>}
-            <button type="submit" className="btn-primary w-full text-base py-3">Unlock</button>
-          </form>
-          <p className="text-center text-xs text-[var(--text-muted)] mt-6">Use the same password you signed in with</p>
+          )}
+
+          <p className="text-center text-xs text-[var(--text-muted)] mt-6">
+            Set or change your app lock password in Settings
+          </p>
         </div>
       </div>
     );

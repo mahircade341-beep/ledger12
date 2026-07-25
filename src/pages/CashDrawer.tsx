@@ -29,6 +29,12 @@ export default function CashDrawer() {
   };
   const grandTotal = payouts.reduce((s: number, p: any) => s + p.amount, 0);
 
+  function fmtTime(ts: number) {
+    const pref = localStorage.getItem('dl-time-format') || '12h';
+    if (pref === '24h') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
   return (
     <div className="space-y-6">
       <div className="page-header"><div><h1 className="page-title">Cash Drawer</h1><p className="page-subtitle">Track payouts, restocks, and expenses</p></div></div>
@@ -85,7 +91,7 @@ export default function CashDrawer() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between"><span className="text-sm font-medium text-[var(--text-primary)] capitalize">{p.category}</span><span className={`text-sm font-bold ${p.type === 'drawdown' ? 'text-cyan-400' : p.type === 'restock' ? 'text-amber-400' : 'text-red-400'}`}>-KES {p.amount.toLocaleString()}</span></div>
                     {p.notes && <p className="text-xs text-[var(--text-muted)] mt-0.5">{p.notes}</p>}
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">{new Date(p._creationTime).toLocaleString()}</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">{new Date(p._creationTime).toLocaleDateString()} {fmtTime(p._creationTime)}</p>
                   </div>
                 </div>
               ))}

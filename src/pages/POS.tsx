@@ -52,6 +52,12 @@ export default function POS() {
   const [showRecentSales, setShowRecentSales] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
+  function fmtTime(ts: number) {
+    const pref = localStorage.getItem('dl-time-format') || '12h';
+    if (pref === '24h') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
   // #1: Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -183,6 +189,7 @@ export default function POS() {
     });
     setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), pricing: pricingMode });
     setSuccessMsg(`Sale finalized! KES ${total.toLocaleString()}`);
+    window.dispatchEvent(new Event('salecompleted'));
     setCart([]); setDiscount(0); setLoading(false);
   };
 
@@ -243,7 +250,7 @@ export default function POS() {
               {transactions.slice(0, 10).map((t: any) => (
                 <button key={t._id} onClick={() => voidTransaction(t._id)}
                   className="w-full text-left p-3 rounded-lg bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-colors">
-                  <div className="flex justify-between text-sm"><span className="text-[var(--text-primary)]">{new Date(t._creationTime).toLocaleDateString()} {new Date(t._creationTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span><span className="text-red-400 font-medium">-KES {t.total.toLocaleString()}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-[var(--text-primary)]">{new Date(t._creationTime).toLocaleDateString()} {fmtTime(t._creationTime)}</span><span className="text-red-400 font-medium">-KES {t.total.toLocaleString()}</span></div>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">{t.items.length} items · {t.paymentMethod}</p>
                 </button>
               ))}
@@ -260,7 +267,7 @@ export default function POS() {
               <div className="text-center border-b-2 border-dashed border-gray-200 pb-4 mb-4">
                 <h2 className="text-lg font-bold text-gray-900">DukaLedger Pro</h2>
                 <p className="text-xs text-gray-500 mt-0.5">Retail Management System</p>
-                <p className="text-xs text-gray-400 mt-1">{receipt.date.toLocaleDateString()} {receipt.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className="text-xs text-gray-400 mt-1">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
                 <p className="text-xs text-gray-400 font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
                 <p className="text-[10px] text-gray-400 mt-0.5 uppercase">{receipt.pricing}</p>
               </div>

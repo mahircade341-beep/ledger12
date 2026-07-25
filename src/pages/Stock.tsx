@@ -19,6 +19,8 @@ export default function Stock() {
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lowStockOnly, setLowStockOnly] = useState(false);
+  const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
+  const [threshold, setThreshold] = useState(lowStockThreshold);
   const fileRef = useRef<HTMLInputElement>(null);
   const { data: categories } = useLocalData('categories');
 
@@ -29,7 +31,7 @@ export default function Stock() {
 
   const filtered = products.filter((p) => {
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !(p.barcode || '').includes(search)) return false;
-    if (lowStockOnly && p.quantity > 5) return false;
+    if (lowStockOnly && p.quantity > lowStockThreshold) return false;
     return true;
   });
 
@@ -65,14 +67,44 @@ export default function Stock() {
 
   const handleDelete = (id: string) => { if (confirm('Delete this product?')) remove(id); };
 
-  const lowStockCount = products.filter((p) => p.quantity <= 5).length;
+  const lowStockCount = products.filter((p) => p.quantity <= lowStockThreshold).length;
+
+  const handleThresholdChange = (val: number) => {
+    const v = Math.max(1, Math.min(100, val));
+    setThreshold(v);
+    localStorage.setItem('dl-low-stock-threshold', v.toString());
+  };
+
+  const criticalCount = products.filter((p) => p.quantity <= 0).length;
 
   return (
     <div className="space-y-6">
       <div className="page-header">
         <div><h1 className="page-title">Stock Management</h1><p className="page-subtitle">Manage your inventory & suppliers</p></div>
-        {lowStockCount > 0 && <span className="badge-amber">{lowStockCount} low stock</span>}
+        <div className="flex items-center gap-2">
+          {criticalCount > 0 && <span className="badge-red">{criticalCount} out of stock</span>}
+          {lowStockCount > 0 && <span className="badge-amber">{lowStockCount} low stock</span>}
+        </div>
       </div>
+
+      {/* Low-Stock Alert Banner */}
+      {lowStockCount > 0 && (
+        <div className="p-3 bg-gradient-to-r from-amber-500/10 to-red-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+            <span className="text-sm text-amber-400 font-medium">{lowStockCount} product{lowStockCount !== 1 ? 's' : ''} running low</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-[var(--text-muted)] whitespace-nowrap">Threshold:</label>
+            <div className="flex items-center gap-1.5">
+              <input type="range" min={1} max={50} value={threshold} onChange={(e) => handleThresholdChange(parseInt(e.target.value))} className="w-20 accent-amber-500" />
+              <span className="text-xs font-medium text-amber-400 w-6">{threshold}</span>
+            </div>
+            <button onClick={() => setLowStockOnly(true)} className="btn-secondary btn-sm text-xs">View All</button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2">
           <div className="card">
@@ -127,7 +159,7 @@ export default function Stock() {
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">Inventory ({products.length})</h2>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer">
+                <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer whitespace-nowrap">
                   <input type="checkbox" checked={lowStockOnly} onChange={(e) => setLowStockOnly(e.target.checked)} className="rounded accent-amber-500" /> Low stock only
                 </label>
                 <div className="relative">
@@ -154,7 +186,7 @@ export default function Stock() {
                         </div>
                       </td>
                       <td className="py-2.5 px-2 text-[var(--text-muted)] hidden sm:table-cell">{p.category || '—'}</td>
-                      <td className={`py-2.5 px-2 text-right ${p.quantity <= 5 ? 'text-amber-400 font-medium' : 'text-[var(--text-secondary)]'}`}>{p.quantity}</td>
+                      <td className={`py-2.5 px-2 text-right ${p.quantity <= 0 ? 'text-red-400 font-medium' : p.quantity <= lowStockThreshold ? 'text-amber-400 font-medium' : 'text-[var(--text-secondary)]'}`}>{p.quantity}</td>
                       <td className="py-2.5 px-2 text-right text-[var(--text-muted)] hidden sm:table-cell">KES {p.wholesalePrice.toLocaleString()}</td>
                       <td className="py-2.5 px-2 text-right text-cyan-400 font-medium">KES {p.retailPrice.toLocaleString()}</td>
                       <td className="py-2.5 px-2 text-[var(--text-muted)] hidden lg:table-cell text-xs">{p.supplier || '—'}</td>

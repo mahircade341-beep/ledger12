@@ -10,6 +10,7 @@ import Daftari from './pages/Daftari';
 import CashDrawer from './pages/CashDrawer';
 import Insights from './pages/Insights';
 import Premium from './pages/Premium';
+import Settings from './pages/Settings';
 import Categories from './pages/Categories';
 
 type Theme = 'dark' | 'light';
@@ -18,7 +19,26 @@ const ThemeContext = createContext<ThemeCtx>({ theme: 'dark', toggleTheme: () =>
 export const useTheme = () => useContext(ThemeContext);
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, appLockEnabled } = useAuth();
+
+  // Auto-lock on tab close/reopen
+  useEffect(() => {
+    if (!appLockEnabled) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        localStorage.setItem('dl-locked', 'true');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    // Also lock on page unload (browser close, navigate away)
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('dl-locked', 'true');
+    });
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('beforeunload', () => {});
+    };
+  }, [appLockEnabled]);
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[var(--bg-primary)]">
@@ -67,6 +87,7 @@ export default function App() {
           <Route path="cash-drawer" element={<CashDrawer />} />
           <Route path="insights" element={<Insights />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="settings" element={<Settings />} />
           <Route path="premium" element={<Premium />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

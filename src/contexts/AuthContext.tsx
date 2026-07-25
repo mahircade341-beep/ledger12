@@ -15,6 +15,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isLocked: boolean;
+  appLockEnabled: boolean;
+  setAppPassword: (password: string) => Promise<void>;
+  removeAppPassword: () => void;
+  verifyAppPassword: (password: string) => Promise<boolean>;
   lock: () => void;
   unlock: (password: string) => boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
@@ -50,6 +54,7 @@ function clearStoredAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [stored, setStored] = useState<StoredAuth | null>(getStoredAuth);
   const [isLocked, setIsLocked] = useState(() => localStorage.getItem('dl-locked') === 'true');
+  const [appLockEnabled, setAppLockEnabled] = useState(() => !!localStorage.getItem('dl-app-lock-hash'));
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
@@ -111,6 +116,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const setAppPassword = async (password: string) => {
+    const hash = await hashPassword(password + '-applock');
+    localStorage.setItem('dl-app-lock-hash', hash);
+    setAppLockEnabled(true);
+  };
+
+  const removeAppPassword = () => {
+    localStorage.removeItem('dl-app-lock-hash');
+    localStorage.removeItem('dl-locked');
+    setIsLocked(false);
+    setAppLockEnabled(false);
+  };
+
+  const verifyAppPassword = async (password: string): Promise<boolean> => {
+    const storedHash = localStorage.getItem('dl-app-lock-hash');
+    if (!storedHash) return false;
+    const hash = await hashPassword(password + '-applock');
+    return hash === storedHash;
+  };
+
   const refreshProfile = () => {
     setStored(getStoredAuth());
   };
@@ -123,6 +148,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!stored,
         isLoading: false,
         isLocked,
+        appLockEnabled,
+        setAppPassword,
+        removeAppPassword,
+        verifyAppPassword,
         lock,
         unlock,
         signUp,

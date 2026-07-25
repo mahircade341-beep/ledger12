@@ -217,7 +217,7 @@ export default function POS() {
         <div className="p-3 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-lg">📊</span>
+              <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
               <span className="text-sm text-[var(--text-secondary)]">Today's Sales:</span>
               <span className="text-lg font-bold text-cyan-400">KES {todayTotal.toLocaleString()}</span>
             </div>
@@ -282,8 +282,8 @@ export default function POS() {
               <div className="text-center mt-4 pt-3 border-t-2 border-dashed border-gray-200"><p className="text-xs text-gray-400">Thank you for your business!</p></div>
             </div>
             <div className="flex gap-2 p-4 bg-gray-50 border-t border-gray-200 print:hidden">
-              <button onClick={() => window.print()} className="btn-primary flex-1">🖨️ Print Receipt</button>
-              <button onClick={() => setReceipt(null)} className="btn-secondary flex-1">Close</button>
+              <button onClick={() => window.print()} className="btn-primary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Print Receipt</button>
+              <button onClick={() => setReceipt(null)} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Close</button>
             </div>
           </div>
         </div>
@@ -313,8 +313,9 @@ export default function POS() {
             <div className="flex items-center gap-2 mb-4 flex-wrap">
               <h2 className="text-lg font-semibold text-[var(--text-primary)] flex-1">Select Products</h2>
               <div className="relative max-w-[180px]">
+                <svg className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4V1m0 3a8 8 0 00-8 8m16 0a8 8 0 00-8-8m-8 8a8 8 0 0014.93 4M12 20v3m-8-8a8 8 0 0014.93-4" /></svg>
                 <input type="text" value={barcodeQuery} onChange={(e) => { setBarcodeQuery(e.target.value); setShowBarcodeSuggestions(true); }}
-                  className="input-field pl-2 text-xs" placeholder="🔍 Scan barcode..."
+                  className="input-field pl-7 text-xs" placeholder="Scan barcode..."
                   onKeyDown={(e) => { if (e.key === 'Enter' && barcodeQuery.trim()) { handleBarcode(barcodeQuery.trim()); setBarcodeQuery(''); setShowBarcodeSuggestions(false); } }}
                   onFocus={() => barcodeQuery.trim() && setShowBarcodeSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowBarcodeSuggestions(false), 200)} />
@@ -337,14 +338,14 @@ export default function POS() {
               <button onClick={toggleVoice} className={`btn-icon ${listening ? 'text-red-400 bg-red-500/10 animate-pulse' : ''}`} title="Voice search">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
               </button>
-              <button onClick={() => setShowRecentSales(!showRecentSales)} className={`btn-icon ${showRecentSales ? 'text-cyan-400 bg-cyan-500/10' : ''}`} title="Recent sales">🕐</button>
+              <button onClick={() => setShowRecentSales(!showRecentSales)} className={`btn-icon ${showRecentSales ? 'text-cyan-400 bg-cyan-500/10' : ''}`} title="Recent sales"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
             </div>
 
             {/* #6: Wholesale/Retail toggle */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-0.5">
-                <button onClick={() => setPricingMode('retail')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${pricingMode === 'retail' ? 'bg-cyan-500/10 text-cyan-400' : 'text-[var(--text-muted)]'}`}>💵 Retail</button>
-                <button onClick={() => setPricingMode('wholesale')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${pricingMode === 'wholesale' ? 'bg-amber-500/10 text-amber-400' : 'text-[var(--text-muted)]'}`}>📦 Wholesale</button>
+                <button onClick={() => setPricingMode('retail')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${pricingMode === 'retail' ? 'bg-cyan-500/10 text-cyan-400' : 'text-[var(--text-muted)]'}`}><svg className="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Retail</button>
+                <button onClick={() => setPricingMode('wholesale')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${pricingMode === 'wholesale' ? 'bg-amber-500/10 text-amber-400' : 'text-[var(--text-muted)]'}`}><svg className="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> Wholesale</button>
               </div>
               <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer">
                 <input type="checkbox" checked={showOutOfStock} onChange={(e) => setShowOutOfStock(e.target.checked)} className="rounded accent-cyan-500" />
@@ -364,7 +365,7 @@ export default function POS() {
                   <div className="relative">
                     <button onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border border-slate-300/30 dark:border-slate-700/30 bg-[var(--bg-surface2)] hover:border-cyan-400/50 transition-all duration-200 whitespace-nowrap">
-                      <span className="text-xs">🏷️</span>
+                      <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                       <span className="text-[var(--text-secondary)]">{categoryFilter || 'All'}</span>
                       <svg className={`w-3.5 h-3.5 text-[var(--text-muted)] transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </button>
@@ -381,7 +382,7 @@ export default function POS() {
                           {uniqueCategories.map((cat) => (
                             <button key={cat} onMouseDown={() => { setCategoryFilter(cat); setShowCategoryDropdown(false); }}
                               className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left transition-colors hover:bg-[var(--bg-surface2)] ${categoryFilter === cat ? 'text-cyan-400 bg-cyan-500/5' : 'text-[var(--text-primary)]'}`}>
-                              <span>🏷️</span><span>{cat}</span>
+                              <svg className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg><span>{cat}</span>
                               {categoryFilter === cat && <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
                             </button>
                           ))}
@@ -412,7 +413,7 @@ export default function POS() {
               <div className="mb-3 p-3 bg-[var(--bg-surface2)] rounded-lg border border-slate-200/30 dark:border-slate-700/30">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-[var(--text-muted)] uppercase">Recently Sold</p>
-                  <button onClick={() => setShowRecentSales(false)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xs">✕</button>
+                  <button onClick={() => setShowRecentSales(false)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {transactions.slice(0, 5).flatMap((t: any) => t.items || []).slice(0, 10).map((item: any, i: number) => (
@@ -480,7 +481,7 @@ export default function POS() {
               <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">Payment Method</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['cash', 'mpesa', 'debt'] as const).map((m) => (
-                    <button key={m} onClick={() => setPaymentMethod(m)} className={`py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${paymentMethod === m ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-[var(--bg-surface2)] text-[var(--text-secondary)] border border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50'}`}>{m === 'cash' ? '💵 Cash' : m === 'mpesa' ? '📱 M-Pesa' : '📋 Debt'}</button>
+                    <button key={m} onClick={() => setPaymentMethod(m)} className={`py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${paymentMethod === m ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-[var(--bg-surface2)] text-[var(--text-secondary)] border border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50'}`}>{m === 'cash' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Cash</> : m === 'mpesa' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> M-Pesa</> : <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Debt</>}</button>
                   ))}
                 </div>
               </div>

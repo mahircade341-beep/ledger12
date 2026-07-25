@@ -17,6 +17,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error?: string }>;
+  updatePassword: (newPassword: string) => Promise<{ error?: string }>;
   refreshProfile: () => void;
 }
 
@@ -108,6 +110,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('dl-locked');
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      if (error) return { error: error.message };
+      return {};
+    } catch (err: any) {
+      return { error: err?.message || 'Failed to send reset email' };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { error: error.message };
+      return {};
+    } catch (err: any) {
+      return { error: err?.message || 'Failed to update password' };
+    }
+  };
+
   const lock = () => {
     setIsLocked(true);
     localStorage.setItem('dl-locked', 'true');
@@ -182,6 +206,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signIn,
         signOut,
+        resetPassword,
+        updatePassword,
         refreshProfile,
       }}
     >

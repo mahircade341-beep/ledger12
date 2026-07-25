@@ -12,6 +12,7 @@ import Insights from './pages/Insights';
 import Premium from './pages/Premium';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
+import ResetPassword from './pages/ResetPassword';
 
 type Theme = 'dark' | 'light';
 interface ThemeCtx { theme: Theme; toggleTheme: () => void }
@@ -80,6 +81,7 @@ export default function App() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <Routes>
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<POS />} />
           <Route path="stock" element={<Stock />} />

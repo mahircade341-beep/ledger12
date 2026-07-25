@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
-  const { signUp, signIn } = useAuth();
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const { signUp, signIn, resetPassword } = useAuth();
+  const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +28,20 @@ export default function Login() {
     setLoading(true);
     const result = await signUp(email, password, fullName);
     if (result.error) setError(result.error);
+    setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) { setError('Enter your email address'); return; }
+    setError('');
+    setLoading(true);
+    const result = await resetPassword(email);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setResetSent(true);
+    }
     setLoading(false);
   };
 
@@ -62,7 +77,52 @@ export default function Login() {
             >Sign Up</button>
           </div>
 
-          {mode === 'login' ? (
+          {/* Tab switcher for login/signup only (not reset) */}
+          {mode !== 'reset' && (
+            <div className="flex mb-6 bg-slate-800/50 rounded-xl p-1 gap-1">
+              <button onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
+                className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${mode === 'login' ? 'bg-cyan-500/10 text-cyan-400 shadow-sm border border-cyan-500/20' : 'text-slate-500 hover:text-slate-300'}`}>Sign In</button>
+              <button onClick={() => { setMode('signup'); setError(''); setResetSent(false); }}
+                className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${mode === 'signup' ? 'bg-cyan-500/10 text-cyan-400 shadow-sm border border-cyan-500/20' : 'text-slate-500 hover:text-slate-300'}`}>Sign Up</button>
+            </div>
+          )}
+
+          {mode === 'reset' ? (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                  </svg>
+                </div>
+                <h2 className="text-lg font-semibold text-slate-100">Reset Password</h2>
+                <p className="text-sm text-slate-500 mt-1">Enter your email and we'll send you a reset link</p>
+              </div>
+
+              {resetSent ? (
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
+                  <svg className="w-10 h-10 text-emerald-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                  <p className="text-sm font-medium text-emerald-400">Check your email!</p>
+                  <p className="text-xs text-emerald-400/70 mt-1">We've sent a password reset link to <strong>{email}</strong></p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" placeholder="you@example.com" required autoComplete="email" />
+                  </div>
+                  {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400 flex items-center gap-2"><svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>{error}</div>}
+                  <button type="submit" disabled={loading || !email.trim()} className="btn-primary w-full py-3">{loading ? 'Sending...' : 'Send Reset Link'}</button>
+                </>
+              )}
+
+              <button type="button" onClick={() => { setMode('login'); setError(''); setResetSent(false); }} className="w-full text-sm text-slate-500 hover:text-cyan-400 transition-colors mt-2">
+                ← Back to Sign In
+              </button>
+            </form>
+          ) : mode === 'login' ? (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Email</label>
@@ -80,6 +140,11 @@ export default function Login() {
                     )}
                   </button>
                 </div>
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={() => { setMode('reset'); setError(''); }} className="text-xs text-slate-500 hover:text-cyan-400 transition-colors">
+                  Forgot password?
+                </button>
               </div>
               {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400 flex items-center gap-2"><svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>{error}</div>}
               <button type="submit" disabled={loading} className="btn-primary w-full py-3">{loading ? 'Signing in...' : 'Sign In'}</button>

@@ -14,12 +14,37 @@ const navItems = [
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
+  const touchStartX = useRef(0);
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [online, setOnline] = useState(navigator.onLine);
   const [importStatus, setImportStatus] = useState('');
   const importRef = useRef<HTMLInputElement>(null);
   const isGod = profile?.email === 'fahmanmanka25@gmail.com';
+
+  // Swipe to open sidebar on mobile
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+    };
+    const handleTouchEnd = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      // Swipe right from the left edge (within 40px of edge, swipe > 60px)
+      if (touchStartX.current < 40 && dx > 60 && !open) {
+        setOpen(true);
+      }
+      // Swipe left to close (when sidebar is open)
+      if (dx < -60 && open) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchend', handleTouchEnd);
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [open]);
 
   useEffect(() => {
     const goOnline = () => setOnline(true);

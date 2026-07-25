@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLocalData } from '../hooks/useLocalData';
+import { useState, useRef } from 'react';
+import { useLocalData, fileToDataURL } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Stock() {
@@ -14,10 +14,18 @@ export default function Stock() {
   const [supplier, setSupplier] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [barcode, setBarcode] = useState('');
+  const [image, setImage] = useState('');
   const [search, setSearch] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lowStockOnly, setLowStockOnly] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { data: categories } = useLocalData('categories');
+
+  const uniqueCategories = [...new Set([
+    ...categories.map((c: any) => c.name),
+    ...products.map((p: any) => p.category).filter(Boolean)
+  ])].sort();
 
   const filtered = products.filter((p) => {
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !(p.barcode || '').includes(search)) return false;
@@ -27,17 +35,23 @@ export default function Stock() {
 
   const resetForm = () => {
     setName(''); setQuantity(0); setWholesalePrice(0); setRetailPrice(0);
-    setCategory(''); setSupplier(''); setSupplierPhone(''); setBarcode(''); setEditId(null);
+    setCategory(''); setSupplier(''); setSupplierPhone(''); setBarcode(''); setImage(''); setEditId(null);
+  };
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) { const dataUrl = await fileToDataURL(file); setImage(dataUrl); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !userId) return;
     setLoading(true);
+    const data = { name: name.trim(), quantity, wholesalePrice, retailPrice, category, supplier, supplierPhone, barcode, image: image || undefined };
     if (editId) {
-      update(editId, { name: name.trim(), quantity, wholesalePrice, retailPrice, category, supplier, supplierPhone, barcode } as any);
+      update(editId, data as any);
     } else {
-      add({ userId: userId as any, name: name.trim(), quantity, wholesalePrice, retailPrice, category, supplier, supplierPhone, barcode } as any);
+      add({ userId: userId as any, ...data } as any);
     }
     resetForm();
     setLoading(false);
@@ -46,7 +60,7 @@ export default function Stock() {
   const editProduct = (p: any) => {
     setName(p.name); setQuantity(p.quantity); setWholesalePrice(p.wholesalePrice);
     setRetailPrice(p.retailPrice); setCategory(p.category || ''); setSupplier(p.supplier || '');
-    setSupplierPhone(p.supplierPhone || ''); setBarcode(p.barcode || ''); setEditId(p._id);
+    setSupplierPhone(p.supplierPhone || ''); setBarcode(p.barcode || ''); setImage(p.image || ''); setEditId(p._id);
   };
 
   const handleDelete = (id: string) => { if (confirm('Delete this product?')) remove(id); };
@@ -66,11 +80,33 @@ export default function Stock() {
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2"><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Product Name *</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="e.g. Cooking Oil 1L" required /></div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Category</label><input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="input-field" placeholder="e.g. Food" /></div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Category</label>
+                  <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="input-field" placeholder="e.g. Food" list="cat-list" />
+                  <datalist id="cat-list">{uniqueCategories.map((c) => <option key={c} value={c} />)}</datalist>
+                </div>
                 <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Barcode</label><input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field" placeholder="Scan or type" /></div>
                 <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Quantity</label><input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-field" /></div>
                 <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Wholesale (KES)</label><input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className="input-field" /></div>
                 <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Retail Price (KES) *</label><input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-field" required /></div>
+              </div>
+              {/* Product Image */}
+              <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-3 mt-1">
+                <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Product Image</p>
+                <div className="flex items-center gap-3">
+                  {image ? (
+                    <div className="relative">
+                      <img src={image} alt="Preview" className="w-16 h-16 rounded-lg object-cover border border-slate-200/30" />
+                      <button type="button" onClick={() => setImage('')} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600">✕</button>
+                    </div>
+                  ) : (
+                    <div onClick={() => fileRef.current?.click()} className="w-16 h-16 rounded-lg border-2 border-dashed border-slate-200/30 flex items-center justify-center cursor-pointer hover:border-cyan-400/50 transition-colors">
+                      <span className="text-2xl text-[var(--text-muted)]">📷</span>
+                    </div>
+                  )}
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
+                  <span className="text-xs text-[var(--text-muted)]">Upload product photo (optional)</span>
+                </div>
               </div>
               <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-3 mt-1">
                 <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Supplier Info</p>
@@ -108,7 +144,12 @@ export default function Stock() {
                 <tbody>
                   {filtered.map((p: any) => (
                     <tr key={p._id} className="border-b border-slate-200/30 dark:border-slate-800/30 hover:bg-[var(--bg-surface2)]/50 transition-colors">
-                      <td className="py-2.5 pr-2 text-[var(--text-primary)] font-medium">{p.name}</td>
+                      <td className="py-2.5 pr-2">
+                        <div className="flex items-center gap-2">
+                          {p.image && <img src={p.image} alt="" className="w-7 h-7 rounded object-cover shrink-0" />}
+                          <span className="text-[var(--text-primary)] font-medium truncate">{p.name}</span>
+                        </div>
+                      </td>
                       <td className="py-2.5 px-2 text-[var(--text-muted)] hidden sm:table-cell">{p.category || '—'}</td>
                       <td className={`py-2.5 px-2 text-right ${p.quantity <= 5 ? 'text-amber-400 font-medium' : 'text-[var(--text-secondary)]'}`}>{p.quantity}</td>
                       <td className="py-2.5 px-2 text-right text-[var(--text-muted)] hidden sm:table-cell">KES {p.wholesalePrice.toLocaleString()}</td>

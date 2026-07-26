@@ -1,17 +1,20 @@
 # DukaLedger Pro — Android App
 
-This is the Android wrapper for [DukaLedger Pro](https://ledger12.netlify.app/), an offline-first POS and inventory management system for Kenyan micro-retail shops.
+This is the Android wrapper for [DukaLedger Pro](https://ledger12.netlify.app/), a cloud-powered POS and inventory management system for Kenyan micro-retail shops. **Data is stored securely in Supabase** and synced across all devices — sign in on any phone or tablet to access your business.
 
 Built using **Trusted Web Activity (TWA)** — wraps the PWA as a native Android app via Chrome Custom Tabs.
 
 ## Features
 
-- Point of Sale with cash, M-Pesa, and debt payment
-- Stock management with barcode scanning and supplier tracking
-- Daftari (Debtor Ledger) with partial payment history
-- Cash Drawer auditing with opening balance
-- Sales analytics with profit calculation
-- Fully offline — all data stored locally on device
+- Point of Sale with cash, M-Pesa, and debt payment (with debtor search & add)
+- Stock management with barcode scanning, supplier tracking, and low-stock alerts
+- Daftari (Debtor Ledger) with partial payment history and running balance
+- Cash Drawer auditing with opening balance and anti-theft reconciliation
+- Sales analytics with profit margin calculation and COGS tracking
+- **Cloud sync** — all data stored in Supabase, accessible from any device
+- Supabase Auth with email/password, password reset, and security question recovery
+- Staff access mode — employees can use POS, Stock, Daftari, and Cash Drawer without a full account
+- Glassmorphism UI with dark/light theme and responsive design
 - App lock password with security question recovery
 
 ## Build Instructions

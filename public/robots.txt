@@ -1,0 +1,16 @@
+# DukaLedger Pro - Web Crawler Rules
+# https://ledger12.netlify.app/
+
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /staff
+Allow: /pos
+Allow: /stock
+Allow: /daftari
+
+Disallow: /reset-password
+Disallow: /settings
+Disallow: /premium
+
+Sitemap: https://ledger12.netlify.app/sitemap.xml

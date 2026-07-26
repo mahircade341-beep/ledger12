@@ -3,7 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LockScreen from './components/LockScreen';
 import Layout from './components/Layout';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
+import StaffAccess from './pages/StaffAccess';
 import POS from './pages/POS';
 import Stock from './pages/Stock';
 import Daftari from './pages/Daftari';
@@ -31,7 +33,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    // Also lock on page unload (browser close, navigate away)
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('dl-locked', 'true');
     });
@@ -40,6 +41,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       window.removeEventListener('beforeunload', () => {});
     };
   }, [appLockEnabled]);
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[var(--bg-primary)]">
@@ -68,22 +70,27 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[var(--bg-primary)]">
+      <div className="h-screen flex items-center justify-center bg-[#020617]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-          <p className="text-[var(--text-muted)] text-sm animate-pulse">Loading DukaLedger...</p>
+          <p className="text-slate-500 text-sm animate-pulse">Loading DukaLedger...</p>
         </div>
       </div>
     );
   }
 
+  // If authenticated, redirect to POS app
+  const landingOrRedirect = isAuthenticated ? <Navigate to="/pos" replace /> : <Landing />;
+
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <Routes>
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/" element={landingOrRedirect} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/staff" element={<StaffAccess />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<POS />} />
+          <Route path="pos" element={<POS />} />
           <Route path="stock" element={<Stock />} />
           <Route path="daftari" element={<Daftari />} />
           <Route path="cash-drawer" element={<CashDrawer />} />

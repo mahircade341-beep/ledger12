@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocalData } from '../hooks/useLocalData';
 
 interface Toast {
   id: string;
@@ -13,6 +14,8 @@ export default function ToastAlerts() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const navigate = useNavigate();
   const dismissedRef = useRef<Set<string>>(new Set());
+  const { data: products } = useLocalData('products');
+  const { data: debtors } = useLocalData('debtors');
 
   const addToast = useCallback((t: Toast) => {
     if (dismissedRef.current.has(t.id)) return;
@@ -27,68 +30,66 @@ export default function ToastAlerts() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Check for alerts every 30 seconds
+  // Check for alerts whenever products or debtors data changes
   useEffect(() => {
-    const checkAlerts = () => {
-      try {
-        const threshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
-        const products = JSON.parse(localStorage.getItem('dl-products') || '[]');
-        const debtors = JSON.parse(localStorage.getItem('dl-debtors') || '[]');
-        const debtPayments = JSON.parse(localStorage.getItem('dl-debt-payments') || '[]');
+    const threshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
 
-        // Low-stock check
-        const lowStock = products.filter((p: any) => p.quantity > 0 && p.quantity <= threshold);
-        const outOfStock = products.filter((p: any) => p.quantity <= 0);
+    // Low-stock check
+    const lowStock = products.filter((p: any) => p.quantity > 0 && p.quantity <= threshold);
+    const outOfStock = products.filter((p: any) => p.quantity <= 0);
 
-        if (outOfStock.length > 0) {
-          addToast({
-            id: 'out-of-stock',
-            type: 'critical',
-            title: 'Out of Stock',
-            message: `${outOfStock.length} product${outOfStock.length !== 1 ? 's are' : ' is'} out of stock`,
-            link: '/stock',
-          });
-        } else if (lowStock.length > 0) {
-          addToast({
-            id: 'low-stock',
-            type: 'stock',
-            title: 'Low Stock Alert',
-            message: `${lowStock.length} product${lowStock.length !== 1 ? 's are' : ' is'} running low (≤ ${threshold})`,
-            link: '/stock',
-          });
-        }
+    if (outOfStock.length > 0) {
+      addToast({
+        id: 'out-of-stock',
+        type: 'critical',
+        title: 'Out of Stock',
+        message: `${outOfStock.length} product${outOfStock.length !== 1 ? 's are' : ' is'} out of stock`,
+        link: '/stock',
+      });
+    } else if (lowStock.length > 0) {
+      addToast({
+        id: 'low-stock',
+        type: 'stock',
+        title: 'Low Stock Alert',
+        message: `${lowStock.length} product${lowStock.length !== 1 ? 's are' : ' is'} running low (≤ ${threshold})`,
+        link: '/stock',
+      });
+    }
 
-        // Outstanding debt check
-        const activeDebtors = debtors.filter((d: any) => d.status === 'active');
-        if (activeDebtors.length > 0) {
-          const totalOwed = activeDebtors.reduce((sum: number, d: any) => sum + d.amount, 0);
-          addToast({
-            id: 'outstanding-debt',
-            type: 'debt',
-            title: 'Payment Reminder',
-            message: `KES ${totalOwed.toLocaleString()} outstanding from ${activeDebtors.length} debtor${activeDebtors.length !== 1 ? 's' : ''}`,
-            link: '/daftari',
-          });
-        }
-      } catch {}
+    // Outstanding debt check
+    const activeDebtors = debtors.filter((d: any) => d.status === 'active');
+    if (activeDebtors.length > 0) {
+      const totalOwed = activeDebtors.reduce((sum: number, d: any) => sum + d.amount, 0);
+      addToast({
+        id: 'outstanding-debt',
+        type: 'debt',
+        title: 'Payment Reminder',
+        message: `KES ${totalOwed.toLocaleString()} outstanding from ${activeDebtors.length} debtor${activeDebtors.length !== 1 ? 's' : ''}`,
+        link: '/daftari',
+      });
+    }
+  }, [products, debtors, addToast]);
+
+  // Also listen for custom event from sales
+  useEffect(() => {
+    const onSale = () => {
+      // Re-trigger check by clearing and re-setting
+      const threshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
+      const lowStock = products.filter((p: any) => p.quantity > 0 && p.quantity <= threshold);
+      const outOfStock = products.filter((p: any) => p.quantity <= 0);
+      if (outOfStock.length > 0) {
+        addToast({
+          id: 'out-of-stock',
+          type: 'critical',
+          title: 'Out of Stock',
+          message: `${outOfStock.length} product${outOfStock.length !== 1 ? 's are' : ' is'} out of stock`,
+          link: '/stock',
+        });
+      }
     };
-
-    // Check on mount
-    const timer = setTimeout(checkAlerts, 1500);
-
-    // Periodic check every 30s
-    const interval = setInterval(checkAlerts, 30000);
-
-    // Also listen for custom event from sales
-    const onSale = () => setTimeout(checkAlerts, 500);
     window.addEventListener('salecompleted', onSale);
-
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-      window.removeEventListener('salecompleted', onSale);
-    };
-  }, [addToast]);
+    return () => window.removeEventListener('salecompleted', onSale);
+  }, [products, addToast]);
 
   if (toasts.length === 0) return null;
 

@@ -326,8 +326,8 @@ export default function POS() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
             <div ref={receiptRef} className="receipt p-6 print:p-4">
               <div className="text-center border-b-2 border-dashed border-gray-200 pb-4 mb-4">
-                <h2 className="text-lg font-bold text-gray-900">DukaLedger Pro</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Retail Management System</p>
+                <h2 className="text-lg font-bold text-gray-900">{profile?.storeName || 'DukaLedger Pro'}</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{(profile?.storeName ? profile.storeName + ' — ' : '') + 'Retail Management System'}</p>
                 <p className="text-xs text-gray-400 mt-1">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
                 <p className="text-xs text-gray-400 font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
                 <p className="text-[10px] text-gray-400 mt-0.5 uppercase">{receipt.pricing}</p>
@@ -373,7 +373,7 @@ export default function POS() {
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
             {quickProducts.map((p: any, idx: number) => (
               <button key={p._id} onClick={() => addToCartDirect(p._id)}
-                className="shrink-0 flex items-center gap-2 px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/20 text-sm font-medium transition-all duration-200 whitespace-nowrap">
+                className="shrink-0 flex items-center gap-2 px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/20 text-sm font-medium transition-all duration-200 whitespace-nowrap backdrop-blur-sm">
                 <span className="text-[10px] text-blue-300/50 font-mono">F{idx + 1}</span>
                 <span>{p.name}</span><span className="text-blue-300/70">KES {getPrice(p).toLocaleString()}</span>
               </button>
@@ -418,7 +418,7 @@ export default function POS() {
 
             {/* #6: Wholesale/Retail toggle */}
             <div className="flex items-center justify-between mb-3">
-              <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-0.5">
+              <div className="flex gap-1 bg-white/5 rounded-lg p-0.5 border border-white/10">
                 <button onClick={() => setPricingMode('retail')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${pricingMode === 'retail' ? 'bg-cyan-500/10 text-cyan-400' : 'text-[var(--text-muted)]'}`}><svg className="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Retail</button>
                 <button onClick={() => setPricingMode('wholesale')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${pricingMode === 'wholesale' ? 'bg-amber-500/10 text-amber-400' : 'text-[var(--text-muted)]'}`}><svg className="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> Wholesale</button>
               </div>
@@ -509,7 +509,7 @@ export default function POS() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto scrollbar-thin">
               {filteredProducts.map((p: any) => (
                 <button key={p._id} onClick={() => { if (p.quantity > 0) { setSelectedProduct(p._id); setQuantity(1); } }}
-                  className={`p-3 rounded-lg text-left transition-all duration-200 border ${p.quantity <= 0 ? 'opacity-40 border-slate-700/30' : selectedProduct === p._id ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-[var(--bg-surface2)] border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50 dark:hover:border-slate-600 text-[var(--text-primary)]'}`}>
+                  className={`p-3 rounded-xl text-left transition-all duration-200 border ${p.quantity <= 0 ? 'opacity-40 border-white/5' : selectedProduct === p._id ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/5' : 'cmp-item border-white/10 text-[var(--text-primary)]'}`}>
                   {p.image && <img src={p.image} alt={p.name} className="w-8 h-8 rounded object-cover mb-1" />}
                   <p className="font-medium text-sm truncate">{p.name}</p>
                   <p className={`text-xs mt-0.5 ${pricingMode === 'wholesale' ? 'text-amber-400' : 'text-cyan-400'}`}>KES {getPrice(p).toLocaleString()}</p>
@@ -533,7 +533,7 @@ export default function POS() {
             {cart.length === 0 ? <p className="text-sm text-[var(--text-muted)] text-center py-8">Cart is empty</p> : (
               <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
                 {cart.map((item: any) => (
-                  <div key={item.product._id} className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-lg">
+                  <div key={item.product._id} className="flex items-center justify-between cmp-item">
                     <div className="flex-1"><p className="text-sm font-medium text-[var(--text-primary)]">{item.product.name}</p><p className="text-xs text-[var(--text-muted)]">{item.quantity} × KES {item.product.retailPrice.toLocaleString()}</p></div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold text-cyan-400">KES {item.subtotal.toLocaleString()}</span>
@@ -559,7 +559,7 @@ export default function POS() {
                     <button key={m} onClick={() => {
                       setPaymentMethod(m);
                       if (m !== 'debt') { setSelectedDebtor(null); setDebtorSearch(''); setShowNewDebtor(false); }
-                    }} className={`py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${paymentMethod === m ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-[var(--bg-surface2)] text-[var(--text-secondary)] border border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50'}`}>{m === 'cash' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Cash</> : m === 'mpesa' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> M-Pesa</> : <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Debt</>}</button>
+                    }} className={`py-2.5 rounded-xl text-sm font-medium capitalize transition-all duration-200 ${paymentMethod === m ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm' : 'cmp-item text-[var(--text-secondary)] border-white/10 hover:border-cyan-500/30'}`}>{m === 'cash' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Cash</> : m === 'mpesa' ? <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> M-Pesa</> : <><svg className="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Debt</>}</button>
                   ))}
                 </div>
               </div>

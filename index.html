@@ -3,27 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#3b82f6" />
+    <meta name="theme-color" content="#020617" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="DukaLedger" />
+    <meta name="apple-mobile-web-app-title" content="DukaLedger Pro" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="DukaLedger Pro" />
-    <meta name="description" content="Complete retail management system for Kenyan micro-retail shops. POS, inventory, Daftari (debtor ledger), cash drawer auditing, M-Pesa tracking — all offline." />
-    <meta name="keywords" content="POS, retail, inventory, stock management, duka, kenya, m-pesa, business, cash drawer, point of sale" />
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="DukaLedger Pro — POS & Retail Management for Kenyan Shops" />
+    <meta name="description" content="Complete retail management system for Kenyan micro-retail shops. POS, inventory, Daftari (debtor ledger), cash drawer auditing, M-Pesa tracking, and sales analytics — all in one app." />
+    <meta name="keywords" content="POS, retail, inventory, stock management, duka, kenya, m-pesa, business, cash drawer, point of sale, daftari, debtor ledger, shop management" />
     <meta name="author" content="DukaLedger" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+
+    <!-- Webmaster Verification (replace content with your codes) -->
+    <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE" />
+    <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE" />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="DukaLedger Pro — POS & Retail Management for Kenyan Shops" />
+    <meta property="og:description" content="Complete retail management system for Kenyan micro-retail shops. POS, inventory, Daftari, cash drawer auditing, and sales analytics." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ledger12.netlify.app/" />
+    <meta property="og:image" content="https://ledger12.netlify.app/icons/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="en_KE" />
+    <meta property="og:site_name" content="DukaLedger Pro" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DukaLedger Pro — POS & Retail Management for Kenyan Shops" />
+    <meta name="twitter:description" content="Complete retail management system for Kenyan micro-retail shops. POS, inventory, Daftari, cash drawer auditing, and sales analytics." />
+    <meta name="twitter:image" content="https://ledger12.netlify.app/icons/icon-512.png" />
+
+    <!-- JSON-LD Structured Data (LocalBusiness Schema) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "DukaLedger Pro",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Complete retail management system for Kenyan micro-retail shops. POS, inventory, Daftari (debtor ledger), cash drawer auditing, and sales analytics.",
+      "url": "https://ledger12.netlify.app/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KES"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "DukaLedger",
+        "url": "https://ledger12.netlify.app/"
+      }
+    }
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "DukaLedger Pro",
+      "url": "https://ledger12.netlify.app/",
+      "logo": "https://ledger12.netlify.app/icons/icon-512.png",
+      "description": "Complete retail management system for Kenyan micro-retail shops.",
+      "sameAs": [
+        "https://facebook.com/dukaledger",
+        "https://twitter.com/dukaledger",
+        "https://linkedin.com/company/dukaledger"
+      ]
+    }
+    </script>
 
     <!-- PWABuilder Tags -->
     <meta name="pwa" content="true" />
     <meta name="pwa-capable" content="yes" />
     <meta name="pwa-structure" content="spa" />
-    <meta name="apple-touch-fullscreen" content="yes" />
-
-    <!-- Social / Open Graph -->
-    <meta property="og:title" content="DukaLedger Pro" />
-    <meta property="og:description" content="Offline-first POS & retail management for Kenyan shops" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://ledger12.netlify.app/" />
 
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
@@ -32,11 +88,30 @@
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://tsthnavocmrqdefvvhke.supabase.co" />
+
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#020617" />
     <meta name="msapplication-tap-highlight" content="no" />
 
-    <title>DukaLedger Pro — POS & Retail Management</title>
+    <!-- Security Headers (via meta where possible) -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+    <!-- Google Analytics (replace G-XXXXXXXXXX with your GA4 ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true });
+    </script>
+
+    <title>DukaLedger Pro — POS & Retail Management for Kenyan Shops</title>
   </head>
   <body class="bg-[#020617] text-slate-100 antialiased">
     <div id="root"></div>

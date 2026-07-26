@@ -3,6 +3,7 @@ import { useLocalData, genId } from '../hooks/useLocalData';
 
 export default function Categories() {
   const { data: categories, add, update, remove } = useLocalData('categories');
+  const { data: products } = useLocalData('products');
   const [name, setName] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -50,17 +51,11 @@ export default function Categories() {
 
   // Count products per category
   const productCounts: Record<string, number> = {};
-  try {
-    const raw = localStorage.getItem('dl-products');
-    if (raw) {
-      const products = JSON.parse(raw);
-      products.forEach((p: any) => {
-        if (p.category) {
-          productCounts[p.category] = (productCounts[p.category] || 0) + 1;
-        }
-      });
+  (products as any[]).forEach((p: any) => {
+    if (p.category) {
+      productCounts[p.category] = (productCounts[p.category] || 0) + 1;
     }
-  } catch {}
+  });
 
   return (
     <div className="space-y-6">

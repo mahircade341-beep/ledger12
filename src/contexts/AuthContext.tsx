@@ -1,11 +1,40 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
+
+interface Profile {
+  userId: string;
+  email: string;
+  fullName: string;
+  storeName: string;
+  role: string;
+}
 
 interface AuthContextType {
   userId: string | null;
-  profile: any | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  profile: Profile | null;
+  storeName: string;
+
+  // Sign up / sign in
+  signUp: (email: string, password: string, fullName: string, storeName: string) => Promise<{ error?: string; data?: any }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signOut: () => Promise<void>;
+
+  // Password reset
+  resetPassword: (email: string) => Promise<{ error?: string }>;
+  updatePassword: (password: string) => Promise<{ error?: string }>;
+
+  // Staff
+  staffPassword: string;
+  setStaffPassword: (password: string) => Promise<{ error?: string }>;
+  verifyStaffPassword: (password: string) => boolean;
+  clearStaffPassword: () => void;
+  fetchStores: () => Promise<{ storeName: string }[]>;
+
+  // App lock (secondary layer)
   isLocked: boolean;
   appLockEnabled: boolean;
   setAppPassword: (password: string, securityQuestion?: string, securityAnswer?: string) => Promise<void>;
@@ -14,12 +43,8 @@ interface AuthContextType {
   verifySecurityAnswer: (answer: string) => Promise<boolean>;
   lock: () => void;
   unlock: (password: string) => boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error?: string }>;
-  updatePassword: (newPassword: string) => Promise<{ error?: string }>;
-  refreshProfile: () => void;
+
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,39 +56,67 @@ async function hashSimple(value: string): Promise<string> {
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+function getItem(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function setItem(key: string, value: string) {
+  try { localStorage.setItem(key, value); } catch {}
+}
+
+function removeItem(key: string) {
+  try { localStorage.removeItem(key); } catch {}
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLocked, setIsLocked] = useState(() => localStorage.getItem('dl-locked') === 'true');
-  const [appLockEnabled, setAppLockEnabled] = useState(() => !!localStorage.getItem('dl-app-lock-hash'));
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isStaffSession, setIsStaffSession] = useState(false);
 
+  // App lock state
+  const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
+  const [appLockEnabled, setAppLockEnabled] = useState(() => !!getItem('dl-app-lock-hash'));
+
+  const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaLedger';
+
+  // Fetch user profile from supabase
+  const refreshProfile = async () => {
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) return;
+    setUser(currentUser);
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .single();
+    if (prof) {
+      const p: Profile = {
+        userId: currentUser.id,
+        email: currentUser.email || '',
+        fullName: prof.full_name || '',
+        storeName: prof.store_name || '',
+        role: prof.role || 'user',
+      };
+      setProfile(p);
+      if (prof.store_name) localStorage.setItem('dl-store-name', prof.store_name);
+    }
+  };
+
+  // Initialize auth state
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      if (s?.user) {
-        setProfile({
-          userId: s.user.id,
-          email: s.user.email,
-          fullName: s.user.user_metadata?.full_name || '',
-          role: s.user.user_metadata?.role || 'user',
-        });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
       }
-      setIsLoading(false);
-    });
+    }).finally(() => setIsLoading(false));
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      if (s?.user) {
-        setProfile({
-          userId: s.user.id,
-          email: s.user.email,
-          fullName: s.user.user_metadata?.full_name || '',
-          role: s.user.user_metadata?.role || 'user',
-        });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        await refreshProfile();
       } else {
+        setUser(null);
         setProfile(null);
       }
     });
@@ -71,130 +124,157 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: email === 'fahmanmanka25@gmail.com' ? 'admin' : 'user',
-          },
-        },
-      });
-      if (error) return { error: error.message };
-      return {};
-    } catch (err: any) {
-      return { error: err?.message || 'Registration failed' };
-    }
+  // ─── Auth Methods ──────────────────────────────
+
+  const signUp = async (email: string, password: string, fullName: string, storeName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName, store_name: storeName, role: 'user' },
+      },
+    });
+    if (error) return { error: error.message };
+    return { data };
   };
 
   const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { error: error.message };
-      setIsLocked(false);
-      localStorage.removeItem('dl-locked');
-      return {};
-    } catch (err: any) {
-      return { error: err?.message || 'Sign in failed' };
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    await refreshProfile();
+    return {};
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    setProfile(null);
+    // Clear staff session
+    removeItem('dl-staff-session');
+    removeItem('dl-staff-auth');
+    removeItem('dl-store-name');
+    setIsStaffSession(false);
     setIsLocked(false);
-    localStorage.removeItem('dl-locked');
+    removeItem('dl-locked');
+
+    // Sign out from Supabase
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
   };
 
   const resetPassword = async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password',
-      });
-      if (error) return { error: error.message };
-      return {};
-    } catch (err: any) {
-      return { error: err?.message || 'Failed to send reset email' };
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return { error: error.message };
+    return {};
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { error: error.message };
+    return {};
+  };
+
+  // ─── Staff ─────────────────────────────────────
+
+  const staffPassword = getItem('dl-staff-pass') || '';
+
+  const setStaffPasswordLocal = async (password: string) => {
+    if (!user) return { error: 'Not signed in' };
+    const { error } = await supabase.from('profiles').update({ staff_password: password }).eq('user_id', user.id);
+    if (error) return { error: error.message };
+    setItem('dl-staff-pass', password);
+    return {};
+  };
+
+  const verifyStaffPassword = (password: string): boolean => {
+    const stored = getItem('dl-staff-pass');
+    return stored === password;
+  };
+
+  const clearStaffPassword = () => {
+    removeItem('dl-staff-pass');
+    if (user) {
+      supabase.from('profiles').update({ staff_password: '' }).eq('user_id', user.id);
     }
   };
 
-  const updatePassword = async (newPassword: string) => {
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) return { error: error.message };
-      return {};
-    } catch (err: any) {
-      return { error: err?.message || 'Failed to update password' };
-    }
+  const fetchStores = async (): Promise<{ storeName: string }[]> => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('store_name')
+      .not('store_name', 'eq', '')
+      .not('staff_password', 'eq', '');
+    if (!data) return [];
+    return data.map(p => ({ storeName: p.store_name }));
   };
 
-  const lock = () => {
-    setIsLocked(true);
-    localStorage.setItem('dl-locked', 'true');
-  };
-
-  const unlock = (_password: string): boolean => {
-    setIsLocked(false);
-    localStorage.removeItem('dl-locked');
-    return true;
-  };
+  // ─── App Lock ──────────────────────────────────
 
   const setAppPassword = async (password: string, securityQuestion?: string, securityAnswer?: string) => {
     const hash = await hashSimple(password + '-applock');
-    localStorage.setItem('dl-app-lock-hash', hash);
+    setItem('dl-app-lock-hash', hash);
     if (securityQuestion && securityAnswer) {
       const ansHash = await hashSimple(securityAnswer.toLowerCase().trim() + '-security');
-      localStorage.setItem('dl-security-q', securityQuestion);
-      localStorage.setItem('dl-security-a', ansHash);
+      setItem('dl-security-q', securityQuestion);
+      setItem('dl-security-a', ansHash);
     }
     setAppLockEnabled(true);
   };
 
   const removeAppPassword = () => {
-    localStorage.removeItem('dl-app-lock-hash');
-    localStorage.removeItem('dl-locked');
-    localStorage.removeItem('dl-security-q');
-    localStorage.removeItem('dl-security-a');
+    removeItem('dl-app-lock-hash');
+    removeItem('dl-locked');
     setIsLocked(false);
     setAppLockEnabled(false);
   };
 
-  const verifySecurityAnswer = async (answer: string): Promise<boolean> => {
-    const storedHash = localStorage.getItem('dl-security-a');
-    if (!storedHash) return false;
-    const ansHash = await hashSimple(answer.toLowerCase().trim() + '-security');
-    return ansHash === storedHash;
-  };
-
   const verifyAppPassword = async (password: string): Promise<boolean> => {
-    const storedHash = localStorage.getItem('dl-app-lock-hash');
+    const storedHash = getItem('dl-app-lock-hash');
     if (!storedHash) return false;
     const hash = await hashSimple(password + '-applock');
     return hash === storedHash;
   };
 
-  const refreshProfile = () => {
-    if (session?.user) {
-      setProfile({
-        userId: session.user.id,
-        email: session.user.email,
-        fullName: session.user.user_metadata?.full_name || '',
-        role: session.user.user_metadata?.role || 'user',
-      });
-    }
+  const verifySecurityAnswer = async (answer: string): Promise<boolean> => {
+    const storedHash = getItem('dl-security-a');
+    if (!storedHash) return false;
+    const ansHash = await hashSimple(answer.toLowerCase().trim() + '-security');
+    return ansHash === storedHash;
+  };
+
+  const lock = () => {
+    setIsLocked(true);
+    setItem('dl-locked', 'true');
+  };
+
+  const unlock = (_password: string): boolean => {
+    setIsLocked(false);
+    removeItem('dl-locked');
+    return true;
   };
 
   return (
     <AuthContext.Provider
       value={{
-        userId: session?.user?.id ?? null,
-        profile: profile ?? null,
-        isAuthenticated: !!session,
+        userId: user?.id || (isStaffSession ? 'staff-session' : null),
+        user,
+        isAuthenticated: !!user || isStaffSession,
         isLoading,
+        profile,
+        storeName,
+
+        signUp,
+        signIn,
+        signOut,
+        resetPassword,
+        updatePassword,
+
+        staffPassword,
+        setStaffPassword: setStaffPasswordLocal,
+        verifyStaffPassword,
+        clearStaffPassword,
+        fetchStores,
+
         isLocked,
         appLockEnabled,
         setAppPassword,
@@ -203,11 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         verifySecurityAnswer,
         lock,
         unlock,
-        signUp,
-        signIn,
-        signOut,
-        resetPassword,
-        updatePassword,
+
         refreshProfile,
       }}
     >

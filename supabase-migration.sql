@@ -43,7 +43,12 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (auth.uid() = user_id);
+-- Allow authenticated users to read their own profile
+CREATE POLICY "profiles_select_own" ON profiles FOR SELECT USING (auth.uid() = user_id);
+-- Allow public (unauthenticated) read access for store_name and staff_password for staff login
+CREATE POLICY "profiles_select_public" ON profiles FOR SELECT
+  USING (true)
+  WITH CHECK (true);
 CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = user_id);
 

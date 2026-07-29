@@ -14,6 +14,7 @@ import Premium from './pages/Premium';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
 import ResetPassword from './pages/ResetPassword';
+import Onboarding from './pages/Onboarding';
 
 type Theme = 'dark' | 'light';
 interface ThemeCtx { theme: Theme; toggleTheme: () => void }
@@ -21,7 +22,12 @@ const ThemeContext = createContext<ThemeCtx>({ theme: 'dark', toggleTheme: () =>
 export const useTheme = () => useContext(ThemeContext);
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, appLockEnabled } = useAuth();
+  const { isAuthenticated, isLoading, appLockEnabled, needsOnboarding } = useAuth();
+
+  // Redirect to onboarding if profile is incomplete (Google OAuth users)
+  if (!isLoading && isAuthenticated && needsOnboarding) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   // Auto-lock on tab close/reopen
   useEffect(() => {
@@ -69,10 +75,10 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#020617]">
+      <div className="h-screen flex items-center justify-center" style={{background:'var(--body-bg)'}}>
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-500 text-sm animate-pulse">Loading DukaHub...</p>
+          <p className="text-sm animate-pulse" style={{color:'var(--text-muted)'}}>Loading DukaHub...</p>
         </div>
       </div>
     );
@@ -87,6 +93,7 @@ export default function App() {
         <Route path="/" element={landingOrRedirect} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="pos" element={<POS />} />
           <Route path="stock" element={<Stock />} />

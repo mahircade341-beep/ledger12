@@ -64,7 +64,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white overflow-x-hidden">
+    <div className="min-h-screen text-[var(--text-primary)] overflow-x-hidden">
       {/* Animated background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         {/* Grid pattern */}

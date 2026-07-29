@@ -96,23 +96,23 @@ export default function Sidebar() {
     <>
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-nav flex items-center justify-between px-4 py-3">
-        <button onClick={() => setOpen(true)} className="p-2 text-slate-400 hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5">
+        <button onClick={() => setOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
         </button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-xs shadow-lg shadow-amber-500/20">📒</div>
-          <span className="font-semibold text-sm text-slate-100 truncate max-w-[120px]">{storeName}</span>
+          <span className="font-semibold text-sm text-[var(--text-primary)] truncate max-w-[120px]">{storeName}</span>
           {isAdmin && <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-cyan-500/20">ADMIN</span>}
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={toggleTheme} className="p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-white/5 transition-all" title="Toggle theme">
+          <button onClick={toggleTheme} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-amber-400 hover:bg-white/5 transition-all" title="Toggle theme">
             {theme === 'dark' ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
             ) : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
             )}
           </button>
-          <button onClick={signOut} className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-white/5 transition-all" title="Sign Out">
+          <button onClick={signOut} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-red-400 hover:bg-white/5 transition-all" title="Sign Out">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
           </button>
         </div>
@@ -124,11 +124,11 @@ export default function Sidebar() {
       {/* Sidebar drawer */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 glass-sidebar transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}>
         {/* Desktop header */}
-        <div className="hidden lg:flex items-center gap-3 px-6 py-5 border-b border-white/10">
+        <div className="hidden lg:flex items-center gap-3 px-6 py-5 border-b border-[var(--border-white)]">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">📒</div>
           <div className="min-w-0">
-            <h1 className="font-bold text-slate-100 truncate">{storeName}</h1>
-            <p className="text-[11px] text-slate-500 font-medium">Retail Management</p>
+            <h1 className="font-bold text-[var(--text-primary)] truncate">{storeName}</h1>
+            <p className="text-[11px] text-[var(--text-muted)] font-medium">Retail Management</p>
           </div>
         </div>
 
@@ -136,20 +136,20 @@ export default function Sidebar() {
         <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-thin">{navLinks}</nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-white/10 space-y-2 bg-white/[0.02]">
+        <div className="p-4 border-t border-[var(--border-white)] space-y-2 bg-[var(--bg-surface2)]/[0.4]">
           {/* Data backup section */}
           <div className="space-y-0.5">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-1 mb-1">Quick Actions</p>
+            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-1">Quick Actions</p>
             <button onClick={() => {
               const current = localStorage.getItem('dl-time-format') || '12h';
               const next = current === '12h' ? '24h' : '12h';
               localStorage.setItem('dl-time-format', next);
               window.dispatchEvent(new Event('timeformatchange'));
-            }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-cyan-400 hover:bg-white/5 transition-all duration-200">
+            }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:text-cyan-400 hover:bg-white/5 transition-all duration-200">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <span>{(localStorage.getItem('dl-time-format') || '12h') === '12h' ? '12-Hour Time' : '24-Hour Time'}</span>
             </button>
-            <button onClick={toggleTheme} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-cyan-400 hover:bg-white/5 transition-all duration-200">
+            <button onClick={toggleTheme} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:text-cyan-400 hover:bg-white/5 transition-all duration-200">
               {theme === 'dark' ? (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
               ) : (
@@ -165,8 +165,8 @@ export default function Sidebar() {
               {profile?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-200 truncate leading-tight">{profile?.fullName || 'User'}</p>
-              <p className="text-xs text-slate-500 truncate">{profile?.email}</p>
+              <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-tight">{profile?.fullName || 'User'}</p>
+              <p className="text-xs text-[var(--text-muted)] truncate">{profile?.email}</p>
             </div>
             {isAdmin && <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-cyan-500/20 shrink-0">ADMIN</span>}
 
@@ -175,7 +175,7 @@ export default function Sidebar() {
           {/* Cloud status */}
           <div className="flex items-center gap-2 px-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40" />
-            <span className="text-xs text-slate-500 font-medium">Connected to Cloud</span>
+            <span className="text-xs text-[var(--text-muted)] font-medium">Connected to Cloud</span>
           </div>
         </div>
       </aside>

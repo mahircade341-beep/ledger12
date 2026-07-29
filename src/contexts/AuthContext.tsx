@@ -40,6 +40,10 @@ interface AuthContextType {
   lock: () => void;
   unlock: (password: string) => boolean;
 
+  // Onboarding (for Google OAuth users)
+  needsOnboarding: boolean;
+  completeProfile: (fullName: string, storeName: string) => Promise<{ error?: string }>;
+
   refreshProfile: () => Promise<void>;
 }
 
@@ -73,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
   const [appLockEnabled, setAppLockEnabled] = useState(() => !!getItem('dl-app-lock-hash'));
 
+  const needsOnboarding = !!user && !profile?.storeName;
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
   // Fetch user profile from supabase
@@ -171,10 +176,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/pos`,
+        redirectTo: `${window.location.origin}/onboarding`,
       },
     });
     if (error) console.error('Google sign-in error:', error.message);
+  };
+
+  // ─── Onboarding ────────────────────────────────
+
+  const completeProfile = async (fullName: string, storeName: string) => {
+    if (!user) return { error: 'Not authenticated' };
+    const { error } = await supabase.from('profiles').upsert({
+      user_id: user.id,
+      email: user.email || '',
+      full_name: fullName,
+      store_name: storeName,
+      role: 'user',
+    }, { onConflict: 'user_id' });
+    if (error) return { error: error.message };
+    await refreshProfile();
+    return {};
   };
 
   // ─── App Lock ──────────────────────────────────
@@ -248,6 +269,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         lock,
         unlock,
 
+        needsOnboarding,
+        completeProfile,
         refreshProfile,
       }}
     >

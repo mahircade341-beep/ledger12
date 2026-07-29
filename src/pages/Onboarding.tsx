@@ -6,6 +6,12 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { user, profile, needsOnboarding, completeProfile } = useAuth();
 
+  // Synchonous check — redirect immediately if already onboarded before any render
+  if (localStorage.getItem('dl-onboarded') === 'true') {
+    navigate('/pos', { replace: true });
+    return null;
+  }
+
   const [fullName, setFullName] = useState('');
   const [storeName, setStoreName] = useState('');
   const [businessType, setBusinessType] = useState<'retail' | 'wholesale'>('retail');

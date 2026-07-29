@@ -96,7 +96,7 @@ export default function Stock() {
       </div>
 
       {/* Add Stock Form */}
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full">
         <div className="card">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-lg bg-[var(--btn-primary-bg)] flex items-center justify-center">
@@ -111,15 +111,15 @@ export default function Stock() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Product Name *</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="e.g. Cooking Oil 1L" required />
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field w-full" placeholder="e.g. Cooking Oil 1L" required />
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode / QR</label>
                 <div className="flex gap-1.5">
-                  <input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field flex-1" placeholder="Scan or type" />
+                  <input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field flex-1 min-w-0" placeholder="Scan or type" />
                   <button type="button" onClick={() => setShowScanner(true)}
                     className="shrink-0 flex items-center justify-center w-10 rounded-lg border bg-[var(--item-bg)] border-[var(--border-color)] hover:border-[var(--border-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
                     title="Scan barcode with camera">
@@ -132,15 +132,15 @@ export default function Stock() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity</label>
-                <input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-field" />
+                <input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-field w-full" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale Price (KES)</label>
-                <input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className={`input-field ${wholesalePrice <= 0 ? 'border-amber-500/40' : ''}`} />
+                <input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className={`input-field w-full ${wholesalePrice <= 0 ? 'border-amber-500/40' : ''}`} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail Price (KES) *</label>
-                <input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-field" required />
+                <input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-field w-full" required />
               </div>
             </div>
 
@@ -178,9 +178,9 @@ export default function Stock() {
             {/* Supplier Info */}
             <div className="border-t border-[var(--border-white)] pt-3 mt-1">
               <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Supplier Info</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Supplier Name</label><input type="text" value={supplier} onChange={(e) => setSupplier(e.target.value)} className="input-field" placeholder="e.g. Bidco" /></div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Supplier Phone</label><input type="tel" value={supplierPhone} onChange={(e) => setSupplierPhone(e.target.value)} className="input-field" placeholder="e.g. 07XX XXX XXX" /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Supplier Name</label><input type="text" value={supplier} onChange={(e) => setSupplier(e.target.value)} className="input-field w-full" placeholder="e.g. Bidco" /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Supplier Phone</label><input type="tel" value={supplierPhone} onChange={(e) => setSupplierPhone(e.target.value)} className="input-field w-full" placeholder="e.g. 07XX XXX XXX" /></div>
               </div>
             </div>
 

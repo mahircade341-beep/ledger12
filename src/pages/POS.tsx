@@ -320,7 +320,7 @@ export default function POS() {
       )}
 
       {/* ── MAIN CONTENT: 2-Column Layout ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 xl:gap-6">
 
         {/* ── LEFT COLUMN: Products ── */}
         <div className="lg:col-span-3 space-y-4">
@@ -335,7 +335,7 @@ export default function POS() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
               </svg>
-              <span className="hidden sm:inline">Scan Barcode</span>
+              <span className="hidden sm:inline">Barcode</span>
               <span className="text-[10px] opacity-60">📷</span>
             </button>
 
@@ -445,7 +445,7 @@ export default function POS() {
           )}
 
           {/* Product Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[300px] overflow-y-auto scrollbar-thin">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[260px] overflow-y-auto scrollbar-thin">
             {filteredProducts.map((p: any) => (
               <button key={p._id} onClick={() => { if (p.quantity > 0) { setSelectedProduct(p._id); setQuantity(1); } }}
                 className={`p-3 rounded-xl text-left transition-all duration-200 border ${
@@ -472,7 +472,7 @@ export default function POS() {
 
           {/* Quantity + Add to Cart */}
           <div className="flex items-end gap-3">
-            <div className="flex-1 max-w-[120px]">
+            <div className="flex-1 min-w-0 max-w-[120px]">
               <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Qty</label>
               <input type="number" min={1} value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
@@ -495,7 +495,7 @@ export default function POS() {
         </div>
 
         {/* ── RIGHT COLUMN: Cart + Payment ── */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3">
           {/* Cart */}
           <div className="card">
             <div className="flex items-center justify-between mb-3">

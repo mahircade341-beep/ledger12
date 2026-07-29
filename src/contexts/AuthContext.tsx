@@ -18,6 +18,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isProfileLoaded: boolean;
   profile: Profile | null;
   storeName: string;
 
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
   // App lock state
   const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
@@ -120,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(p);
       if (prof.store_name) localStorage.setItem('dl-store-name', prof.store_name);
     }
+    setIsProfileLoaded(true);
   };
 
   // Initialize auth state
@@ -289,6 +292,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated: !!user,
         isLoading,
+        isProfileLoaded,
         profile,
         storeName,
 

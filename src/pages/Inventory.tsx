@@ -257,7 +257,7 @@ export default function Inventory() {
             <p className="text-sm text-[var(--text-muted)]">No products found</p>
           </div>
         ) : (
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="table-wrap">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[var(--text-muted)] border-b border-[var(--border-white)]">                    <th className="text-left py-2.5 pr-2 font-medium">Product</th>

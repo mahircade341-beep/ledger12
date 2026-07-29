@@ -21,11 +21,11 @@ const ThemeContext = createContext<ThemeCtx>({ theme: 'dark', toggleTheme: () =>
 export const useTheme = () => useContext(ThemeContext);
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, appLockEnabled, needsOnboarding, isPremium, isGodUser } = useAuth();
+  const { isAuthenticated, isLoading, isProfileLoaded, appLockEnabled, needsOnboarding, isPremium, isGodUser } = useAuth();
   const location = useLocation();
 
-  // Redirect to onboarding if profile is incomplete (Google OAuth users)
-  if (!isLoading && isAuthenticated && needsOnboarding) {
+  // Redirect to onboarding only after profile is loaded (prevents flash on refresh)
+  if (!isLoading && isProfileLoaded && isAuthenticated && needsOnboarding) {
     return <Navigate to="/onboarding" replace />;
   }
 

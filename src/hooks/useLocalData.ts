@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
-type TableName = 'products' | 'transactions' | 'debtors' | 'debtPayments' | 'payouts' | 'categories' | 'stockAdjustments';
+type TableName = 'products' | 'transactions' | 'debtors' | 'debtPayments' | 'payouts' | 'stockAdjustments';
 
 interface AppRecord {
   _id: string;
@@ -16,7 +16,6 @@ const TABLE_MAP: Record<string, string> = {
   debtors: 'debtors',
   debtPayments: 'debt_payments',
   payouts: 'payouts',
-  categories: 'categories',
   stockAdjustments: 'stock_adjustments',
 };
 
@@ -165,7 +164,6 @@ function mapFromSupabase(table: string, item: any): any {
         quantity: item.quantity || 0,
         wholesalePrice: item.wholesale_price || 0,
         retailPrice: item.retail_price || 0,
-        category: item.category || '',
         barcode: item.barcode || '',
         image: item.image || '',
         supplier: item.supplier || '',
@@ -197,12 +195,9 @@ function mapFromSupabase(table: string, item: any): any {
     case 'payouts':
       return {
         type: item.type || 'drawdown',
-        category: item.category || '',
         amount: item.amount || 0,
         notes: item.notes || '',
       };
-    case 'categories':
-      return { name: item.name || '' };
     case 'stockAdjustments':
       return {
         productId: item.product_id || '',
@@ -224,7 +219,7 @@ function mapToSupabase(table: string, record: any, id?: string): any {
 
   switch (table) {
     case 'products':
-      return { ...base, name: record.name || '', quantity: record.quantity || 0, wholesale_price: record.wholesalePrice || 0, retail_price: record.retailPrice || 0, category: record.category || '', barcode: record.barcode || '', image: record.image || '', supplier: record.supplier || '', supplier_phone: record.supplierPhone || '' };
+      return { ...base, name: record.name || '', quantity: record.quantity || 0, wholesale_price: record.wholesalePrice || 0, retail_price: record.retailPrice || 0, barcode: record.barcode || '', image: record.image || '', supplier: record.supplier || '', supplier_phone: record.supplierPhone || '' };
     case 'transactions':
       return { ...base, items: record.items || [], total: record.total || 0, payment_method: record.paymentMethod || 'cash', discount: record.discount || 0, pricing: record.pricing || 'retail', debtorId: record.debtorId || '', debtorName: record.debtorName || '' };
     case 'debtors':
@@ -232,9 +227,7 @@ function mapToSupabase(table: string, record: any, id?: string): any {
     case 'debtPayments':
       return { ...base, debtor_id: record.debtorId || '', amount: record.amount || 0 };
     case 'payouts':
-      return { ...base, type: record.type || 'drawdown', category: record.category || '', amount: record.amount || 0, notes: record.notes || '' };
-    case 'categories':
-      return { ...base, name: record.name || '' };
+      return { ...base, type: record.type || 'drawdown', amount: record.amount || 0, notes: record.notes || '' };
     case 'stockAdjustments':
       return { ...base, product_id: record.productId || '', product_name: record.productName || '', quantity_change: record.quantityChange || 0, previous_quantity: record.previousQuantity || 0, new_quantity: record.newQuantity || 0, type: record.type || 'restock', notes: record.notes || '' };
     default:
@@ -245,7 +238,7 @@ function mapToSupabase(table: string, record: any, id?: string): any {
 function mapChangesToSupabase(table: string, changes: any): any {
   switch (table) {
     case 'products':
-      return { name: changes.name, quantity: changes.quantity, wholesale_price: changes.wholesalePrice, retail_price: changes.retailPrice, category: changes.category, barcode: changes.barcode, image: changes.image, supplier: changes.supplier, supplier_phone: changes.supplierPhone, updated_at: new Date().toISOString() };
+      return { name: changes.name, quantity: changes.quantity, wholesale_price: changes.wholesalePrice, retail_price: changes.retailPrice, barcode: changes.barcode, image: changes.image, supplier: changes.supplier, supplier_phone: changes.supplierPhone, updated_at: new Date().toISOString() };
     case 'transactions':
       return { items: changes.items, total: changes.total, payment_method: changes.paymentMethod, discount: changes.discount, pricing: changes.pricing, debtorId: changes.debtorId, debtorName: changes.debtorName };
     case 'debtors':
@@ -253,9 +246,7 @@ function mapChangesToSupabase(table: string, changes: any): any {
     case 'debtPayments':
       return { debtor_id: changes.debtorId, amount: changes.amount };
     case 'payouts':
-      return { type: changes.type, category: changes.category, amount: changes.amount, notes: changes.notes };
-    case 'categories':
-      return { name: changes.name };
+      return { type: changes.type, amount: changes.amount, notes: changes.notes };
     case 'stockAdjustments':
       return { product_id: changes.productId, product_name: changes.productName, quantity_change: changes.quantityChange, previous_quantity: changes.previousQuantity, new_quantity: changes.newQuantity, type: changes.type, notes: changes.notes };
     default:

@@ -12,7 +12,6 @@ export default function Stock() {
   const [quantity, setQuantity] = useState(0);
   const [wholesalePrice, setWholesalePrice] = useState(0);
   const [retailPrice, setRetailPrice] = useState(0);
-  const [category, setCategory] = useState('');
   const [supplier, setSupplier] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [barcode, setBarcode] = useState('');
@@ -21,16 +20,10 @@ export default function Stock() {
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [showScanner, setShowScanner] = useState(false);
-  const { data: categories } = useLocalData('categories');
-
-  const uniqueCategories = [...new Set([
-    ...categories.map((c: any) => c.name),
-    ...products.map((p: any) => p.category).filter(Boolean)
-  ])].sort();
 
   const resetForm = () => {
     setName(''); setQuantity(0); setWholesalePrice(0); setRetailPrice(0);
-    setCategory(''); setSupplier(''); setSupplierPhone(''); setBarcode(''); setImage(''); setEditId(null);
+    setSupplier(''); setSupplierPhone(''); setBarcode(''); setImage(''); setEditId(null);
   };
 
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +35,7 @@ export default function Stock() {
     e.preventDefault();
     if (!name.trim() || !userId) return;
     setLoading(true);
-    const data = { name: name.trim(), quantity, wholesalePrice, retailPrice, category, supplier, supplierPhone, barcode, image: image || undefined };
+    const data = { name: name.trim(), quantity, wholesalePrice, retailPrice, supplier, supplierPhone, barcode, image: image || undefined };
 
     if (editId) {
       // Update existing product — log the stock change
@@ -122,11 +115,6 @@ export default function Stock() {
               <div className="col-span-2">
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Product Name *</label>
                 <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="e.g. Cooking Oil 1L" required />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
-                <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="input-field" placeholder="e.g. Food" list="cat-list" />
-                <datalist id="cat-list">{uniqueCategories.map((c) => <option key={c} value={c} />)}</datalist>
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode / QR</label>

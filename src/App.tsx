@@ -13,7 +13,6 @@ import Insights from './pages/Insights';
 import Inventory from './pages/Inventory';
 import Premium from './pages/Premium';
 import Settings from './pages/Settings';
-import Categories from './pages/Categories';
 import ResetPassword from './pages/ResetPassword';
 import Onboarding from './pages/Onboarding';
 
@@ -102,7 +101,6 @@ export default function App() {
           <Route path="daftari" element={<Daftari />} />
           <Route path="cash-drawer" element={<CashDrawer />} />
           <Route path="insights" element={<Insights />} />
-          <Route path="categories" element={<Categories />} />
           <Route path="settings" element={<Settings />} />
           <Route path="premium" element={<Premium />} />
         </Route>

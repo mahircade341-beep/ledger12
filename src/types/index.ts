@@ -16,7 +16,6 @@ export interface Product {
   quantity: number;
   wholesale_price: number;
   retail_price: number;
-  category: string;
   created_at: string;
   updated_at: string;
 }

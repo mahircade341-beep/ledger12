@@ -19,7 +19,6 @@ export default function CashDrawer() {
   const [openingBal, setOpeningBal] = useState(getOpeningBalance());
   const [openingInput, setOpeningInput] = useState(openingBal > 0 ? openingBal : 0);
   const [type, setType] = useState<'drawdown' | 'restock' | 'expense'>('drawdown');
-  const [category, setCategory] = useState('');
   const [amount, setAmount] = useState(0);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,7 +34,7 @@ export default function CashDrawer() {
     e.preventDefault();
     if (amount <= 0 || !userId) return;
     setLoading(true);
-    add({ userId: userId as any, type, category: category || (type === 'drawdown' ? 'Lunch/Chai' : type === 'restock' ? 'Supplier Restock' : 'General'), amount, notes } as any);
+    add({ userId: userId as any, type, amount, notes } as any);
     setAmount(0); setNotes(''); setLoading(false);
   };
 
@@ -110,14 +109,6 @@ export default function CashDrawer() {
                     <button key={opt.v} type="button" onClick={() => setType(opt.v)} className={`flex items-center justify-center gap-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${type === opt.v ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-[var(--bg-surface2)] text-[var(--text-secondary)] border border-slate-300/30 dark:border-slate-700/30 hover:border-slate-400/50'}`}>{opt.icon} {opt.l}</button>
                   ))}
                 </div>
-              </div>
-              <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Category</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="select-field">
-                  <option value="">Select category...</option>
-                  {type === 'drawdown' && <><option value="Lunch/Chai">Lunch/Chai</option><option value="Transport">Transport</option><option value="Personal">Personal</option><option value="Other">Other</option></>}
-                  {type === 'restock' && <><option value="Supplier Restock">Supplier Restock</option><option value="Inventory Purchase">Inventory Purchase</option></>}
-                  {type === 'expense' && <><option value="Utilities">Utilities</option><option value="Rent">Rent</option><option value="Maintenance">Maintenance</option><option value="Other">Other</option></>}
-                </select>
               </div>
               <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Amount (KES)</label><input type="number" min={0} value={amount} onChange={(e) => setAmount(parseInt(e.target.value) || 0)} className="input-field" placeholder="0" required /></div>
               <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Notes</label><textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="input-field min-h-[80px] resize-none" placeholder="Add details..." rows={2} /></div>

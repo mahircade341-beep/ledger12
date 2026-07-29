@@ -7,13 +7,11 @@ export default function Inventory() {
   const { userId } = useAuth();
   const { data: products, update, remove } = useLocalData('products');
   const { data: transactions } = useLocalData('transactions');
-  const { data: categories } = useLocalData('categories');
   const { data: adjustments, add: addAdjustment } = useLocalData('stockAdjustments');
 
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'quantity' | 'price' | 'category'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'quantity' | 'price'>('name');
   const [showFilters, setShowFilters] = useState(false);
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [threshold, setThreshold] = useState(lowStockThreshold);
@@ -26,7 +24,6 @@ export default function Inventory() {
   const [editQty, setEditQty] = useState(0);
   const [editWholesale, setEditWholesale] = useState(0);
   const [editRetail, setEditRetail] = useState(0);
-  const [editCategory, setEditCategory] = useState('');
   const [editBarcode, setEditBarcode] = useState('');
   const [editSupplier, setEditSupplier] = useState('');
   const [editSupplierPhone, setEditSupplierPhone] = useState('');
@@ -53,25 +50,14 @@ export default function Inventory() {
     ).slice(0, 30);
   }, [transactions]);
 
-  const uniqueCategories = useMemo(() => {
-    const cats = new Set<string>();
-    products.forEach((p: any) => { if (p.category) cats.add(p.category); });
-    categories.forEach((c: any) => { if (c.name) cats.add(c.name); });
-    return Array.from(cats).sort();
-  }, [products, categories]);
-
   const filteredProducts = useMemo(() => {
     let result = [...products];
     if (search) {
       const q = search.toLowerCase();
       result = result.filter((p: any) =>
         p.name.toLowerCase().includes(q) ||
-        (p.barcode || '').toLowerCase().includes(q) ||
-        (p.category || '').toLowerCase().includes(q)
+        (p.barcode || '').toLowerCase().includes(q)
       );
-    }
-    if (categoryFilter) {
-      result = result.filter((p: any) => p.category === categoryFilter);
     }
     if (lowStockOnly) {
       result = result.filter((p: any) => p.quantity <= lowStockThreshold);
@@ -81,12 +67,11 @@ export default function Inventory() {
         case 'name': return a.name.localeCompare(b.name);
         case 'quantity': return (a.quantity || 0) - (b.quantity || 0);
         case 'price': return (a.retailPrice || 0) - (b.retailPrice || 0);
-        case 'category': return (a.category || '').localeCompare(b.category || '');
         default: return 0;
       }
     });
     return result;
-  }, [products, search, categoryFilter, sortBy, lowStockOnly, lowStockThreshold]);
+  }, [products, search, sortBy, lowStockOnly, lowStockThreshold]);
 
   const handleThresholdChange = (val: number) => {
     const v = Math.max(1, Math.min(100, val));
@@ -100,7 +85,7 @@ export default function Inventory() {
     setEditQty(p.quantity);
     setEditWholesale(p.wholesalePrice);
     setEditRetail(p.retailPrice);
-    setEditCategory(p.category || '');
+
     setEditBarcode(p.barcode || '');
     setEditSupplier(p.supplier || '');
     setEditSupplierPhone(p.supplierPhone || '');
@@ -117,7 +102,7 @@ export default function Inventory() {
       quantity: editQty,
       wholesalePrice: editWholesale,
       retailPrice: editRetail,
-      category: editCategory,
+
       barcode: editBarcode,
       supplier: editSupplier,
       supplierPhone: editSupplierPhone,
@@ -226,7 +211,7 @@ export default function Inventory() {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
           </svg>
-          Filters{(lowStockOnly || categoryFilter) && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+          Filters{lowStockOnly && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
         </button>
         <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer whitespace-nowrap">
           <input type="checkbox" checked={lowStockOnly} onChange={(e) => setLowStockOnly(e.target.checked)} className="rounded accent-amber-500" /> Low stock only
@@ -238,25 +223,16 @@ export default function Inventory() {
         <div className="p-4 rounded-xl border bg-[var(--bg-surface2)]/50 border-[var(--border-color)]">
           <div className="flex items-center gap-4 flex-wrap">
             <div>
-              <label className="block text-[10px] font-medium text-[var(--text-muted)] uppercase mb-1">Category</label>
-              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-                className="select-field text-sm">
-                <option value="">All Categories</option>
-                {uniqueCategories.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
               <label className="block text-[10px] font-medium text-[var(--text-muted)] uppercase mb-1">Sort By</label>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}
                 className="select-field text-sm">
                 <option value="name">Name</option>
                 <option value="quantity">Stock Level</option>
                 <option value="price">Price</option>
-                <option value="category">Category</option>
               </select>
             </div>
-            {(categoryFilter || lowStockOnly) && (
-              <button onClick={() => { setCategoryFilter(''); setLowStockOnly(false); setSortBy('name'); }}
+            {lowStockOnly && (
+              <button onClick={() => { setLowStockOnly(false); setSortBy('name'); }}
                 className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline mt-4">
                 Clear all filters
               </button>
@@ -284,14 +260,12 @@ export default function Inventory() {
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-[var(--text-muted)] border-b border-[var(--border-white)]">
-                  <th className="text-left py-2.5 pr-2 font-medium">Product</th>
-                  <th className="text-left py-2.5 px-2 font-medium hidden sm:table-cell">Category</th>
-                  <th className="text-right py-2.5 px-2 font-medium">Qty</th>
-                  <th className="text-right py-2.5 px-2 font-medium hidden sm:table-cell">Wholesale</th>
-                  <th className="text-right py-2.5 px-2 font-medium">Retail</th>
-                  <th className="text-left py-2.5 px-2 font-medium hidden lg:table-cell">Supplier</th>
-                  <th className="text-right py-2.5 pl-2 font-medium">Actions</th>
+                <tr className="text-[var(--text-muted)] border-b border-[var(--border-white)]">                    <th className="text-left py-2.5 pr-2 font-medium">Product</th>
+                    <th className="text-right py-2.5 px-2 font-medium">Qty</th>
+                    <th className="text-right py-2.5 px-2 font-medium hidden sm:table-cell">Wholesale</th>
+                    <th className="text-right py-2.5 px-2 font-medium">Retail</th>
+                    <th className="text-left py-2.5 px-2 font-medium hidden lg:table-cell">Supplier</th>
+                    <th className="text-right py-2.5 pl-2 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -308,7 +282,6 @@ export default function Inventory() {
                         {p.barcode && <span className="text-[10px] text-[var(--text-muted)] font-mono hidden sm:inline">{p.barcode}</span>}
                       </div>
                     </td>
-                    <td className="py-2.5 px-2 text-[var(--text-muted)] hidden sm:table-cell">{p.category || '—'}</td>
                     <td className={`py-2.5 px-2 text-right font-medium ${
                       p.quantity <= 0 ? 'text-red-400' :
                       p.quantity <= lowStockThreshold ? 'text-amber-400' :
@@ -472,8 +445,7 @@ export default function Inventory() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
-                  <input type="text" value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="input-field" list="cat-list-edit" />
-                  <datalist id="cat-list-edit">{uniqueCategories.map((c) => <option key={c} value={c} />)}</datalist>
+
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode</label>

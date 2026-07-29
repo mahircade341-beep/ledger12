@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useLocalData, fileToDataURL } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
+import BarcodeScanner from '../components/BarcodeScanner';
 
 export default function Stock() {
   const { userId } = useAuth();
@@ -22,6 +23,7 @@ export default function Stock() {
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const [threshold, setThreshold] = useState(lowStockThreshold);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [showScanner, setShowScanner] = useState(false);
   const { data: categories } = useLocalData('categories');
 
   const uniqueCategories = [...new Set([
@@ -117,7 +119,19 @@ export default function Stock() {
                   <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} className="input-field" placeholder="e.g. Food" list="cat-list" />
                   <datalist id="cat-list">{uniqueCategories.map((c) => <option key={c} value={c} />)}</datalist>
                 </div>
-                <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode</label><input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field" placeholder="Scan or type" /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode</label>
+                  <div className="flex gap-1.5">
+                    <input type="text" value={barcode} onChange={(e) => setBarcode(e.target.value)} className="input-field flex-1" placeholder="Scan or type" />
+                    <button type="button" onClick={() => setShowScanner(true)}
+                      className="shrink-0 flex items-center justify-center w-10 rounded-lg border bg-[var(--item-bg)] border-[var(--border-color)] hover:border-[var(--border-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+                      title="Scan barcode with camera">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
                 <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity</label><input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-field" /></div>
                 <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES)</label><input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className={`input-field ${wholesalePrice <= 0 ? 'border-amber-500/40' : ''}`} /></div>
                 <div><label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail Price (KES) *</label><input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-field" required /></div>
@@ -211,6 +225,15 @@ export default function Stock() {
           </div>
         </div>
       </div>
+
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          onScan={(code) => { setBarcode(code); setShowScanner(false); }}
+          onClose={() => setShowScanner(false)}
+          title="Scan Product Barcode"
+        />
+      )}
     </div>
   );
 }

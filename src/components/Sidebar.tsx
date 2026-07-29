@@ -81,7 +81,7 @@ export default function Sidebar() {
   const navLinks = navItems.map((item) => {
     let badge = null;
     if (item.path === '/stock' && (lowStockCount > 0 || criticalCount > 0)) {
-      badge = <span className="ml-auto flex items-center gap-1">{criticalCount > 0 && <span className="w-2 h-2 rounded-full bg-red-400 shadow-sm shadow-red-400/40" />}{lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400/40" />}</span>;
+      badge = <span className="ml-auto flex items-center gap-1">{criticalCount > 0 && <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/40" />}{lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/40" />}</span>;
     }
     return (
       <NavLink key={item.path} to={item.path} end={item.path === '/pos'} className={linkClass} onClick={() => setOpen(false)}>
@@ -100,12 +100,12 @@ export default function Sidebar() {
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-xs shadow-lg shadow-amber-500/20">📒</div>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>📒</div>
           <span className="font-semibold text-sm text-[var(--text-primary)] truncate max-w-[120px]">{storeName}</span>
-          {isAdmin && <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-cyan-500/20">ADMIN</span>}
+          {isAdmin && <span className="bg-[var(--accent-dim)] text-[var(--text-secondary)] text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[var(--border-color)]">ADMIN</span>}
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={toggleTheme} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-amber-400 hover:bg-white/5 transition-all" title="Toggle theme">
+          <button onClick={toggleTheme} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Toggle theme">
             {theme === 'dark' ? (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
             ) : (
@@ -125,7 +125,7 @@ export default function Sidebar() {
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 glass-sidebar transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}>
         {/* Desktop header */}
         <div className="hidden lg:flex items-center gap-3 px-6 py-5 border-b border-[var(--border-white)]">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-xl shadow-lg shadow-amber-500/20">📒</div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>📒</div>
           <div className="min-w-0">
             <h1 className="font-bold text-[var(--text-primary)] truncate">{storeName}</h1>
             <p className="text-[11px] text-[var(--text-muted)] font-medium">Retail Management</p>
@@ -161,14 +161,14 @@ export default function Sidebar() {
 
           {/* User info */}
           <div className="flex items-center gap-3 px-1 py-2 border-t border-white/5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 flex items-center justify-center text-xs font-bold text-white shadow-md shadow-amber-500/10 shrink-0">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm shrink-0" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>
               {profile?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-tight">{profile?.fullName || 'User'}</p>
               <p className="text-xs text-[var(--text-muted)] truncate">{profile?.email}</p>
             </div>
-            {isAdmin && <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-cyan-500/20 shrink-0">ADMIN</span>}
+            {isAdmin && <span className="bg-[var(--accent-dim)] text-[var(--text-secondary)] text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[var(--border-color)] shrink-0">ADMIN</span>}
 
           </div>
 

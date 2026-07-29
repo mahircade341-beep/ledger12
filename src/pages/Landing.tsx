@@ -7,7 +7,7 @@ function FloatingOrb({ delay = 0, size = 60, color = 'cyan', x = 0, y = 0 }: { d
     blue: 'bg-blue-500/20 shadow-blue-500/20',
     violet: 'bg-violet-500/20 shadow-violet-500/20',
     emerald: 'bg-emerald-500/20 shadow-emerald-500/20',
-    amber: 'bg-amber-500/20 shadow-amber-500/20',
+    default: 'bg-[var(--accent-dim)] shadow-sm',
   };
   return (
     <div

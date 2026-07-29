@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 interface Props {
   onScan: (code: string) => void;
@@ -17,11 +18,10 @@ export default function BarcodeScanner({ onScan, onClose, title = 'Scan Code' }:
 
     async function init() {
       try {
-        const { Html5Qrcode: H5Q } = await import('html5-qrcode');
-        const scanner = new H5Q('barcode-scanner-reader');
+        const scanner = new Html5Qrcode('barcode-scanner-reader');
         scannerRef.current = scanner;
 
-        const cameras = await H5Q.getCameras();
+        const cameras = await Html5Qrcode.getCameras();
         if (!mountedRef.current) return;
 
         if (cameras.length === 0) {

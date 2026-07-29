@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LockScreen from './components/LockScreen';
 import Layout from './components/Layout';
-import Landing from './pages/Landing';
 import Login from './pages/Login';
 import POS from './pages/POS';
 import Stock from './pages/Stock';
@@ -90,13 +89,10 @@ export default function App() {
     );
   }
 
-  // If authenticated, redirect to POS app
-  const landingOrRedirect = isAuthenticated ? <Navigate to="/pos" replace /> : <Landing />;
-
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <Routes>
-        <Route path="/" element={landingOrRedirect} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/onboarding" element={<Onboarding />} />

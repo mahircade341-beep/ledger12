@@ -157,12 +157,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      // Better error messages for the user
-      if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
-        return { error: 'Please confirm your email first. Check your inbox (and spam folder) for the confirmation link, or request a new one.' };
-      }
       if (error.message?.includes('Invalid login credentials')) {
-        return { error: 'Wrong email or password. If you just signed up, check your email for the confirmation link first.' };
+        return { error: 'Wrong email or password. Try again or reset your password.' };
       }
       return { error: error.message };
     }

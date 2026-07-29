@@ -55,7 +55,7 @@ export default function Login() {
       return;
     }
 
-    setSuccessMsg('Account created! Check your email for the confirmation link, then sign in below.');
+    setSuccessMsg('Account created! You can now sign in below.');
     setTab('signin');
     setLoading(false);
   };
@@ -291,9 +291,7 @@ export default function Login() {
                     <button type="submit" disabled={loading} className="btn-primary w-full py-3">
                       {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : 'Create Account'}
                     </button>
-                    <p className="text-xs text-[var(--text-muted)] text-center">
-                      After signing up, check your email for the confirmation link.
-                    </p>
+
                   </form>
                 </>
               )}

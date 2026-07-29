@@ -1,9 +1,9 @@
 {
-  "name": "DukaLedger Pro - POS & Inventory",
-  "short_name": "DukaLedger",
+  "name": "DukaHub - POS & Retail Management",
+  "short_name": "DukaHub",
   "description": "Complete retail management system for Kenyan micro-retail shops. Point of Sale, inventory tracking, debtor ledger (Daftari), cash drawer auditing, M-Pesa tracking, and sales analytics — all offline first.",
   "start_url": "/",
-  "id": "dukaledger-pro-v1",
+  "id": "dukahub-v1",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#020617",
@@ -19,8 +19,8 @@
   "related_applications": [
     {
       "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.dukaledger.pro",
-      "id": "com.dukaledger.pro"
+      "url": "https://play.google.com/store/apps/details?id=com.dukahub.app",
+      "id": "com.dukahub.app"
     }
   ],
   "icons": [

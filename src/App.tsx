@@ -73,7 +73,7 @@ export default function App() {
       <div className="h-screen flex items-center justify-center bg-[#020617]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-500 text-sm animate-pulse">Loading DukaLedger...</p>
+          <p className="text-slate-500 text-sm animate-pulse">Loading DukaHub...</p>
         </div>
       </div>
     );

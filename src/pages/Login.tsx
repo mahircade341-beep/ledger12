@@ -114,8 +114,8 @@ export default function Login() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3h11.25M9 3v18m-5.25-3h12.75a.75.75 0 00.75-.75V6.75a.75.75 0 00-.75-.75H3.75A.75.75 0 003 6.75v10.5a.75.75 0 00.75.75z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">DukaLedger Pro</h1>
-          <p className="text-slate-500 text-sm mt-1">Retail management for Kenyan micro-shops</p>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">DukaHub</h1>
+          <p className="text-slate-500 text-sm mt-1">Cloud-powered retail management for Kenyan shops</p>
         </div>
 
         <div className="glass-strong rounded-2xl p-6 shadow-xl">
@@ -244,7 +244,7 @@ export default function Login() {
           </Link>
         </div>
 
-        <p className="text-center text-xs text-slate-700 mt-4 font-medium tracking-wide">DukaLedger Pro v2.0</p>
+        <p className="text-center text-xs text-slate-700 mt-4 font-medium tracking-wide">DukaHub v1.0</p>
       </div>
     </div>
   );

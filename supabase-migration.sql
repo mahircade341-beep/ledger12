@@ -1,5 +1,5 @@
 -- ============================================================
--- DukaLedger Pro - Supabase Database Schema (v2.0)
+-- DukaHub - Supabase Database Schema (v1.0)
 -- Run this in your Supabase SQL Editor (Dashboard > SQL Editor)
 -- ============================================================
 

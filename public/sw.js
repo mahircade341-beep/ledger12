@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dukaledger-v3';
+const CACHE_NAME = 'dukahub-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -67,7 +67,7 @@ self.addEventListener('fetch', (event) => {
         return fetch(event.request).then((response) => {
           if (response.status === 200) {
             const clone = response.clone();
-            caches.open('dukaledger-screenshots').then((cache) => cache.put(event.request, clone));
+            caches.open('dukahub-screenshots').then((cache) => cache.put(event.request, clone));
           }
           return response;
         }).catch(() => new Response(null, { status: 404 }));

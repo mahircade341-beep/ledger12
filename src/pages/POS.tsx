@@ -326,7 +326,7 @@ export default function POS() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
             <div ref={receiptRef} className="receipt p-6 print:p-4">
               <div className="text-center border-b-2 border-dashed border-gray-200 pb-4 mb-4">
-                <h2 className="text-lg font-bold text-gray-900">{profile?.storeName || 'DukaLedger Pro'}</h2>
+                <h2 className="text-lg font-bold text-gray-900">{profile?.storeName || 'DukaHub'}</h2>
                 <p className="text-xs text-gray-500 mt-0.5">{(profile?.storeName ? profile.storeName + ' — ' : '') + 'Retail Management System'}</p>
                 <p className="text-xs text-gray-400 mt-1">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
                 <p className="text-xs text-gray-400 font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
@@ -355,7 +355,7 @@ export default function POS() {
             <div className="flex gap-2 p-4 bg-gray-50 border-t border-gray-200 print:hidden">
               <button onClick={() => window.print()} className="btn-primary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> {window.innerWidth > 480 ? 'Print Receipt' : 'Print'}</button>
               <button onClick={() => {
-                const text = `DukaLedger Pro\n${receipt.date.toLocaleDateString()} ${fmtTime(receipt.date.getTime())}\n#${receipt.id.slice(-8).toUpperCase()}\n\n${receipt.items.map(i => `${i.name} ×${i.quantity} = KES ${i.subtotal.toLocaleString()}`).join('\n')}\n\nTotal: KES ${receipt.total.toLocaleString()}\nPayment: ${receipt.paymentMethod}${receipt.debtorName ? '\nDebtor: ' + receipt.debtorName : ''}\n\nThank you for your business!`;
+                const text = `${profile?.storeName || 'DukaHub'}\n${receipt.date.toLocaleDateString()} ${fmtTime(receipt.date.getTime())}\n#${receipt.id.slice(-8).toUpperCase()}\n\n${receipt.items.map(i => `${i.name} ×${i.quantity} = KES ${i.subtotal.toLocaleString()}`).join('\n')}\n\nTotal: KES ${receipt.total.toLocaleString()}\nPayment: ${receipt.paymentMethod}${receipt.debtorName ? '\nDebtor: ' + receipt.debtorName : ''}\n\nThank you for your business!`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
               }} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> WhatsApp</button>
               <button onClick={() => setReceipt(null)} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Close</button>

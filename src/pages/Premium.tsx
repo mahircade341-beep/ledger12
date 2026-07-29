@@ -17,7 +17,7 @@ export default function Premium() {
           </div>
           <h2 className="text-2xl font-bold text-emerald-400 mt-4">All Features Unlocked</h2>
           <p className="text-slate-400 mt-3 max-w-md mx-auto">
-            DukaLedger Pro is now completely free. All features — POS, Inventory, Daftari, Cash Drawer, and Insights — are available to every user.
+            DukaHub is now completely free. All features — POS, Inventory, Daftari, Cash Drawer, and Insights — are available to every user.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             <span className="badge-cyan">POS Terminal</span>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DukaLedger Pro</string>
-    <string name="short_name">DukaLedger</string>
+    <string name="app_name">DukaHub</string>
+    <string name="short_name">DukaHub</string>
     <string name="description">Complete retail management system for Kenyan micro-retail shops. POS, inventory, debtor ledger, cash drawer auditing, M-Pesa tracking — all offline.</string>
 </resources>

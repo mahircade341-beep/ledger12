@@ -62,7 +62,7 @@ export default function Sidebar() {
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
   const isAdmin = profile?.role === 'admin' || profile?.role === 'user';
   const isStaff = profile?.role === 'staff';
-  const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaLedger';
+  const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
   // Determine which nav items to show
   const navItems = isStaff ? staffNavItems : adminNavItems;
@@ -82,7 +82,7 @@ export default function Sidebar() {
 
 
 
-  const storeNameFromProfile = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaLedger';
+  const storeNameFromProfile = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
   const linkClass = ({ isActive }: { isActive: boolean }) => isActive ? 'nav-link-active' : 'nav-link';
 

@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
   const [appLockEnabled, setAppLockEnabled] = useState(() => !!getItem('dl-app-lock-hash'));
 
-  const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaLedger';
+  const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
   // Fetch user profile from supabase
   const refreshProfile = async () => {

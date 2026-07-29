@@ -86,7 +86,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-lg shadow-lg shadow-cyan-500/20">📒</div>
-            <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">DukaLedger Pro</span>
+            <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">DukaHub</span>
           </div>
           <div className="flex items-center gap-3">
             <Link to="/staff" className="btn-ghost text-sm text-slate-400 hover:text-white">
@@ -163,7 +163,7 @@ export default function Landing() {
                     <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                     <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   </div>
-                  <div className="flex-1 text-center text-xs text-slate-500 font-medium">DukaLedger Pro — Point of Sale</div>
+                  <div className="flex-1 text-center text-xs text-slate-500 font-medium">DukaHub — Point of Sale</div>
                 </div>
                 <div className="p-4 sm:p-6 grid grid-cols-5 gap-4 min-h-[300px]">
                   {/* POS UI mockup */}
@@ -238,7 +238,7 @@ export default function Landing() {
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Everything Your <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Duka</span> Needs
             </h2>
-            <p className="text-slate-500 max-w-2xl mx-auto">From checkout to debt collection, DukaLedger Pro covers every aspect of your retail business.</p>
+            <p className="text-slate-500 max-w-2xl mx-auto">From checkout to debt collection, DukaHub covers every aspect of your retail business.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f, i) => (
@@ -268,7 +268,7 @@ export default function Landing() {
             <div className="relative z-10">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
               <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-                Join thousands of Kenyan retailers who trust DukaLedger Pro. 
+                Join thousands of Kenyan retailers who trust DukaHub. 
                 Sign up today and get access to all features — no credit card required.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -294,7 +294,7 @@ export default function Landing() {
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-sm">📒</div>
-                <span className="font-bold">DukaLedger Pro</span>
+                <span className="font-bold">DukaHub</span>
               </div>
               <p className="text-sm text-slate-500 leading-relaxed">Complete retail management for Kenyan micro-retail shops.</p>
             </div>
@@ -337,7 +337,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-600">© 2026 DukaLedger Pro. All rights reserved.</p>
+            <p className="text-xs text-slate-600">© 2026 DukaHub. All rights reserved.</p>
             <div className="flex items-center gap-4 text-xs text-slate-600">
               <a href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
               <a href="#" className="hover:text-slate-400 transition-colors">Terms of Service</a>

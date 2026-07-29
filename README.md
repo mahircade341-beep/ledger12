@@ -1,2 +1,2 @@
-# ledger12
-my ledger pro21
+# DukaHub
+A cloud-powered POS and retail management system for Kenyan micro-retail shops

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base app theme -->
-    <style name="Theme.DukaLedger" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.DukaHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#3b82f6</item>
         <item name="colorPrimaryVariant">#2563eb</item>
         <item name="colorOnPrimary">#ffffff</item>
@@ -12,7 +12,7 @@
     </style>
 
     <!-- Splash screen theme -->
-    <style name="Theme.DukaLedger.Splash" parent="Theme.DukaLedger">
+    <style name="Theme.DukaHub.Splash" parent="Theme.DukaHub">
         <item name="android:windowBackground">#020617</item>
     </style>
 </resources>

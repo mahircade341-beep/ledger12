@@ -110,7 +110,7 @@ export default function Insights() {
     const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
-    a.download = `dukaledger-sales-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `dukahub-sales-${period}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click(); URL.revokeObjectURL(url);
   }, [filteredTransactions, products, period]);
 

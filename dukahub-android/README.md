@@ -1,6 +1,6 @@
-# DukaLedger Pro — Android App
+# DukaHub — Android App
 
-This is the Android wrapper for [DukaLedger Pro](https://ledger12.netlify.app/), a cloud-powered POS and inventory management system for Kenyan micro-retail shops. **Data is stored securely in Supabase** and synced across all devices — sign in on any phone or tablet to access your business.
+This is the Android wrapper for [DukaHub](https://ledger12.netlify.app/), a cloud-powered POS and inventory management system for Kenyan micro-retail shops. **Data is stored securely in Supabase** and synced across all devices — sign in on any phone or tablet to access your business.
 
 Built using **Trusted Web Activity (TWA)** — wraps the PWA as a native Android app via Chrome Custom Tabs.
 
@@ -29,8 +29,8 @@ Built using **Trusted Web Activity (TWA)** — wraps the PWA as a native Android
 
 ```bash
 # Clone the repo
-git clone https://github.com/nextlevelbuilder/dukaledger-android
-cd dukaledger-android
+git clone https://github.com/nextlevelbuilder/dukahub-android
+cd dukahub-android
 
 # Build debug APK
 ./gradlew assembleDebug

@@ -93,7 +93,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center  p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{background:'var(--bg-primary)'}}>
       {/* Background orbs */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06)_0%,transparent_60%)]" />
       <div className="absolute inset-0 bg-grid pointer-events-none" />

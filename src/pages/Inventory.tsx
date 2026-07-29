@@ -8,6 +8,7 @@ export default function Inventory() {
   const { data: products, update, remove } = useLocalData('products');
   const { data: transactions } = useLocalData('transactions');
   const { data: categories } = useLocalData('categories');
+  const { data: adjustments, add: addAdjustment } = useLocalData('stockAdjustments');
 
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const [search, setSearch] = useState('');
@@ -17,6 +18,7 @@ export default function Inventory() {
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [threshold, setThreshold] = useState(lowStockThreshold);
   const [showScanner, setShowScanner] = useState(false);
+  const [showAllLog, setShowAllLog] = useState(false);
 
   // Edit modal state
   const [editModal, setEditModal] = useState<any>(null);
@@ -108,6 +110,8 @@ export default function Inventory() {
   const handleEditSave = async () => {
     if (!editModal || !editName.trim()) return;
     setEditLoading(true);
+
+    const prevQty = editModal.quantity || 0;
     await update(editModal._id, {
       name: editName.trim(),
       quantity: editQty,
@@ -119,6 +123,22 @@ export default function Inventory() {
       supplierPhone: editSupplierPhone,
       image: editImage || undefined,
     } as any);
+
+    // Log stock adjustment if quantity changed
+    const diff = editQty - prevQty;
+    if (diff !== 0 && userId) {
+      addAdjustment({
+        userId: userId as any,
+        productId: editModal._id,
+        productName: editName.trim(),
+        quantityChange: diff,
+        previousQuantity: prevQty,
+        newQuantity: editQty,
+        type: diff > 0 ? 'restock' : 'adjustment',
+        notes: diff > 0 ? 'Manual restock' : 'Manual reduction',
+      } as any);
+    }
+
     setEditLoading(false);
     setEditModal(null);
   };
@@ -319,20 +339,100 @@ export default function Inventory() {
         )}
       </div>
 
-      {/* Recent Stock Movements */}
-      {recentMovements.length > 0 && (
-        <div className="card">
-          <h2 className="text-base font-semibold text-[var(--text-primary)] mb-3">Recent Stock Movements</h2>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto scrollbar-thin">
-            {recentMovements.slice(0, 15).map((m: any, i: number) => (
-              <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-[var(--nav-hover-bg)] transition-colors">
-                <span className="text-sm text-[var(--text-primary)]">{m.name}</span>
-                <span className="text-sm font-medium text-red-400">{m.quantity}</span>
+      {/* Stock Adjustment Log */}
+      {(() => {
+        const hasAdjustments = adjustments.length > 0 || recentMovements.length > 0;
+        if (!hasAdjustments) return null;
+
+        const combined = [
+          // From stock_adjustments table
+          ...adjustments.map((a: any) => ({
+            name: a.productName,
+            quantity: a.quantityChange,
+            date: new Date(a._creationTime || Date.now()),
+            type: a.type as string,
+            notes: a.notes || '',
+          })),
+          // From sales (transactions)
+          ...recentMovements,
+        ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 50);
+
+        const displayed = showAllLog ? combined : combined.slice(0, 20);
+
+        return (
+          <div className="card">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25" />
+                </svg>
+                <h2 className="text-base font-semibold text-[var(--text-primary)]">Stock Adjustment Log</h2>
+                <span className="text-[10px] text-[var(--text-muted)] font-medium bg-[var(--bg-surface3)] px-2 py-0.5 rounded-full">
+                  {combined.length} entries
+                </span>
               </div>
-            ))}
+              {combined.length > 20 && (
+                <button onClick={() => setShowAllLog(!showAllLog)}
+                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">
+                  {showAllLog ? 'Show less' : 'View all'}
+                </button>
+              )}
+            </div>
+            <div className="space-y-0.5 max-h-72 overflow-y-auto scrollbar-thin">
+              {displayed.map((m: any, i: number) => {
+                const isPositive = m.quantity > 0;
+                const dateStr = m.date.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
+                const timeStr = m.date.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+                return (
+                  <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-[var(--nav-hover-bg)] transition-colors group">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                        isPositive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+                      }`}>
+                        {isPositive ? (
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                          </svg>
+                        ) : (
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">{m.name}</p>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-semibold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {isPositive ? '+' : ''}{m.quantity}
+                          </span>
+                          <span className="text-[10px] text-[var(--text-muted)]">•</span>
+                          <span className={`text-[10px] font-medium ${
+                            m.type === 'restock' ? 'text-emerald-400/70' :
+                            m.type === 'adjustment' ? 'text-amber-400/70' :
+                            'text-red-400/70'
+                          }`}>
+                            {m.type === 'restock' ? 'Restock' : m.type === 'adjustment' ? 'Adjustment' : 'Sale'}
+                          </span>
+                          {m.notes && (
+                            <>
+                              <span className="text-[10px] text-[var(--text-muted)]">•</span>
+                              <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[100px]">{m.notes}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-[var(--text-muted)] shrink-0 hidden sm:block group-hover:text-[var(--text-secondary)] transition-colors">
+                      {dateStr} {timeStr}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-muted)] shrink-0 sm:hidden">{dateStr}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">

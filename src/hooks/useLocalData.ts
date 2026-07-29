@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
-type TableName = 'products' | 'transactions' | 'debtors' | 'debtPayments' | 'payouts' | 'categories';
+type TableName = 'products' | 'transactions' | 'debtors' | 'debtPayments' | 'payouts' | 'categories' | 'stockAdjustments';
 
 interface AppRecord {
   _id: string;
@@ -17,6 +17,7 @@ const TABLE_MAP: Record<string, string> = {
   debtPayments: 'debt_payments',
   payouts: 'payouts',
   categories: 'categories',
+  stockAdjustments: 'stock_adjustments',
 };
 
 export function genId(): string {
@@ -202,6 +203,16 @@ function mapFromSupabase(table: string, item: any): any {
       };
     case 'categories':
       return { name: item.name || '' };
+    case 'stockAdjustments':
+      return {
+        productId: item.product_id || '',
+        productName: item.product_name || '',
+        quantityChange: item.quantity_change || 0,
+        previousQuantity: item.previous_quantity || 0,
+        newQuantity: item.new_quantity || 0,
+        type: item.type || 'restock',
+        notes: item.notes || '',
+      };
     default:
       return item;
   }
@@ -224,6 +235,8 @@ function mapToSupabase(table: string, record: any, id?: string): any {
       return { ...base, type: record.type || 'drawdown', category: record.category || '', amount: record.amount || 0, notes: record.notes || '' };
     case 'categories':
       return { ...base, name: record.name || '' };
+    case 'stockAdjustments':
+      return { ...base, product_id: record.productId || '', product_name: record.productName || '', quantity_change: record.quantityChange || 0, previous_quantity: record.previousQuantity || 0, new_quantity: record.newQuantity || 0, type: record.type || 'restock', notes: record.notes || '' };
     default:
       return { ...base, ...record };
   }
@@ -243,6 +256,8 @@ function mapChangesToSupabase(table: string, changes: any): any {
       return { type: changes.type, category: changes.category, amount: changes.amount, notes: changes.notes };
     case 'categories':
       return { name: changes.name };
+    case 'stockAdjustments':
+      return { product_id: changes.productId, product_name: changes.productName, quantity_change: changes.quantityChange, previous_quantity: changes.previousQuantity, new_quantity: changes.newQuantity, type: changes.type, notes: changes.notes };
     default:
       return changes;
   }

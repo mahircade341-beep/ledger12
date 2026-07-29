@@ -6,6 +6,7 @@ import BarcodeScanner from '../components/BarcodeScanner';
 export default function Stock() {
   const { userId } = useAuth();
   const { data: products, add, update } = useLocalData('products');
+  const { add: addAdjustment } = useLocalData('stockAdjustments');
 
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(0);
@@ -42,11 +43,42 @@ export default function Stock() {
     if (!name.trim() || !userId) return;
     setLoading(true);
     const data = { name: name.trim(), quantity, wholesalePrice, retailPrice, category, supplier, supplierPhone, barcode, image: image || undefined };
+
     if (editId) {
+      // Update existing product — log the stock change
+      const existing = products.find((p: any) => p._id === editId);
+      const prevQty = existing?.quantity || 0;
       update(editId, data as any);
+      const diff = quantity - prevQty;
+      if (diff !== 0) {
+        addAdjustment({
+          userId: userId as any,
+          productId: editId,
+          productName: name.trim(),
+          quantityChange: diff,
+          previousQuantity: prevQty,
+          newQuantity: quantity,
+          type: diff > 0 ? 'restock' : 'adjustment',
+          notes: diff > 0 ? 'Stock added' : 'Stock reduced',
+        } as any);
+      }
     } else {
-      add({ userId: userId as any, ...data } as any);
+      // New product
+      const newId = add({ userId: userId as any, ...data } as any);
+      if (quantity > 0) {
+        addAdjustment({
+          userId: userId as any,
+          productId: newId,
+          productName: name.trim(),
+          quantityChange: quantity,
+          previousQuantity: 0,
+          newQuantity: quantity,
+          type: 'restock',
+          notes: 'Initial stock',
+        } as any);
+      }
     }
+
     resetForm();
     setLoading(false);
   };

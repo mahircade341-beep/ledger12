@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isPremium = godOverride || profile?.isPremium || false;
   const premiumExpiresAt = profile?.premiumExpiresAt || null;
   const isGodUser = godOverride;
-  const needsOnboarding = !!user && !profile?.storeName;
+  const needsOnboarding = !!user && !profile?.storeName && localStorage.getItem('dl-onboarded') !== 'true';
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
   // Fetch user profile from supabase

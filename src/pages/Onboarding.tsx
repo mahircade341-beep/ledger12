@@ -20,9 +20,9 @@ export default function Onboarding() {
     }
   }, [user]);
 
-  // If profile is already complete, redirect to POS
+  // If profile is already complete or already onboarded, redirect to POS
   useEffect(() => {
-    if (!needsOnboarding && profile?.storeName) {
+    if (localStorage.getItem('dl-onboarded') === 'true' || (!needsOnboarding && profile?.storeName)) {
       navigate('/pos', { replace: true });
     }
   }, [needsOnboarding, profile, navigate]);
@@ -42,6 +42,7 @@ export default function Onboarding() {
       return;
     }
     setLoading(false);
+    localStorage.setItem('dl-onboarded', 'true');
     navigate('/pos', { replace: true });
   };
 

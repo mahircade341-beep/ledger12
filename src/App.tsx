@@ -10,6 +10,7 @@ import Stock from './pages/Stock';
 import Daftari from './pages/Daftari';
 import CashDrawer from './pages/CashDrawer';
 import Insights from './pages/Insights';
+import Inventory from './pages/Inventory';
 import Premium from './pages/Premium';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
@@ -96,6 +97,7 @@ export default function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="pos" element={<POS />} />
+          <Route path="inventory" element={<Inventory />} />
           <Route path="stock" element={<Stock />} />
           <Route path="daftari" element={<Daftari />} />
           <Route path="cash-drawer" element={<CashDrawer />} />

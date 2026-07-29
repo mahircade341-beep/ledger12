@@ -4,10 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { user, profile, needsOnboarding, completeProfile, refreshProfile } = useAuth();
+  const { user, profile, needsOnboarding, completeProfile } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [businessType, setBusinessType] = useState<'retail' | 'wholesale'>('retail');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +35,7 @@ export default function Onboarding() {
       return;
     }
     setLoading(true);
-    const result = await completeProfile(fullName.trim(), storeName.trim());
+    const result = await completeProfile(fullName.trim(), storeName.trim(), businessType);
     if (result.error) {
       setError(result.error);
       setLoading(false);
@@ -114,6 +115,41 @@ export default function Onboarding() {
               <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
                 This will appear as your store's name throughout the app
               </p>
+            </div>
+
+            {/* Business Type */}
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                Business Type
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setBusinessType('retail')}
+                  className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                    businessType === 'retail'
+                      ? 'border-[var(--accent-primary)] bg-[var(--accent-dim)]'
+                      : 'border-[var(--border-color)] bg-[var(--item-bg)] hover:border-[var(--border-hover)]'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">🏪</div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Retail</div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Sell to end customers</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBusinessType('wholesale')}
+                  className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
+                    businessType === 'wholesale'
+                      ? 'border-[var(--accent-primary)] bg-[var(--accent-dim)]'
+                      : 'border-[var(--border-color)] bg-[var(--item-bg)] hover:border-[var(--border-hover)]'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">📦</div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Wholesale</div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Sell in bulk to retailers</div>
+                </button>
+              </div>
             </div>
 
             {error && (

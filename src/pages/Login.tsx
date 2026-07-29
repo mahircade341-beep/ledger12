@@ -6,6 +6,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signUp, signIn, resetPassword, isAuthenticated, signInWithGoogle } = useAuth();
+  const [businessType, setBusinessType] = useState<'retail' | 'wholesale'>('retail');
 
   // Tab: signin | signup | reset
   const [tab, setTab] = useState<'signin' | 'signup'>(() => (searchParams.get('mode') === 'signup' ? 'signup' : 'signin'));
@@ -47,7 +48,7 @@ export default function Login() {
     if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setLoading(true);
 
-    const result = await signUp(email.trim(), password, fullName.trim(), storeName.trim());
+    const result = await signUp(email.trim(), password, fullName.trim(), storeName.trim(), businessType);
     if (result.error) {
       setError(result.error);
       setLoading(false);
@@ -240,6 +241,27 @@ export default function Login() {
                         <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Store Name</label>
                         <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)}
                           className="glass-input w-full" placeholder="e.g. Mama's Shop" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Business Type</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button type="button" onClick={() => setBusinessType('retail')}
+                          className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                            businessType === 'retail'
+                              ? 'border-[var(--accent-primary)] bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                              : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)]'
+                          }`}>
+                          🏪 Retail
+                        </button>
+                        <button type="button" onClick={() => setBusinessType('wholesale')}
+                          className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                            businessType === 'wholesale'
+                              ? 'border-[var(--accent-primary)] bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                              : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)]'
+                          }`}>
+                          📦 Wholesale
+                        </button>
                       </div>
                     </div>
                     <div>

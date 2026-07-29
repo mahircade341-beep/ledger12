@@ -8,6 +8,7 @@ interface Profile {
   fullName: string;
   storeName: string;
   role: string;
+  businessType: 'retail' | 'wholesale';
 }
 
 interface AuthContextType {
@@ -19,7 +20,7 @@ interface AuthContextType {
   storeName: string;
 
   // Sign up / sign in
-  signUp: (email: string, password: string, fullName: string, storeName: string) => Promise<{ error?: string; data?: any }>;
+  signUp: (email: string, password: string, fullName: string, storeName: string, businessType?: string) => Promise<{ error?: string; data?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 
@@ -42,7 +43,7 @@ interface AuthContextType {
 
   // Onboarding (for Google OAuth users)
   needsOnboarding: boolean;
-  completeProfile: (fullName: string, storeName: string) => Promise<{ error?: string }>;
+  completeProfile: (fullName: string, storeName: string, businessType?: string) => Promise<{ error?: string }>;
 
   refreshProfile: () => Promise<void>;
 }
@@ -97,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fullName: prof.full_name || '',
         storeName: prof.store_name || '',
         role: prof.role || 'user',
+        businessType: prof.business_type || 'retail',
       };
       setProfile(p);
       if (prof.store_name) localStorage.setItem('dl-store-name', prof.store_name);
@@ -126,21 +128,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ─── Auth Methods ──────────────────────────────
 
-  const signUp = async (email: string, password: string, fullName: string, storeName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, storeName: string, businessType?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName, store_name: storeName, role: 'user' },
+        data: { full_name: fullName, store_name: storeName, role: 'user', business_type: businessType || 'retail' },
       },
     });
     if (error) return { error: error.message };
+
+    // Auto-create profile row immediately
+    if (data?.user) {
+      const { error: profError } = await supabase.from('profiles').upsert({
+        user_id: data.user.id,
+        email: email,
+        full_name: fullName,
+        store_name: storeName,
+        role: 'user',
+        business_type: businessType || 'retail',
+      }, { onConflict: 'user_id' });
+      if (profError) console.error('Profile creation error:', profError);
+    }
+
     return { data };
   };
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
+    if (error) {
+      // Better error messages for the user
+      if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+        return { error: 'Please confirm your email first. Check your inbox (and spam folder) for the confirmation link, or request a new one.' };
+      }
+      if (error.message?.includes('Invalid login credentials')) {
+        return { error: 'Wrong email or password. If you just signed up, check your email for the confirmation link first.' };
+      }
+      return { error: error.message };
+    }
     await refreshProfile();
     return {};
   };
@@ -184,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ─── Onboarding ────────────────────────────────
 
-  const completeProfile = async (fullName: string, storeName: string) => {
+  const completeProfile = async (fullName: string, storeName: string, businessType?: string) => {
     if (!user) return { error: 'Not authenticated' };
     const { error } = await supabase.from('profiles').upsert({
       user_id: user.id,
@@ -192,6 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       full_name: fullName,
       store_name: storeName,
       role: 'user',
+      business_type: businessType || 'retail',
     }, { onConflict: 'user_id' });
     if (error) return { error: error.message };
     await refreshProfile();

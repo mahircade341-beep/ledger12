@@ -11,9 +11,14 @@ const adminNavItems = [
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3h11.25M9 3v18m-5.25-3h12.75a.75.75 0 00.75-.75V6.75a.75.75 0 00-.75-.75H3.75A.75.75 0 003 6.75v10.5a.75.75 0 00.75.75z" />
     </svg>
   )},
-  { path: '/stock', label: 'Stock', icon: (
+  { path: '/inventory', label: 'Inventory', icon: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+    </svg>
+  )},
+  { path: '/stock', label: 'Stock Mgmt', icon: (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
     </svg>
   )},
   { path: '/daftari', label: 'Daftari', icon: (
@@ -80,7 +85,7 @@ export default function Sidebar() {
 
   const navLinks = navItems.map((item) => {
     let badge = null;
-    if (item.path === '/stock' && (lowStockCount > 0 || criticalCount > 0)) {
+    if (item.path === '/inventory' && (lowStockCount > 0 || criticalCount > 0)) {
       badge = <span className="ml-auto flex items-center gap-1">{criticalCount > 0 && <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/40" />}{lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/40" />}</span>;
     }
     return (

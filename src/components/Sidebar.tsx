@@ -104,7 +104,7 @@ export default function Sidebar() {
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>📒</div>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>D</div>
           <span className="font-semibold text-sm text-[var(--text-primary)] truncate max-w-[120px]">{storeName}</span>
           {isAdmin && <span className="bg-[var(--accent-dim)] text-[var(--text-secondary)] text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[var(--border-color)]">ADMIN</span>}
         </div>
@@ -129,7 +129,7 @@ export default function Sidebar() {
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 glass-sidebar transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}>
         {/* Desktop header */}
         <div className="hidden lg:flex items-center gap-3 px-6 py-5 border-b border-[var(--border-white)]">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>📒</div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>D</div>
           <div className="min-w-0">
             <h1 className="font-bold text-[var(--text-primary)] truncate flex items-center gap-1.5">
               {storeName}

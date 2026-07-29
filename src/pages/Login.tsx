@@ -106,11 +106,9 @@ export default function Login() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-3xl shadow-2xl mb-4 ring-1 ring-[var(--border-color)]"
-            style={{ background: 'var(--btn-primary-bg)', transform: `perspective(1000px) rotateY(${mousePos.x * 5}deg) rotateX(${mousePos.y * -5}deg)`, transition: 'transform 0.2s ease-out' }}>
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3h11.25M9 3v18m-5.25-3h12.75a.75.75 0 00.75-.75V6.75a.75.75 0 00-.75-.75H3.75A.75.75 0 003 6.75v10.5a.75.75 0 00.75.75z" />
-            </svg>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-4"
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', transform: `perspective(1000px) rotateY(${mousePos.x * 5}deg) rotateX(${mousePos.y * -5}deg)`, transition: 'transform 0.2s ease-out' }}>
+            <span className="text-2xl font-extrabold text-white">DH</span>
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub</h1>
           <p className="text-[var(--text-muted)] text-sm mt-1">Cloud-powered retail management for Kenyan shops</p>

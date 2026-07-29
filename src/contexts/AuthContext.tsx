@@ -23,6 +23,9 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 
+  // Google OAuth
+  signInWithGoogle: () => Promise<void>;
+
   // Password reset
   resetPassword: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
@@ -162,6 +165,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return {};
   };
 
+  // ─── Google OAuth ──────────────────────────────
+
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/pos`,
+      },
+    });
+    if (error) console.error('Google sign-in error:', error.message);
+  };
+
   // ─── App Lock ──────────────────────────────────
 
   const setAppPassword = async (password: string, securityQuestion?: string, securityAnswer?: string) => {
@@ -220,6 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signIn,
         signOut,
+        signInWithGoogle,
         resetPassword,
         updatePassword,
 

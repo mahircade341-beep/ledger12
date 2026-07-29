@@ -34,24 +34,50 @@ export default function Insights() {
   const { remove: removeTx, update: updateTx } = useLocalData('transactions');
   const [period, setPeriod] = useState<ViewPeriod>('daily');
 
-  const getDateRange = () => {
+  const getDateRange = (forPeriod?: ViewPeriod) => {
     const now = new Date();
     let start: Date;
-    if (period === 'daily') start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    else if (period === 'weekly') { const day = now.getDay(); start = new Date(now); start.setDate(now.getDate() - day); start.setHours(0, 0, 0, 0); }
+    const p = forPeriod || period;
+    if (p === 'daily') start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    else if (p === 'weekly') { const day = now.getDay(); start = new Date(now); start.setDate(now.getDate() - day); start.setHours(0, 0, 0, 0); }
     else start = new Date(now.getFullYear(), now.getMonth(), 1);
     return { start, end: now };
   };
 
+  // Previous period for comparison
+  const getPrevDateRange = () => {
+    const now = new Date();
+    let prevStart: Date, prevEnd: Date;
+    if (period === 'daily') {
+      prevStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      prevEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (period === 'weekly') {
+      prevStart = new Date(now); prevStart.setDate(now.getDate() - now.getDay() - 7); prevStart.setHours(0,0,0,0);
+      prevEnd = new Date(now); prevEnd.setDate(now.getDate() - now.getDay()); prevEnd.setHours(0,0,0,0);
+    } else {
+      prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      prevEnd = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    return { prevStart, prevEnd };
+  };
+
   const { start, end } = getDateRange();
+  const { prevStart, prevEnd } = getPrevDateRange();
 
   const filteredTransactions = useMemo(() => transactions.filter((t: any) => t._creationTime >= start.getTime() && t._creationTime <= end.getTime()), [transactions, start, end]);
+  const prevFilteredTransactions = useMemo(() => transactions.filter((t: any) => t._creationTime >= prevStart.getTime() && t._creationTime < prevEnd.getTime()), [transactions, prevStart, prevEnd]);
+
   const filteredPayouts = useMemo(() => payouts.filter((p: any) => p._creationTime >= start.getTime() && p._creationTime <= end.getTime()), [payouts, start, end]);
 
   const grossSales = filteredTransactions.reduce((sum: number, t: any) => sum + t.total, 0);
+  const prevGrossSales = prevFilteredTransactions.reduce((sum: number, t: any) => sum + t.total, 0);
+  const salesGrowth = prevGrossSales > 0 ? ((grossSales - prevGrossSales) / prevGrossSales) * 100 : grossSales > 0 ? 100 : 0;
+
   const totalDiscounts = filteredTransactions.reduce((sum: number, t: any) => sum + (t.discount || 0), 0);
   const totalPayoutsAmt = filteredPayouts.reduce((sum: number, p: any) => sum + p.amount, 0);
   const numTransactions = filteredTransactions.length;
+  const prevNumTransactions = prevFilteredTransactions.length;
+  const txnGrowth = prevNumTransactions > 0 ? ((numTransactions - prevNumTransactions) / prevNumTransactions) * 100 : numTransactions > 0 ? 100 : 0;
   const avgTicket = numTransactions > 0 ? grossSales / numTransactions : 0;
 
   // #5: Profit calculation with wholesale price warnings
@@ -130,11 +156,11 @@ export default function Insights() {
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="stat-card"><span className="stat-label">Gross Sales</span><span className="stat-value text-emerald-400">KES {grossSales.toLocaleString()}</span><span className="text-xs text-[var(--text-muted)]">{numTransactions} txns</span></div>
-        <div className="stat-card"><span className="stat-label">Avg. Ticket</span><span className="stat-value text-cyan-400">KES {avgTicket.toLocaleString()}</span></div>
+        <div className="stat-card"><div className="flex items-center justify-between w-full"><span className="stat-label">Gross Sales</span><span className={`text-xs font-medium ${salesGrowth >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{salesGrowth >= 0 ? '↑' : '↓'} {Math.abs(salesGrowth).toFixed(0)}%</span></div><span className="stat-value text-emerald-400">KES {grossSales.toLocaleString()}</span><span className="text-xs text-[var(--text-muted)]">{numTransactions} txns vs {prevNumTransactions} prev</span></div>
+        <div className="stat-card"><span className="stat-label">Avg. Ticket</span><span className="stat-value text-cyan-400">KES {avgTicket.toLocaleString()}</span><span className="text-xs text-[var(--text-muted)]">{period} average</span></div>
         <div className="stat-card"><span className={`stat-label ${profitData.itemsMissingWholesale > 0 ? 'text-amber-400' : ''}`}>Confirmed Profit {profitData.itemsMissingWholesale > 0 && <span className="badge-amber text-[10px] ml-1">⚠</span>}</span><span className={`stat-value ${profitData.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {profitData.totalProfit.toLocaleString()}</span><span className="text-xs text-[var(--text-muted)]">{profitData.margin.toFixed(1)}% margin</span></div>
-        <div className="stat-card"><span className="stat-label">Cost of Goods</span><span className="stat-value text-amber-400">KES {profitData.totalCost.toLocaleString()}</span></div>
-        <div className="stat-card"><span className="stat-label">Discounts</span><span className="stat-value text-amber-400">KES {totalDiscounts.toLocaleString()}</span></div>
+        <div className="stat-card"><span className="stat-label">Cost of Goods</span><span className="stat-value text-amber-400">KES {profitData.totalCost.toLocaleString()}</span><span className="text-xs text-[var(--text-muted)]">{profitData.totalItems} items sold</span></div>
+        <div className="stat-card"><span className="stat-label">Txns This {period.charAt(0).toUpperCase() + period.slice(1)}</span><div className="flex items-end gap-2"><span className="stat-value text-cyan-400">{numTransactions}</span><span className={`text-xs font-medium mb-1 ${txnGrowth >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{txnGrowth >= 0 ? '↑' : '↓'} {Math.abs(txnGrowth).toFixed(0)}%</span></div><span className="text-xs text-[var(--text-muted)]">Discounts: KES {totalDiscounts.toLocaleString()}</span></div>
       </div>
 
       {profitData.itemsMissingWholesale > 0 && (

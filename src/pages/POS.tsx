@@ -6,7 +6,7 @@ import BarcodeScanner from '../components/BarcodeScanner';
 interface ReceiptData {
   id: string;
   items: { name: string; quantity: number; price: number; subtotal: number }[];
-  total: number; subtotal: number; discount: number; paymentMethod: string; date: Date; pricing: 'retail' | 'wholesale';
+  total: number; subtotal: number; discount: number; paymentMethod: string; date: Date;
   debtorName?: string;
 }
 
@@ -26,7 +26,6 @@ export default function POS() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [search, setSearch] = useState('');
-  const [pricingMode, setPricingMode] = useState<'retail' | 'wholesale'>('retail');
   const [showOutOfStock, setShowOutOfStock] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [voidTxId, setVoidTxId] = useState<string | null>(null);
@@ -97,7 +96,7 @@ export default function POS() {
 
   const quickProducts = useMemo(() => products.filter((p: any) => p.quantity > 0).slice(0, 8), [products]);
 
-  const getPrice = useCallback((p: any) => pricingMode === 'wholesale' ? (p.wholesalePrice || 0) : (p.retailPrice || 0), [pricingMode]);
+  const getPrice = useCallback((p: any) => p.retailPrice || 0, []);
 
   // ── Cart methods ──
   const addToCartDirect = (productId: string) => {
@@ -169,7 +168,7 @@ export default function POS() {
     setLoading(true); setSuccessMsg(''); setReceipt(null);
     const items = cart.map((c: any) => ({
       productId: c.product._id, name: c.product.name, quantity: c.quantity,
-      price: pricingMode === 'wholesale' ? (c.product.wholesalePrice || 0) : c.product.retailPrice,
+      price: c.product.retailPrice,
       wholesalePrice: c.product.wholesalePrice, subtotal: c.subtotal,
     }));
     const extraData: any = {};
@@ -181,12 +180,12 @@ export default function POS() {
         updateDebtor(selectedDebtor._id, { amount: (currentDebtor.amount || 0) + total, status: 'active' } as any);
       }
     }
-    const txId = addTx({ userId: userId as any, items, total, paymentMethod, discount, pricing: pricingMode, ...extraData } as any);
+    const txId = addTx({ userId: userId as any, items, total, paymentMethod, discount, ...extraData } as any);
     cart.forEach((c: any) => {
       const p = products.find((x: any) => x._id === c.product._id);
       if (p) updateQuantity(p._id, Math.max(0, p.quantity - c.quantity));
     });
-    setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), pricing: pricingMode, debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined });
+    setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined });
     setSuccessMsg(`Sale finalized! KES ${total.toLocaleString()}`);
     window.dispatchEvent(new Event('salecompleted'));
     setCart([]); setDiscount(0); setSelectedDebtor(null); setDebtorSearch(''); setLoading(false);
@@ -279,7 +278,7 @@ export default function POS() {
                 <p className="text-xs text-gray-500 mt-0.5">{(profile?.storeName ? profile.storeName + ' — ' : '') + 'Retail Management System'}</p>
                 <p className="text-xs text-gray-400 mt-1">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
                 <p className="text-xs text-gray-400 font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
-                <p className="text-[10px] text-gray-400 mt-0.5 uppercase">{receipt.pricing}</p>
+
               </div>
               <div className="space-y-1.5 mb-4">
                 <div className="flex justify-between text-[11px] font-semibold text-gray-400 uppercase tracking-wider pb-1 border-b border-gray-100">
@@ -351,18 +350,6 @@ export default function POS() {
               </svg>
               Recent
             </button>
-
-            {/* Pricing Toggle */}
-            <div className="flex gap-0.5 bg-[var(--item-bg)] rounded-xl p-0.5 border border-[var(--border-color)]">
-              <button onClick={() => setPricingMode('retail')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${pricingMode === 'retail' ? 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
-                Retail
-              </button>
-              <button onClick={() => setPricingMode('wholesale')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${pricingMode === 'wholesale' ? 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
-                Wholesale
-              </button>
-            </div>
 
             {/* Out of stock toggle */}
             <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer ml-auto">

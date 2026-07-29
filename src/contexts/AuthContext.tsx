@@ -27,13 +27,6 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
 
-  // Staff
-  staffPassword: string;
-  setStaffPassword: (password: string) => Promise<{ error?: string }>;
-  verifyStaffPassword: (password: string) => boolean;
-  clearStaffPassword: () => void;
-  fetchStores: () => Promise<{ storeName: string }[]>;
-
   // App lock (secondary layer)
   isLocked: boolean;
   appLockEnabled: boolean;
@@ -72,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isStaffSession, setIsStaffSession] = useState(false);
 
   // App lock state
   const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
@@ -146,11 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clear staff session
-    removeItem('dl-staff-session');
-    removeItem('dl-staff-auth');
     removeItem('dl-store-name');
-    setIsStaffSession(false);
     setIsLocked(false);
     removeItem('dl-locked');
 
@@ -172,40 +160,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) return { error: error.message };
     return {};
-  };
-
-  // ─── Staff ─────────────────────────────────────
-
-  const staffPassword = getItem('dl-staff-pass') || '';
-
-  const setStaffPasswordLocal = async (password: string) => {
-    if (!user) return { error: 'Not signed in' };
-    const { error } = await supabase.from('profiles').update({ staff_password: password }).eq('user_id', user.id);
-    if (error) return { error: error.message };
-    setItem('dl-staff-pass', password);
-    return {};
-  };
-
-  const verifyStaffPassword = (password: string): boolean => {
-    const stored = getItem('dl-staff-pass');
-    return stored === password;
-  };
-
-  const clearStaffPassword = () => {
-    removeItem('dl-staff-pass');
-    if (user) {
-      supabase.from('profiles').update({ staff_password: '' }).eq('user_id', user.id);
-    }
-  };
-
-  const fetchStores = async (): Promise<{ storeName: string }[]> => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('store_name')
-      .not('store_name', 'eq', '')
-      .not('staff_password', 'eq', '');
-    if (!data) return [];
-    return data.map(p => ({ storeName: p.store_name }));
   };
 
   // ─── App Lock ──────────────────────────────────
@@ -256,9 +210,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        userId: user?.id || (isStaffSession ? 'staff-session' : null),
+        userId: user?.id || null,
         user,
-        isAuthenticated: !!user || isStaffSession,
+        isAuthenticated: !!user,
         isLoading,
         profile,
         storeName,
@@ -268,12 +222,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         resetPassword,
         updatePassword,
-
-        staffPassword,
-        setStaffPassword: setStaffPasswordLocal,
-        verifyStaffPassword,
-        clearStaffPassword,
-        fetchStores,
 
         isLocked,
         appLockEnabled,

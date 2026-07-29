@@ -5,7 +5,6 @@ import LockScreen from './components/LockScreen';
 import Layout from './components/Layout';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
-import StaffAccess from './pages/StaffAccess';
 import POS from './pages/POS';
 import Stock from './pages/Stock';
 import Daftari from './pages/Daftari';
@@ -87,7 +86,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={landingOrRedirect} />
         <Route path="/login" element={<Login />} />
-        <Route path="/staff" element={<StaffAccess />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="pos" element={<POS />} />

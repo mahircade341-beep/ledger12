@@ -89,13 +89,7 @@ export default function Landing() {
             <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">DukaHub</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/staff" className="btn-ghost text-sm text-slate-400 hover:text-white">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-              </svg>
-              Staff Access
-            </Link>
-            <Link to="/login" className="btn-ghost text-sm text-slate-400 hover:text-white">Sign In</Link>
+<Link to="/login" className="btn-ghost text-sm text-slate-400 hover:text-white">Sign In</Link>
             <Link to="/login?mode=signup" className="btn-primary text-sm">
               Get Started Free
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -277,9 +271,6 @@ export default function Landing() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                   </svg>
-                </Link>
-                <Link to="/staff" className="btn-ghost text-base px-6 py-4 border border-white/10 text-slate-400 hover:text-white">
-                  Staff? Access Here
                 </Link>
               </div>
             </div>

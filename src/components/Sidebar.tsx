@@ -45,11 +45,6 @@ const adminNavItems = [
   )},
 ];
 
-// Staff nav items (limited access)
-const staffNavItems = adminNavItems.filter(item =>
-  ['/pos', '/stock', '/daftari', '/cash-drawer'].includes(item.path)
-);
-
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const touchStartX = useRef(0);
@@ -61,11 +56,8 @@ export default function Sidebar() {
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= lowStockThreshold).length;
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
   const isAdmin = profile?.role === 'admin' || profile?.role === 'user';
-  const isStaff = profile?.role === 'staff';
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
-
-  // Determine which nav items to show
-  const navItems = isStaff ? staffNavItems : adminNavItems;
+  const navItems = adminNavItems;
 
   // Swipe to open sidebar on mobile
   useEffect(() => {
@@ -177,7 +169,7 @@ export default function Sidebar() {
               <p className="text-xs text-slate-500 truncate">{profile?.email}</p>
             </div>
             {isAdmin && <span className="bg-cyan-500/10 text-cyan-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-cyan-500/20 shrink-0">ADMIN</span>}
-            {isStaff && <span className="bg-amber-500/10 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0">STAFF</span>}
+
           </div>
 
           {/* Cloud status */}

@@ -3,57 +3,6 @@ import { useTheme } from '../App';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocalData } from '../hooks/useLocalData';
 
-function StaffPasswordForm() {
-  const { staffPassword, setStaffPassword, clearStaffPassword } = useAuth();
-  const [staffPass, setStaffPass] = useState('');
-  const [confirmStaffPass, setConfirmStaffPass] = useState('');
-  const [error, setError] = useState('');
-  const [saved, setSaved] = useState(false);
-
-  const handleSetStaffPass = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (staffPass.length < 4) { setError('Password must be at least 4 characters'); return; }
-    if (staffPass !== confirmStaffPass) { setError('Passwords do not match'); return; }
-    setStaffPassword(staffPass);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-    setStaffPass('');
-    setConfirmStaffPass('');
-  };
-
-  return (
-    <form onSubmit={handleSetStaffPass} className="space-y-2">
-      {staffPassword && (
-        <div className="flex items-center gap-2 p-2 bg-emerald-500/10 rounded-lg mb-2">
-          <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-xs text-emerald-400">Staff password is currently set</p>
-        </div>
-      )}
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <input type="password" value={staffPass} onChange={(e) => setStaffPass(e.target.value)}
-            className="input-field text-sm" placeholder="New staff password" minLength={4} />
-        </div>
-        <div className="flex-1">
-          <input type="password" value={confirmStaffPass} onChange={(e) => setConfirmStaffPass(e.target.value)}
-            className="input-field text-sm" placeholder="Confirm password" />
-        </div>
-        <button type="submit" disabled={!staffPass || !confirmStaffPass} className="btn-primary btn-sm whitespace-nowrap">
-          {staffPassword ? 'Update' : 'Set Password'}
-        </button>
-      </div>
-      <div className="flex items-center justify-between">
-        {error && <p className="text-xs text-red-400">{error}</p>}
-        {saved && <p className="text-xs text-emerald-400">✓ Staff password updated!</p>}
-        <p className="text-xs text-[var(--text-muted)]">Share this password with your staff</p>
-      </div>
-    </form>
-  );
-}
-
 function fmtTime(ts: number) {
   const pref = localStorage.getItem('dl-time-format') || '12h';
   if (pref === '24h') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -354,41 +303,6 @@ export default function Settings() {
           )}
         </div>
       </div>
-
-      {/* Staff Access - Only visible to admin */}
-      {isAdmin && (
-        <div className="card border-amber-500/20">
-          <div className="flex items-center gap-2 mb-4">
-            <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-            </svg>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Staff Access</h2>
-          </div>
-          <div className="space-y-3">
-            <div className="p-3 bg-[var(--bg-surface2)] rounded-lg">
-              <p className="text-sm font-medium text-[var(--text-primary)]">Staff Password</p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5 mb-3">
-                Set a password so your employees can access the app via the Staff Access page.
-                Staff can use <strong>POS, Stock, Daftari, and Cash Drawer</strong> without needing a full account.
-              </p>
-              <StaffPasswordForm />
-            </div>
-            <div className="flex items-start gap-3 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-              <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
-              <div>
-                <p className="text-xs font-medium text-amber-400">How staff access works</p>
-                <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
-                  Share your <strong>store name</strong> and this <strong>staff password</strong> with your employees. 
-                  They go to <code className="text-cyan-400">/staff</code> on your app URL, enter both, and get instant access 
-                  to essential features. No email or sign-up needed.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Account */}
       <div className="card border-violet-500/20">

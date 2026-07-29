@@ -208,7 +208,7 @@ export default function POS() {
   const isGod = profile?.email === 'fahmanmanka25@gmail.com';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-16 lg:pb-0">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
@@ -482,7 +482,7 @@ export default function POS() {
         </div>
 
         {/* ── RIGHT COLUMN: Cart + Payment ── */}
-        <div className="lg:col-span-2 space-y-3">
+        <div id="checkout-section" className="lg:col-span-2 space-y-3">
           {/* Cart */}
           <div className="card">
             <div className="flex items-center justify-between mb-3">
@@ -652,6 +652,33 @@ export default function POS() {
           onClose={() => setShowScanner(false)}
           title="Scan Product Barcode"
         />
+      )}
+
+      {/* Mobile floating checkout button (visible on small screens when cart has items) */}
+      {cart.length > 0 && !receipt && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 p-3 pb-[env(safe-area-inset-bottom,12px)] lg:hidden bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/95 to-transparent">
+          <button
+            onClick={() => {
+              const el = document.getElementById('checkout-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
+            style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)' }}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+              </svg>
+              View Cart ({cart.length})
+            </span>
+            <span className="flex items-center gap-2">
+              <span>KES {total.toLocaleString()}</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </span>
+          </button>
+        </div>
       )}
     </div>
   );

@@ -9,8 +9,6 @@ interface Profile {
   storeName: string;
   role: string;
   businessType: 'retail' | 'wholesale';
-  isPremium: boolean;
-  premiumExpiresAt: string | null;
 }
 
 interface AuthContextType {
@@ -21,11 +19,6 @@ interface AuthContextType {
   isProfileLoaded: boolean;
   profile: Profile | null;
   storeName: string;
-
-  // Premium
-  isPremium: boolean;
-  premiumExpiresAt: string | null;
-  isGodUser: boolean;
 
   // Sign up / sign in
   signUp: (email: string, password: string, fullName: string, storeName: string, businessType?: string) => Promise<{ error?: string; data?: any }>;
@@ -87,11 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
   const [appLockEnabled, setAppLockEnabled] = useState(() => !!getItem('dl-app-lock-hash'));
 
-  const GOD_EMAIL = 'mahircade341@gmail.com';
-  const godOverride = user?.email === GOD_EMAIL;
-  const isPremium = godOverride || profile?.isPremium || false;
-  const premiumExpiresAt = profile?.premiumExpiresAt || null;
-  const isGodUser = godOverride;
   const needsOnboarding = !!user && !profile?.storeName && localStorage.getItem('dl-onboarded') !== 'true';
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
@@ -106,9 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('user_id', currentUser.id)
       .single();
     if (prof) {
-      const now = new Date();
-      const expiresAt = prof.premium_expires_at ? new Date(prof.premium_expires_at) : null;
-      const isStillPremium = expiresAt ? expiresAt > now : (prof.is_premium === true);
       const p: Profile = {
         userId: currentUser.id,
         email: currentUser.email || '',
@@ -116,8 +101,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         storeName: prof.store_name || '',
         role: prof.role || 'user',
         businessType: prof.business_type || 'retail',
-        isPremium: isStillPremium,
-        premiumExpiresAt: prof.premium_expires_at || null,
       };
       setProfile(p);
       if (prof.store_name) localStorage.setItem('dl-store-name', prof.store_name);
@@ -295,11 +278,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isProfileLoaded,
         profile,
         storeName,
-
-        // Premium
-        isPremium,
-        premiumExpiresAt,
-        isGodUser,
 
         signUp,
         signIn,

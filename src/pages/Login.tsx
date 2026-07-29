@@ -22,16 +22,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouse = (e: MouseEvent) => {
-      setMousePos({ x: (e.clientX / window.innerWidth - 0.5) * 2, y: (e.clientY / window.innerHeight - 0.5) * 2 });
-    };
-    window.addEventListener('mousemove', handleMouse);
-    return () => window.removeEventListener('mousemove', handleMouse);
-  }, []);
-
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) navigate('/pos', { replace: true });
@@ -99,15 +89,15 @@ export default function Login() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06)_0%,transparent_60%)]" />
       <div className="absolute inset-0 bg-grid pointer-events-none" />
       <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-500/5 blur-3xl pointer-events-none"
-        style={{ top: '20%', left: '10%', transform: `translate(${mousePos.x * -30}px, ${mousePos.y * -30}px)`, transition: 'transform 0.3s ease-out' }} />
+        style={{ top: '20%', left: '10%' }} />
       <div className="absolute w-[400px] h-[400px] rounded-full bg-rose-500/5 blur-3xl pointer-events-none"
-        style={{ bottom: '10%', right: '10%', transform: `translate(${mousePos.x * 30}px, ${mousePos.y * 30}px)`, transition: 'transform 0.3s ease-out' }} />
+        style={{ bottom: '10%', right: '10%' }} />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-4"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', transform: `perspective(1000px) rotateY(${mousePos.x * 5}deg) rotateX(${mousePos.y * -5}deg)`, transition: 'transform 0.2s ease-out' }}>
+            style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
             <span className="text-2xl font-extrabold text-white">DH</span>
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub</h1>

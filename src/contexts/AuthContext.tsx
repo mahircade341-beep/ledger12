@@ -24,6 +24,7 @@ interface AuthContextType {
   // Premium
   isPremium: boolean;
   premiumExpiresAt: string | null;
+  isGodUser: boolean;
 
   // Sign up / sign in
   signUp: (email: string, password: string, fullName: string, storeName: string, businessType?: string) => Promise<{ error?: string; data?: any }>;
@@ -84,8 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLocked, setIsLocked] = useState(() => getItem('dl-locked') === 'true');
   const [appLockEnabled, setAppLockEnabled] = useState(() => !!getItem('dl-app-lock-hash'));
 
-  const isPremium = profile?.isPremium || false;
+  const GOD_EMAIL = 'mahircade341@gmail.com';
+  const godOverride = user?.email === GOD_EMAIL;
+  const isPremium = godOverride || profile?.isPremium || false;
   const premiumExpiresAt = profile?.premiumExpiresAt || null;
+  const isGodUser = godOverride;
   const needsOnboarding = !!user && !profile?.storeName;
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
@@ -291,6 +295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Premium
         isPremium,
         premiumExpiresAt,
+        isGodUser,
 
         signUp,
         signIn,

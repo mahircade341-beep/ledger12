@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import LockScreen from './components/LockScreen';
 import Layout from './components/Layout';
@@ -22,11 +22,17 @@ const ThemeContext = createContext<ThemeCtx>({ theme: 'dark', toggleTheme: () =>
 export const useTheme = () => useContext(ThemeContext);
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, appLockEnabled, needsOnboarding } = useAuth();
+  const { isAuthenticated, isLoading, appLockEnabled, needsOnboarding, isPremium, isGodUser } = useAuth();
+  const location = useLocation();
 
   // Redirect to onboarding if profile is incomplete (Google OAuth users)
   if (!isLoading && isAuthenticated && needsOnboarding) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Premium gating: non-premium users (except god) can only access /premium
+  if (!isLoading && isAuthenticated && !needsOnboarding && !isPremium && !isGodUser && location.pathname !== '/premium') {
+    return <Navigate to="/premium" replace />;
   }
 
   // Auto-lock on tab close/reopen

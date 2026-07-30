@@ -11,7 +11,7 @@ function fmtTime(ts: number) {
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const { profile, signOut, userId, appLockEnabled, setAppPassword, removeAppPassword } = useAuth();
+  const { profile, signOut, userId, appLockEnabled, setAppPassword, removeAppPassword, updateStoreName } = useAuth();
   const { data: products } = useLocalData('products');
   const isAdmin = profile?.role === 'admin' || profile?.role === 'user';
 
@@ -26,6 +26,80 @@ export default function Settings() {
   const [appPassLoading, setAppPassLoading] = useState(false);
   const [securityQ, setSecurityQ] = useState('');
   const [securityA, setSecurityA] = useState('');
+
+  // Store Name Editor
+  const [editStoreName, setEditStoreName] = useState('');
+  const [showStoreNameEditor, setShowStoreNameEditor] = useState(false);
+  const [storeNameSaving, setStoreNameSaving] = useState(false);
+  const [storeNameError, setStoreNameError] = useState('');
+
+  function EditStoreName() {
+    const currentName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
+
+    const handleSave = async () => {
+      if (!editStoreName.trim()) { setStoreNameError('Store name cannot be empty'); return; }
+      setStoreNameSaving(true);
+      setStoreNameError('');
+      const result = await updateStoreName(editStoreName.trim());
+      if (result.error) {
+        setStoreNameError(result.error);
+      } else {
+        setShowStoreNameEditor(false);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
+      setStoreNameSaving(false);
+    };
+
+    return (
+      <div className="space-y-3">
+        <div className="cmp-item">
+          <div>
+            <p className="text-sm font-medium text-[var(--text-primary)]">Store Name</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              This name appears on receipts, the sidebar, and throughout the app
+            </p>
+          </div>
+          {showStoreNameEditor ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={editStoreName}
+                onChange={(e) => setEditStoreName(e.target.value)}
+                className="input-field w-40 text-sm"
+                placeholder="Your store name"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowStoreNameEditor(false); }}
+              />
+              <button onClick={handleSave} disabled={storeNameSaving} className="btn-primary btn-sm">
+                {storeNameSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button onClick={() => setShowStoreNameEditor(false)} className="btn-ghost text-xs">Cancel</button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-[var(--text-accent)]">{currentName}</span>
+              <button onClick={() => { setEditStoreName(currentName); setShowStoreNameEditor(true); setStoreNameError(''); }} className="btn-ghost p-1.5" title="Edit store name">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+        {storeNameError && <p className="text-xs text-red-400">{storeNameError}</p>}
+        {!showStoreNameEditor && (
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-xs text-[var(--text-muted)]">Receipt preview:</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+              <span className="text-[10px] font-bold text-gray-900 dark:text-white">{currentName}</span>
+              <span className="text-[8px] text-gray-400">· Receipt</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const handleTimeFormat = (fmt: string) => {
     setTimeFormat(fmt);
@@ -302,6 +376,17 @@ export default function Settings() {
             </form>
           )}
         </div>
+      </div>
+
+      {/* Store Profile */}
+      <div className="card border-blue-500/20">
+        <div className="flex items-center gap-2 mb-4">
+          <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614fM16.5 12V4.5l-3 3m0 0l-3-3m3 3V4.5" />
+          </svg>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Store Profile</h2>
+        </div>
+        <EditStoreName />
       </div>
 
       {/* Account */}

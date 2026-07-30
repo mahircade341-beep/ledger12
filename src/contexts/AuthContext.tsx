@@ -46,6 +46,9 @@ interface AuthContextType {
   needsOnboarding: boolean;
   completeProfile: (fullName: string, storeName: string, businessType?: string) => Promise<{ error?: string }>;
 
+  /** Update store name — reflects immediately on receipts, sidebar, etc. */
+  updateStoreName: (storeName: string) => Promise<{ error?: string }>;
+
   refreshProfile: () => Promise<void>;
 }
 
@@ -223,6 +226,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return {};
   };
 
+  // ─── Update Store Name ─────────────────────────
+
+  const updateStoreName = async (storeName: string): Promise<{ error?: string }> => {
+    if (!user) return { error: 'Not authenticated' };
+    const { error } = await supabase.from('profiles').upsert({
+      user_id: user.id,
+      email: user.email || '',
+      store_name: storeName,
+    }, { onConflict: 'user_id' });
+    if (error) return { error: error.message };
+    localStorage.setItem('dl-store-name', storeName);
+    await refreshProfile();
+    // Notify the app that store name changed (re-receipts, sidebar etc.)
+    window.dispatchEvent(new CustomEvent('storenamechanged', { detail: storeName }));
+    return {};
+  };
+
   // ─── App Lock ──────────────────────────────────
 
   const setAppPassword = async (password: string, securityQuestion?: string, securityAnswer?: string) => {
@@ -297,6 +317,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         needsOnboarding,
         completeProfile,
+        updateStoreName,
         refreshProfile,
       }}
     >

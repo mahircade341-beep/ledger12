@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 type TableName = 'products' | 'transactions' | 'debtors' | 'debtPayments' | 'payouts' | 'stockAdjustments';
@@ -19,6 +19,24 @@ const TABLE_MAP: Record<string, string> = {
   stockAdjustments: 'stock_adjustments',
 };
 
+// ── Cross-component sync: broadcast data changes via window events ──
+const EVENT_PREFIX = 'dl-data-changed:';
+
+function emitDataChanged(table: string) {
+  try {
+    window.dispatchEvent(new CustomEvent(EVENT_PREFIX + table));
+  } catch {
+    // silently fail if event dispatch is unavailable
+  }
+}
+
+function listenDataChanged(table: string, handler: () => void) {
+  window.addEventListener(EVENT_PREFIX + table, handler);
+  return () => window.removeEventListener(EVENT_PREFIX + table, handler);
+}
+
+// ── Helpers ──
+
 export function genId(): string {
   return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -32,75 +50,81 @@ export function fileToDataURL(file: File): Promise<string> {
   });
 }
 
+async function fetchAll(table: string, supabaseTable: string): Promise<any[]> {
+  const { data: result, error } = await supabase
+    .from(supabaseTable)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(`Error fetching ${table}:`, error);
+    return [];
+  }
+
+  return (result || []).map((item: any) => ({
+    _id: item.id,
+    _creationTime: new Date(item.created_at || Date.now()).getTime(),
+    userId: item.user_id,
+    ...mapFromSupabase(table, item),
+  }));
+}
+
 export function useLocalData<T extends AppRecord>(table: TableName) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const supabaseTable = TABLE_MAP[table];
+  const mountedRef = useRef(true);
 
-  // Load from Supabase on mount
+  // ── Load from Supabase on mount + listen for cross-component sync events ──
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
     setLoading(true);
 
-    async function fetchData() {
-      const { data: result, error } = await supabase
-        .from(supabaseTable)
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error(`Error fetching ${table}:`, error);
-        if (mounted) { setData([]); setLoading(false); }
-        return;
+    fetchAll(table, supabaseTable).then((mapped) => {
+      if (mountedRef.current) {
+        setData(mapped as unknown as T[]);
+        setLoading(false);
       }
+    });
 
-      const mapped = (result || []).map((item: any) => ({
-        _id: item.id,
-        _creationTime: new Date(item.created_at || Date.now()).getTime(),
-        userId: item.user_id,
-        ...mapFromSupabase(table, item),
-      })) as unknown as T[];
+    // Listen for data-change events from other instances (Stock, POS, etc.)
+    const unsub = listenDataChanged(table, () => {
+      fetchAll(table, supabaseTable).then((mapped) => {
+        if (mountedRef.current) {
+          setData(mapped as unknown as T[]);
+        }
+      });
+    });
 
-      if (mounted) { setData(mapped); setLoading(false); }
-    }
-
-    fetchData();
-    return () => { mounted = false; };
+    return () => {
+      mountedRef.current = false;
+      unsub();
+    };
   }, [table, supabaseTable]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const { data: result, error } = await supabase
-      .from(supabaseTable)
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error(`Error refreshing ${table}:`, error);
+    const mapped = await fetchAll(table, supabaseTable);
+    if (mountedRef.current) {
+      setData(mapped as unknown as T[]);
       setLoading(false);
-      return;
     }
-
-    const mapped = (result || []).map((item: any) => ({
-      _id: item.id,
-      _creationTime: new Date(item.created_at || Date.now()).getTime(),
-      userId: item.user_id,
-      ...mapFromSupabase(table, item),
-    })) as unknown as T[];
-
-    setData(mapped);
-    setLoading(false);
   }, [table, supabaseTable]);
 
   const add = useCallback((record: Omit<T, '_id' | '_creationTime'>): string => {
     const id = genId();
     const supabaseRecord = mapToSupabase(table, record, id);
-    
+
     const newRecord = { ...record, _id: id, _creationTime: Date.now() } as unknown as T;
     setData((prev) => [newRecord, ...prev]);
 
     supabase.from(supabaseTable).insert(supabaseRecord).then(({ error }) => {
-      if (error) console.error(`Error inserting ${table}:`, error);
+      if (error) {
+        console.error(`Error inserting ${table}:`, error);
+      } else {
+        // Broadcast so other components (POS, Inventory) refresh from Supabase
+        emitDataChanged(table);
+      }
     });
 
     return id;
@@ -111,21 +135,33 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
 
     const supabaseChanges = mapChangesToSupabase(table, changes as any);
     supabase.from(supabaseTable).update(supabaseChanges).eq('id', id).then(({ error }) => {
-      if (error) console.error(`Error updating ${table}:`, error);
+      if (error) {
+        console.error(`Error updating ${table}:`, error);
+      } else {
+        emitDataChanged(table);
+      }
     });
   }, [table, supabaseTable]);
 
   const remove = useCallback((id: string) => {
     setData((prev) => prev.filter((r) => r._id !== id));
     supabase.from(supabaseTable).delete().eq('id', id).then(({ error }) => {
-      if (error) console.error(`Error deleting ${table}:`, error);
+      if (error) {
+        console.error(`Error deleting ${table}:`, error);
+      } else {
+        emitDataChanged(table);
+      }
     });
   }, [table, supabaseTable]);
 
   const updateQuantity = useCallback((id: string, newQty: number) => {
     setData((prev) => prev.map((r) => r._id === id ? { ...r, quantity: newQty } : r));
     supabase.from(supabaseTable).update({ quantity: newQty, updated_at: new Date().toISOString() }).eq('id', id).then(({ error }) => {
-      if (error) console.error(`Error updating quantity:`, error);
+      if (error) {
+        console.error(`Error updating quantity:`, error);
+      } else {
+        emitDataChanged(table);
+      }
     });
   }, [table, supabaseTable]);
 
@@ -138,14 +174,19 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
     const records = items.map((item) => mapToSupabase(table, item));
     if (records.length > 0) {
       supabase.from(supabaseTable).insert(records).then(({ error }) => {
-        if (error) console.error(`Error bulk inserting ${table}:`, error);
+        if (error) {
+          console.error(`Error bulk inserting ${table}:`, error);
+        } else {
+          emitDataChanged(table);
+        }
       });
     }
   }, [table, supabaseTable]);
 
   const clearAll = useCallback(() => {
     setData([]);
-  }, []);
+    emitDataChanged(table);
+  }, [table]);
 
   return { data, add, update, remove, updateQuantity, getById, refresh, addAll, clearAll, loading };
 }

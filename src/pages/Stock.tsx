@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useLocalData, fileToDataURL } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
 import BarcodeScanner from '../components/BarcodeScanner';
@@ -14,12 +14,36 @@ export default function Stock() {
   const [retailPrice, setRetailPrice] = useState(0);
   const [supplier, setSupplier] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
+  const [search, setSearch] = useState('');
   const [barcode, setBarcode] = useState('');
   const [image, setImage] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [showScanner, setShowScanner] = useState(false);
+
+  const filteredProducts = useMemo(() => {
+    if (!search.trim()) return [];
+    const q = search.toLowerCase();
+    return products.filter((p: any) =>
+      p.name.toLowerCase().includes(q) ||
+      (p.barcode || '').toLowerCase().includes(q) ||
+      (p.supplier || '').toLowerCase().includes(q)
+    ).slice(0, 20);
+  }, [products, search]);
+
+  const handleSelectProduct = (p: any) => {
+    setName(p.name);
+    setBarcode(p.barcode || '');
+    setWholesalePrice(p.wholesalePrice || 0);
+    setRetailPrice(p.retailPrice || 0);
+    setSupplier(p.supplier || '');
+    setSupplierPhone(p.supplierPhone || '');
+    setImage(p.image || '');
+    setQuantity(0);  // reset quantity so they enter how many to add
+    setEditId(p._id);
+    setSearch('');
+  };
 
   const resetForm = () => {
     setName(''); setQuantity(0); setWholesalePrice(0); setRetailPrice(0);
@@ -93,6 +117,51 @@ export default function Stock() {
           {outOfStockCount > 0 && <span className="badge-red">{outOfStockCount} out</span>}
           {lowStockCount > 0 && <span className="badge-amber">{lowStockCount} low</span>}
         </div>
+      </div>
+
+      {/* Search existing products to restock */}
+      <div className="relative">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+              className="glass-input w-full pl-9" placeholder="Search existing products to restock..." />
+          </div>
+          {search && (
+            <button onClick={() => setSearch('')} className="btn-ghost p-2 text-xs text-[var(--text-muted)]">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+        </div>
+
+        {/* Quick product results */}
+        {filteredProducts.length > 0 && (
+          <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-lg">
+            {filteredProducts.map((p: any) => (
+              <button key={p._id} type="button" onClick={() => handleSelectProduct(p)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left hover:bg-[var(--nav-hover-bg)] transition-colors border-b border-[var(--border-color)] last:border-0">
+                {p.image ? (
+                  <img src={p.image} alt="" className="w-8 h-8 rounded object-cover shrink-0" />
+                ) : (
+                  <div className="w-8 h-8 rounded bg-[var(--bg-surface3)] flex items-center justify-center text-xs shrink-0">📦</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-[var(--text-primary)] truncate">{p.name}</p>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Stock: <span className={p.quantity <= 0 ? 'text-red-400' : 'text-emerald-400'}>{p.quantity}</span>
+                    {p.barcode && <span className="ml-2 font-mono">{p.barcode}</span>}
+                  </p>
+                </div>
+                <span className="text-xs text-[var(--accent-primary)] font-medium shrink-0">Restock →</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {search && filteredProducts.length === 0 && (
+          <p className="mt-1.5 text-xs text-[var(--text-muted)] text-center py-2">No products match "{search}" — fill the form below to add a new one</p>
+        )}
       </div>
 
       {/* Add Stock Form */}

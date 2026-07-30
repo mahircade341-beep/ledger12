@@ -61,25 +61,25 @@ export default function Settings() {
             </p>
           </div>
           {showStoreNameEditor ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <input
                 type="text"
                 value={editStoreName}
                 onChange={(e) => setEditStoreName(e.target.value)}
-                className="input-field w-40 text-sm"
+                className="input-v2 w-40 text-sm"
                 placeholder="Your store name"
                 autoFocus
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowStoreNameEditor(false); }}
               />
-              <button onClick={handleSave} disabled={storeNameSaving} className="btn-primary btn-sm">
+              <button onClick={handleSave} disabled={storeNameSaving} className="btn-v2-primary text-xs h-8">
                 {storeNameSaving ? 'Saving...' : 'Save'}
               </button>
-              <button onClick={() => setShowStoreNameEditor(false)} className="btn-ghost text-xs">Cancel</button>
+              <button onClick={() => setShowStoreNameEditor(false)} className="btn-v2-secondary text-xs h-8">Cancel</button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-[var(--text-accent)]">{currentName}</span>
-              <button onClick={() => { setEditStoreName(currentName); setShowStoreNameEditor(true); setStoreNameError(''); }} className="btn-ghost p-1.5" title="Edit store name">
+              <span className="text-sm font-semibold text-[var(--accent-primary)]">{currentName}</span>
+              <button onClick={() => { setEditStoreName(currentName); setShowStoreNameEditor(true); setStoreNameError(''); }} className="btn-ghost p-1.5 hover:text-[var(--accent-primary)] transition-colors" title="Edit store name">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                 </svg>
@@ -91,9 +91,9 @@ export default function Settings() {
         {!showStoreNameEditor && (
           <div className="flex items-center gap-2 px-1">
             <span className="text-xs text-[var(--text-muted)]">Receipt preview:</span>
-            <div className="flex items-center gap-1 px-2 py-1 rounded bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-              <span className="text-[10px] font-bold text-gray-900 dark:text-white">{currentName}</span>
-              <span className="text-[8px] text-gray-400">· Receipt</span>
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-sm">
+              <span className="text-[10px] font-bold text-[var(--text-primary)]">{currentName}</span>
+              <span className="text-[8px] text-[var(--text-muted)]">· Receipt</span>
             </div>
           </div>
         )}
@@ -180,20 +180,24 @@ export default function Settings() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div className="page-header">
+      {/* V2 header */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="page-title">Settings</h1>
-          <p className="page-subtitle">Manage app preferences and data</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Settings</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage app preferences and data</p>
         </div>
-        {saved && <span className="badge-emerald animate-fade-in">Saved</span>}
+        {saved && <span className="badge-v2-success animate-fade-in">Saved</span>}
       </div>
 
-      {/* Appearance */}
-      <div className="card border-blue-500/20">
-        <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-          </svg>
+      {/* V2 Appearance card */}
+      <div className="card-v2 border-blue-500/20">
+        <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-500/30 rounded-t-xl -mt-[1px] mx-auto" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+            </svg>
+          </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Appearance</h2>
         </div>
         <div className="space-y-4">
@@ -202,7 +206,7 @@ export default function Settings() {
               <p className="text-sm font-medium text-[var(--text-primary)]">Theme</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Switch between dark and light mode</p>
             </div>
-            <button onClick={toggleTheme} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${theme === 'dark' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-slate-200 text-slate-700'}`}>
+            <button onClick={toggleTheme} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${theme === 'dark' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm' : 'bg-slate-200 text-slate-700 border border-slate-300'}`}>
               {theme === 'dark' ? (
                 <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg> Light Mode</>
               ) : (
@@ -213,12 +217,15 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Preferences */}
-      <div className="card border-cyan-500/20">
-        <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-          </svg>
+      {/* V2 Preferences card */}
+      <div className="card-v2 border-cyan-500/20">
+        <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+          </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Preferences</h2>
         </div>
         <div className="space-y-4">
@@ -228,9 +235,9 @@ export default function Settings() {
               <p className="text-sm font-medium text-[var(--text-primary)]">Time Format</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Display times in 12-hour or 24-hour format</p>
             </div>
-            <div className="flex gap-1 bg-white/5 rounded-lg p-0.5 border border-white/10">
-              <button onClick={() => handleTimeFormat('12h')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${timeFormat === '12h' ? 'bg-cyan-500/20 text-cyan-400' : 'text-[var(--text-muted)]'}`}>12h</button>
-              <button onClick={() => handleTimeFormat('24h')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${timeFormat === '24h' ? 'bg-cyan-500/20 text-cyan-400' : 'text-[var(--text-muted)]'}`}>24h</button>
+            <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-1">
+              <button onClick={() => handleTimeFormat('12h')} className={`tab-v2 ${timeFormat === '12h' ? 'tab-v2-active' : ''}`}>12h</button>
+              <button onClick={() => handleTimeFormat('24h')} className={`tab-v2 ${timeFormat === '24h' ? 'tab-v2-active' : ''}`}>24h</button>
             </div>
           </div>
 
@@ -245,7 +252,7 @@ export default function Settings() {
               </div>
             </div>
             <div className="flex flex-col items-end gap-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 p-1.5 bg-[var(--bg-surface2)] rounded-xl">
                 <input type="range" min={1} max={50} value={threshold} onChange={(e) => handleThreshold(parseInt(e.target.value))} className="w-28 accent-amber-500" />
                 <span className="text-sm font-bold text-amber-400 w-8 text-right">{threshold}</span>
               </div>
@@ -259,45 +266,51 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Data Management */}
-      <div className="card border-emerald-500/20">
-        <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-          </svg>
+      {/* V2 Data Management card */}
+      <div className="card-v2 border-emerald-500/20">
+        <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 to-emerald-500/30 rounded-t-xl -mt-[1px] mx-auto" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+            </svg>
+          </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Data & Backup</h2>
         </div>
         <div className="space-y-3">
           <p className="text-xs text-[var(--text-muted)]">All data is stored locally on this device. Export to back up or transfer between devices.</p>
           <div className="flex flex-wrap gap-2">
-            <button onClick={exportData} className="btn-primary btn-sm">
+            <button onClick={exportData} className="btn-v2-primary text-xs h-9">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
               Export Data
             </button>
-            <label className="btn-secondary btn-sm cursor-pointer">
+            <label className="btn-v2-secondary text-xs h-9 cursor-pointer">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
               Import Data
               <input type="file" accept=".json" className="hidden" onChange={importData} />
             </label>
           </div>
           {importStatus && <p className="text-xs text-emerald-500">{importStatus}</p>}
-          <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-3 mt-2">
-            <p className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Storage Info</p>
-            <div className="flex items-center gap-4 mt-1 text-xs text-[var(--text-secondary)]">
-              <span>Products: {products.length}</span>
-              <span>Low stock: {lowStockCount}</span>
-              <span>Out of stock: {criticalCount}</span>
-            </div>
+          <div className="divider-v2">
+            <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Storage Info</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+            <span className="badge-v2">Products: {products.length}</span>
+            <span className="badge-v2-warning">Low: {lowStockCount}</span>
+            <span className="badge-v2-danger">Out: {criticalCount}</span>
           </div>
         </div>
       </div>
 
-      {/* Security */}
-      <div className="card border-violet-500/20">
-        <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-          </svg>
+      {/* V2 Security card */}
+      <div className="card-v2 border-violet-500/20">
+        <div className="h-0.5 w-full bg-gradient-to-r from-violet-500 to-violet-500/30 rounded-t-xl -mt-[1px] mx-auto" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+          </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Security</h2>
         </div>
         <div className="space-y-3">
@@ -313,11 +326,11 @@ export default function Settings() {
             <div className="flex items-center gap-2">
               {appLockEnabled ? (
                 <>
-                  <span className="badge-emerald text-[10px]">Enabled</span>
-                  <button onClick={handleRemoveAppPassword} className="btn-danger btn-sm text-xs">Remove</button>
+                  <span className="badge-v2-success text-[10px]">Enabled</span>
+                  <button onClick={handleRemoveAppPassword} className="btn-v2-danger text-xs h-8">Remove</button>
                 </>
               ) : (
-                <button onClick={() => setShowAppPass(!showAppPass)} className="btn-primary btn-sm">
+                <button onClick={() => setShowAppPass(!showAppPass)} className="btn-v2-primary text-xs h-8">
                   {showAppPass ? 'Cancel' : 'Set Password'}
                 </button>
               )}
@@ -325,89 +338,96 @@ export default function Settings() {
           </div>
 
           {showAppPass && (
-            <form onSubmit={handleSetAppPassword} className="p-3 bg-[var(--bg-surface2)] rounded-lg border border-violet-500/20 space-y-3">
+            <form onSubmit={handleSetAppPassword} className="p-3 bg-[var(--bg-surface2)] rounded-xl border border-violet-500/20 space-y-3">
               <p className="text-xs text-[var(--text-muted)]">Set a password that will be required to open the app after closing it.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">New Password *</label>
-                  <input type="password" value={newAppPass} onChange={(e) => setNewAppPass(e.target.value)} className="input-field" placeholder="Min 4 characters" minLength={4} required />
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">New Password <span className="text-[var(--accent-primary)]">*</span></label>
+                  <input type="password" value={newAppPass} onChange={(e) => setNewAppPass(e.target.value)} className="input-v2 w-full" placeholder="Min 4 characters" minLength={4} required />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Confirm Password *</label>
-                  <input type="password" value={confirmAppPass} onChange={(e) => setConfirmAppPass(e.target.value)} className="input-field" placeholder="Re-enter password" required />
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Confirm Password <span className="text-[var(--accent-primary)]">*</span></label>
+                  <input type="password" value={confirmAppPass} onChange={(e) => setConfirmAppPass(e.target.value)} className="input-v2 w-full" placeholder="Re-enter password" required />
                 </div>
               </div>
-              <div className="border-t border-slate-200/30 dark:border-slate-700/30 pt-3">
-                <p className="text-xs font-semibold text-cyan-400 mb-2">Password Recovery (Required)</p>
-                <p className="text-xs text-[var(--text-muted)] mb-3">Set a security question so you can recover your password if you forget it. Your answer is stored securely (hashed).</p>
-                <div className="space-y-3">
+              <div className="divider-v2">
+                <span className="text-xs font-semibold text-cyan-400">Password Recovery <span className="font-normal text-[var(--text-muted)]">(Required)</span></span>
+              </div>
+              <p className="text-xs text-[var(--text-muted)]">Set a security question so you can recover your password if you forget it. Your answer is stored securely (hashed).</p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Security Question <span className="text-[var(--accent-primary)]">*</span></label>
+                  <select value={securityQ} onChange={(e) => setSecurityQ(e.target.value)} className="input-v2 w-full" required>
+                    <option value="">Choose a question...</option>
+                    <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                    <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                    <option value="What city were you born in?">What city were you born in?</option>
+                    <option value="What is your favorite book?">What is your favorite book?</option>
+                    <option value="What was the make of your first car?">What was the make of your first car?</option>
+                    <option value="What primary school did you attend?">What primary school did you attend?</option>
+                    <option value="Custom question">Custom question...</option>
+                  </select>
+                </div>
+                {securityQ === 'Custom question' && (
                   <div>
-                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Security Question *</label>
-                    <select value={securityQ} onChange={(e) => setSecurityQ(e.target.value)} className="select-field" required>
-                      <option value="">Choose a question...</option>
-                      <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
-                      <option value="What was the name of your first pet?">What was the name of your first pet?</option>
-                      <option value="What city were you born in?">What city were you born in?</option>
-                      <option value="What is your favorite book?">What is your favorite book?</option>
-                      <option value="What was the make of your first car?">What was the make of your first car?</option>
-                      <option value="What primary school did you attend?">What primary school did you attend?</option>
-                      <option value="Custom question">Custom question...</option>
-                    </select>
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Your custom question <span className="text-[var(--accent-primary)]">*</span></label>
+                    <input type="text" value={securityQ === 'Custom question' ? '' : securityQ} onChange={(e) => setSecurityQ(e.target.value)} className="input-v2 w-full" placeholder="e.g. What is my shop's name?" />
                   </div>
-                  {securityQ === 'Custom question' && (
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Your custom question *</label>
-                      <input type="text" value={securityQ === 'Custom question' ? '' : securityQ} onChange={(e) => setSecurityQ(e.target.value)} className="input-field" placeholder="e.g. What is my shop's name?" />
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Security Answer *</label>
-                    <input type="text" value={securityA} onChange={(e) => setSecurityA(e.target.value)} className="input-field" placeholder="Your answer (case-insensitive)" required />
-                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Security Answer <span className="text-[var(--accent-primary)]">*</span></label>
+                  <input type="text" value={securityA} onChange={(e) => setSecurityA(e.target.value)} className="input-v2 w-full" placeholder="Your answer (case-insensitive)" required />
                 </div>
               </div>
               {appPassError && <p className="text-xs text-red-400">{appPassError}</p>}
               <div className="flex gap-2">
-                <button type="submit" disabled={appPassLoading} className="btn-primary btn-sm">
+                <button type="submit" disabled={appPassLoading} className="btn-v2-primary text-xs h-9">
                   {appPassLoading ? 'Setting...' : 'Enable App Lock'}
                 </button>
-                <button type="button" onClick={() => setShowAppPass(false)} className="btn-ghost text-xs">Cancel</button>
+                <button type="button" onClick={() => setShowAppPass(false)} className="btn-v2-secondary text-xs h-9">Cancel</button>
               </div>
             </form>
           )}
         </div>
       </div>
 
-      {/* Store Profile */}
-      <div className="card border-blue-500/20">
-        <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614fM16.5 12V4.5l-3 3m0 0l-3-3m3 3V4.5" />
-          </svg>
+      {/* V2 Store Profile card */}
+      <div className="card-v2 border-blue-500/20">
+        <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-500/30 rounded-t-xl -mt-[1px] mx-auto" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614fM16.5 12V4.5l-3 3m0 0l-3-3m3 3V4.5" />
+            </svg>
+          </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Store Profile</h2>
         </div>
         <EditStoreName />
       </div>
 
-      {/* Account */}
-      <div className="card border-violet-500/20">
-        <div className="flex items-center gap-2 mb-4">
-          <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-          </svg>
+      {/* V2 Account card */}
+      <div className="card-v2 border-violet-500/20">
+        <div className="h-0.5 w-full bg-gradient-to-r from-violet-500 to-violet-500/30 rounded-t-xl -mt-[1px] mx-auto" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          </div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Account</h2>
-        </div>            <div className="cmp-item">
+        </div>
+        <div className="cmp-item">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-cyan-500 flex items-center justify-center text-sm font-bold text-white">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-400 to-cyan-500 flex items-center justify-center text-lg font-bold text-white shadow-lg shrink-0">
               {profile?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div>
-              <p className="text-sm font-medium text-[var(--text-primary)]">{profile?.fullName || 'User'}</p>
-              <p className="text-xs text-[var(--text-muted)]">{profile?.email} · {profile?.role}</p>
-              <p className="text-xs text-[var(--text-muted)]">User ID: {userId?.slice(0, 8)}...</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">{profile?.fullName || 'User'}</p>
+              <p className="text-xs text-[var(--text-muted)]">{profile?.email} · <span className="badge-v2-info text-[10px]">{profile?.role}</span></p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">ID: <span className="font-mono">{userId?.slice(0, 8)}...</span></p>
             </div>
           </div>
-          <button onClick={() => signOut()} className="btn-danger btn-sm">
+          <button onClick={() => signOut()} className="btn-v2-danger text-xs h-9">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
             Sign Out
           </button>

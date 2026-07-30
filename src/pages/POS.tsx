@@ -249,17 +249,23 @@ export default function POS() {
         </div>
       </div>
 
-      {/* Daily Sales Summary */}
+      {/* Daily Sales Summary — V2 stat-v2 */}
       {todayCount > 0 && (
-        <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-[var(--bg-surface2)]/50 border border-[var(--border-color)]">
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-            </svg>
-            <span className="text-xs text-[var(--text-secondary)]">Today:</span>
-            <span className="text-sm font-bold text-[var(--text-primary)]">KES {todayTotal.toLocaleString()}</span>
+        <div className="stat-v2 stat-v2-accent flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[var(--accent-dim)] flex items-center justify-center">
+              <svg className="w-5 h-5 text-[var(--brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+              </svg>
+            </div>
+            <div>
+              <p className="stat-label-v2">Today's Sales</p>
+              <p className="stat-value-v2">KES {todayTotal.toLocaleString()}</p>
+            </div>
           </div>
-          <span className="text-xs text-[var(--text-muted)]">{todayCount} txns</span>
+          <div className="text-right">
+            <p className="text-xs font-semibold text-[var(--text-accent)]">{todayCount} txns</p>
+          </div>
         </div>
       )}
 
@@ -273,67 +279,87 @@ export default function POS() {
         </div>
       )}
 
-      {/* Void Modal */}
+      {/* Void Modal — V2 glass */}
       {voidTxId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setVoidTxId(null)}>
-          <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl max-w-md w-full p-6 border border-[var(--border-color)]" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Void Transaction</h2>
-            <p className="text-sm text-[var(--text-muted)] mb-4">This removes the transaction and restores stock.</p>
-            <div className="space-y-2 max-h-48 overflow-y-auto mb-4">
+          <div className="glass-v2-strong rounded-2xl max-w-md w-full p-6 animate-scale-in-v2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center">
+                <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Void Transaction</h2>
+                <p className="text-xs text-[var(--text-muted)]">Select a transaction to void — stock will be restored</p>
+              </div>
+            </div>
+            <div className="space-y-2 max-h-48 overflow-y-auto mb-4 scrollbar-thin">
               {transactions.slice(0, 10).map((t: any) => (
                 <button key={t._id} onClick={() => voidTransaction(t._id)}
-                  className="w-full text-left p-3 rounded-lg bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-colors">
+                  className="w-full text-left p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-all duration-200 item-v2-hover">
                   <div className="flex justify-between text-sm">
-                    <span className="text-[var(--text-primary)]">{new Date(t._creationTime).toLocaleDateString()} {fmtTime(t._creationTime)}</span>
-                    <span className="text-red-400 font-medium">-KES {t.total.toLocaleString()}</span>
+                    <span className="text-[var(--text-primary)] font-medium">{new Date(t._creationTime).toLocaleDateString()} {fmtTime(t._creationTime)}</span>
+                    <span className="text-red-400 font-semibold">-KES {t.total.toLocaleString()}</span>
                   </div>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t.items.length} items · {t.paymentMethod}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="badge-v2-info text-[10px]">{t.items.length} items</span>
+                    <span className="text-xs text-[var(--text-muted)]">·</span>
+                    <span className="text-xs text-[var(--text-muted)] capitalize">{t.paymentMethod}</span>
+                  </div>
                 </button>
               ))}
             </div>
-            <button onClick={() => setVoidTxId(null)} className="btn-secondary w-full">Close</button>
+            <button onClick={() => setVoidTxId(null)} className="btn-v2-secondary w-full">Cancel</button>
           </div>
         </div>
       )}
 
-      {/* Receipt Modal */}
+      {/* Receipt Modal — V2 glass */}
       {receipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0" onClick={() => setReceipt(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0 animate-fade-in-v2" onClick={() => setReceipt(null)}>
+          <div className="glass-v2-strong rounded-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
             <div ref={receiptRef} className="receipt p-6 print:p-4">
-              <div className="text-center border-b-2 border-dashed border-gray-200 pb-4 mb-4">
-                <h2 className="text-lg font-bold text-gray-900">{profile?.storeName || 'DukaHub'}</h2>
-                <p className="text-xs text-gray-500 mt-0.5">{(profile?.storeName ? profile.storeName + ' — ' : '') + 'Retail Management System'}</p>
-                <p className="text-xs text-gray-400 mt-1">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
-                <p className="text-xs text-gray-400 font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
-
+              <div className="text-center border-b-2 border-dashed border-[var(--border-color)] pb-4 mb-4">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-3"
+                  style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
+                  <span className="text-sm font-extrabold text-white">D</span>
+                </div>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">{profile?.storeName || 'DukaHub'}</h2>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Retail Management</p>
+                <p className="text-xs text-[var(--text-muted)] mt-2">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
+                <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
               </div>
               <div className="space-y-1.5 mb-4">
-                <div className="flex justify-between text-[11px] font-semibold text-gray-400 uppercase tracking-wider pb-1 border-b border-gray-100">
+                <div className="flex justify-between text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider pb-1 border-b border-[var(--border-color)]">
                   <span className="flex-1">Item</span><span className="w-10 text-right">Qty</span><span className="w-16 text-right">Price</span><span className="w-18 text-right">Total</span>
                 </div>
                 {receipt.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm text-gray-700 py-0.5">
+                  <div key={i} className="flex justify-between text-sm text-[var(--text-primary)] py-0.5">
                     <span className="flex-1 truncate">{item.name}</span>
-                    <span className="w-10 text-right text-gray-500">{item.quantity}</span>
-                    <span className="w-16 text-right text-gray-500">{item.price.toLocaleString()}</span>
-                    <span className="w-18 text-right font-medium">{item.subtotal.toLocaleString()}</span>
+                    <span className="w-10 text-right text-[var(--text-muted)]">{item.quantity}</span>
+                    <span className="w-16 text-right text-[var(--text-muted)]">{item.price.toLocaleString()}</span>
+                    <span className="w-18 text-right font-medium text-[var(--text-primary)]">{item.subtotal.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t-2 border-dashed border-gray-200 pt-3 space-y-1">
-                <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>KES {receipt.subtotal.toLocaleString()}</span></div>
-                {receipt.discount > 0 && <div className="flex justify-between text-sm text-red-500"><span>Discount</span><span>-KES {receipt.discount.toLocaleString()}</span></div>}
-                <div className="flex justify-between text-base font-bold text-gray-900 pt-1 border-t border-gray-100"><span>Total</span><span>KES {receipt.total.toLocaleString()}</span></div>
+              <div className="border-t-2 border-dashed border-[var(--border-color)] pt-3 space-y-1">
+                <div className="flex justify-between text-sm text-[var(--text-secondary)]"><span>Subtotal</span><span>KES {receipt.subtotal.toLocaleString()}</span></div>
+                {receipt.discount > 0 && <div className="flex justify-between text-sm text-red-400"><span>Discount</span><span>-KES {receipt.discount.toLocaleString()}</span></div>}
+                <div className="flex justify-between text-base font-bold text-[var(--text-primary)] pt-1 border-t border-[var(--border-color)]">
+                  <span>Total</span><span>KES {receipt.total.toLocaleString()}</span>
+                </div>
               </div>
-              <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-200">
-                <div className="flex justify-between text-sm text-gray-600"><span>Payment</span><span className="font-medium capitalize">{receipt.paymentMethod}</span></div>
-                {receipt.debtorName && <div className="flex justify-between text-sm text-gray-600 mt-1"><span>Debtor</span><span className="font-medium">{receipt.debtorName}</span></div>}
+              <div className="mt-3 pt-3 border-t-2 border-dashed border-[var(--border-color)]">
+                <div className="flex justify-between text-sm text-[var(--text-secondary)]"><span>Payment</span><span className="font-medium capitalize text-[var(--text-accent)]">{receipt.paymentMethod}</span></div>
+                {receipt.debtorName && <div className="flex justify-between text-sm text-[var(--text-secondary)] mt-1"><span>Debtor</span><span className="font-medium text-amber-400">{receipt.debtorName}</span></div>}
               </div>
-              <div className="text-center mt-4 pt-3 border-t-2 border-dashed border-gray-200"><p className="text-xs text-gray-400">Thank you for your business!</p></div>
+              <div className="text-center mt-4 pt-3 border-t-2 border-dashed border-[var(--border-color)]">
+                <p className="text-xs text-[var(--text-muted)] italic">Thank you for your business!</p>
+              </div>
             </div>
-            <div className="flex gap-2 p-4 bg-gray-50 border-t border-gray-200 print:hidden">
-              <button onClick={() => window.print()} className="btn-primary flex-1 text-gray-900 bg-gray-900 text-white hover:bg-gray-800">
+            <div className="flex gap-2 p-4 bg-[var(--bg-surface)] border-t border-[var(--border-color)] print:hidden">
+              <button onClick={() => window.print()} className="btn-primary flex-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Print
               </button>
               <button onClick={() => {
@@ -511,13 +537,22 @@ export default function POS() {
 
         {/* ── RIGHT COLUMN: Cart + Payment ── */}
         <div id="checkout-section" className="lg:col-span-2 space-y-3">
-          {/* Cart */}
-          <div className="card">
+          {/* Cart — V2 card */}
+          <div className="card relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--brand)] to-[var(--brand-light)]" />
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-[var(--text-primary)]">Cart ({cart.length})</h2>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-[var(--brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                <h2 className="text-base font-semibold text-[var(--text-primary)]">Cart</h2>
+                {cart.length > 0 && (
+                  <span className="badge-v2-primary text-[10px] px-1.5 py-0.5 min-w-[20px] text-center">{cart.length}</span>
+                )}
+              </div>
               {cart.length > 0 && (
                 <button onClick={() => setCart([])}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1">
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 btn-ghost p-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                   </svg>
@@ -572,21 +607,22 @@ export default function POS() {
             </div>
           </div>
 
-          {/* Payment */}
-          <div className="card">
+          {/* Payment — V2 card */}
+          <div className="card relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-[var(--brand)]" />
             <h2 className="text-base font-semibold text-[var(--text-primary)] mb-3">Payment</h2>
 
-            {/* Payment Method */}
+            {/* Payment Method — V2 tabs */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               {(['cash', 'mpesa', 'debt'] as const).map((m) => (
                 <button key={m} onClick={() => {
                   setPaymentMethod(m);
                   if (m !== 'debt') { setSelectedDebtor(null); setDebtorSearch(''); setShowNewDebtor(false); }
                 }}
-                  className={`py-2.5 rounded-xl text-sm font-medium capitalize transition-all duration-200 border ${
+                  className={`py-3 rounded-xl text-sm font-semibold capitalize transition-all duration-200 ${
                     paymentMethod === m
-                      ? 'border-[var(--border-hover)] bg-[var(--nav-active-bg)] text-[var(--text-primary)]'
-                      : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)] hover:border-[var(--border-hover)]'
+                      ? 'tab-v2-active'
+                      : 'tab-v2'
                   }`}>
                   {m === 'cash' && <>💰 Cash</>}
                   {m === 'mpesa' && <>📱 M-Pesa</>}

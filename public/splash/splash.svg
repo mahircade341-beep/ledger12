@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2732" viewBox="0 0 2048 2732">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="50%" style="stop-color:#0c1322"/>
+      <stop offset="100%" style="stop-color:#080e1a"/>
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="50%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(96,165,250,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(59,130,246,0.03)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="2048" height="2732" fill="url(#bgGrad)"/>
+
+  <!-- Glow behind icon -->
+  <circle cx="1024" cy="1200" r="380" fill="url(#glowGrad)"/>
+
+  <!-- Brand D letter mark -->
+  <g transform="translate(1024,1200)">
+    <!-- Logo container -->
+    <rect x="-184" y="-208" width="368" height="416" rx="64" fill="url(#brandGrad)"
+          filter="drop-shadow(0 16px 64px rgba(59,130,246,0.35))"/>
+
+    <!-- Inner white D letter -->
+    <path d="M-96 -144 L-96 144
+             C-96 144, -24 160, 48 144
+             C144 120, 176 48, 176 -24
+             C176 -96, 144 -160, 48 -160
+             C-24 -160, -96 -144, -96 -144Z"
+          fill="white" stroke="none" opacity="0.95"/>
+  </g>
+
+  <!-- Brand name text -->
+  <text x="1024" y="1560" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="40" font-weight="800" fill="white" letter-spacing="4" opacity="0.9">
+    DukaHub
+  </text>
+  <text x="1024" y="1610" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="18" font-weight="500" fill="rgba(148,163,184,0.6)" letter-spacing="6">
+    RETAIL MANAGEMENT
+  </text>
+
+  <!-- Loading indicator dots -->
+  <g transform="translate(1024,1720)">
+    <circle cx="-28" cy="0" r="6" fill="rgba(59,130,246,0.6)">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.4s" repeatCount="indefinite" begin="0s"/>
+    </circle>
+    <circle cx="0" cy="0" r="6" fill="rgba(59,130,246,0.6)">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.4s" repeatCount="indefinite" begin="0.2s"/>
+    </circle>
+    <circle cx="28" cy="0" r="6" fill="rgba(59,130,246,0.6)">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.4s" repeatCount="indefinite" begin="0.4s"/>
+    </circle>
+  </g>
+
+  <!-- Subtle bottom text -->
+  <text x="1024" y="2620" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-size="14" font-weight="400" fill="rgba(148,163,184,0.25)" letter-spacing="2">
+    v2.0 · Retail Operating System
+  </text>
+</svg>

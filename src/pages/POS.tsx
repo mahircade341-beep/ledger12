@@ -7,7 +7,6 @@ import ProductHeroImage from '../components/ProductHeroImage';
 import StickyAddCart from '../components/StickyAddCart';
 import BarcodeScanner from '../components/BarcodeScanner';
 import useCartPersistence from '../hooks/useCartPersistence';
-import MpesaCheckoutModal from '../components/MpesaCheckoutModal';
 
 interface ReceiptData {
   id: string;
@@ -73,9 +72,9 @@ export default function POS() {
   const [newDebtorName, setNewDebtorName] = useState('');
   const [newDebtorPhone, setNewDebtorPhone] = useState('');
   const [showScanner, setShowScanner] = useState(false);
-  const [showMpesaModal, setShowMpesaModal] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const debtorRef = useRef<HTMLInputElement>(null);
+  const swipeStartY = useRef({ receipt: 0, void: 0 });
 
   // ── Persist cart to localStorage on every change ──
   useEffect(() => {
@@ -221,13 +220,7 @@ export default function POS() {
   const subtotal = cart.reduce((s: number, i: any) => s + i.subtotal, 0);
   const total = Math.max(0, subtotal - discount);
 
-  // ── M-Pesa handler ──
-  const handleMpesaComplete = (phone: string) => {
-    setShowMpesaModal(false);
-    setPaymentMethod('mpesa');
-    // Proceed with sale after M-Pesa init
-    setTimeout(() => finalizeSale(), 300);
-  };
+
 
   // ── Debtor ──
   const handleAddDebtor = () => {
@@ -379,9 +372,16 @@ export default function POS() {
         </div>
       )}
 
-      {/* Void Modal */}
+      {/* Void Modal — swipe down to dismiss */}
       {voidTxId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setVoidTxId(null)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setVoidTxId(null)}
+          onTouchStart={(e) => { swipeStartY.current.void = e.touches[0].clientY; }}
+          onTouchMove={(e) => {
+            const dy = e.touches[0].clientY - swipeStartY.current.void;
+            if (dy > 100) { swipeStartY.current.void = Infinity; setVoidTxId(null); }
+          }}>
           <div className="glass-v2-strong rounded-2xl max-w-md w-full p-6 animate-scale-in-v2" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center">
@@ -415,19 +415,16 @@ export default function POS() {
         </div>
       )}
 
-      {/* ── M-Pesa Checkout Modal ── */}
-      {showMpesaModal && (
-        <MpesaCheckoutModal
-          total={total}
-          items={cart.map((c: any) => ({ name: c.product.name, quantity: c.quantity, subtotal: c.subtotal }))}
-          onComplete={handleMpesaComplete}
-          onClose={() => setShowMpesaModal(false)}
-        />
-      )}
-
-      {/* ── Receipt Modal ── */}
+      {/* ── Receipt Modal — swipe down to dismiss ── */}
       {receipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0 animate-scale-in-v2" onClick={() => setReceipt(null)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0 animate-scale-in-v2"
+          onClick={() => setReceipt(null)}
+          onTouchStart={(e) => { swipeStartY.current.receipt = e.touches[0].clientY; }}
+          onTouchMove={(e) => {
+            const dy = e.touches[0].clientY - swipeStartY.current.receipt;
+            if (dy > 100) { swipeStartY.current.receipt = Infinity; setReceipt(null); }
+          }}>
           <div className="glass-v2-strong rounded-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
             <div ref={receiptRef} className="receipt p-5 print:p-3">
               <div className="text-center relative">
@@ -782,7 +779,7 @@ export default function POS() {
                 <button key={m} onClick={() => {
                   setPaymentMethod(m);
                   if (m !== 'debt') { setSelectedDebtor(null); setDebtorSearch(''); setShowNewDebtor(false); }
-                  if (m === 'mpesa') { setShowMpesaModal(true); }
+
                 }}
                   className={`py-3 rounded-xl text-sm font-semibold capitalize transition-all duration-200 ${
                     paymentMethod === m ? 'tab-v2-active' : 'tab-v2'

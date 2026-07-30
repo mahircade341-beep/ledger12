@@ -306,9 +306,10 @@
     font-size: 0.875rem;
     transition: all 0.2s ease;
     cursor: pointer;
-    &:active:not(:disabled) { transform: scale(0.97); }
-    &:disabled { opacity: 0.5; cursor: not-allowed; &:active { transform: none; } }
   }
+  .btn-v2:active:not(:disabled) { transform: scale(0.97); }
+  .btn-v2:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-v2:disabled:active { transform: none; }
   .btn-v2-primary {
     @apply btn-v2;
     background: var(--gradient-brand);

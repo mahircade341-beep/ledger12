@@ -1,35 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e3a5f"/>
-      <stop offset="50%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#020617"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#080e1a"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#F59E0B"/>
-      <stop offset="100%" style="stop-color:#F43F5E"/>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="50%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
     </linearGradient>
   </defs>
-  <!-- Background -->
-  <rect width="192" height="192" rx="36" fill="url(#bg)"/>
-  <!-- Outer ring glow -->
-  <rect x="8" y="8" width="176" height="176" rx="30" fill="none" stroke="url(#accent)" stroke-width="1.5" opacity="0.3"/>
-  <!-- POS Terminal Icon -->
-  <g transform="translate(96,88)" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-    <!-- Monitor -->
-    <rect x="-52" y="-48" width="104" height="72" rx="6" stroke-width="4.5"/>
-    <!-- Screen content line 1 -->
-    <line x1="-36" y1="-30" x2="-8" y2="-30" stroke-width="3.5" opacity="0.7"/>
-    <line x1="-36" y1="-16" x2="-20" y2="-16" stroke-width="3.5" opacity="0.5"/>
-    <!-- Screen content line 2 -->
-    <line x1="6" y1="-30" x2="36" y2="-30" stroke-width="3.5" opacity="0.7"/>
-    <line x1="6" y1="-16" x2="24" y2="-16" stroke-width="3.5" opacity="0.5"/>
-    <!-- Price / Total -->
-    <rect x="-32" y="4" width="64" height="14" rx="3" fill="url(#accent)" stroke="none"/>
-    <!-- Stand -->
-    <line x1="-16" y1="24" x2="-4" y2="40" stroke-width="4"/>
-    <line x1="16" y1="24" x2="4" y2="40" stroke-width="4"/>
-    <!-- Base -->
-    <rect x="-20" y="40" width="40" height="6" rx="3" stroke-width="4"/>
+
+  <!-- Rounded square background -->
+  <rect width="192" height="192" rx="32" fill="url(#bgGrad)"/>
+
+  <!-- Outer ring -->
+  <rect x="10" y="10" width="172" height="172" rx="26" fill="none" stroke="rgba(59,130,246,0.12)" stroke-width="1"/>
+
+  <!-- Main D letter mark -->
+  <g transform="translate(96,96)">
+    <rect x="-36" y="-40" width="72" height="80" rx="14" fill="url(#brandGrad)"
+          filter="drop-shadow(0 4px 16px rgba(59,130,246,0.3))"/>
+
+    <!-- Inner white D letter -->
+    <path d="M-20 -28 L-20 28 
+             C-20 28, -6 32, 8 28 
+             C26 22, 34 8, 34 -6 
+             C34 -20, 26 -32, 8 -32 
+             C-6 -32, -20 -28, -20 -28Z" 
+          fill="white" stroke="none" opacity="0.95"/>
   </g>
 </svg>

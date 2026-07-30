@@ -6,6 +6,8 @@ import useUtmTracker from '../hooks/useUtmTracker';
 import ProductHeroImage from '../components/ProductHeroImage';
 import StickyAddCart from '../components/StickyAddCart';
 import BarcodeScanner from '../components/BarcodeScanner';
+import useCartPersistence from '../hooks/useCartPersistence';
+import MpesaCheckoutModal from '../components/MpesaCheckoutModal';
 
 interface ReceiptData {
   id: string;
@@ -24,8 +26,33 @@ export default function POS() {
 
   const { trackAddToCart, trackBeginCheckout, trackPurchase } = useAnalytics();
   const { appendToPayload } = useUtmTracker();
+  const { savedCart, saveCart, clearCart, isOffline } = useCartPersistence();
 
-  const [cart, setCart] = useState<any[]>([]);
+  const [cart, setCart] = useState<any[]>(() => {
+    // Load saved cart from localStorage on mount (only if there are stored items)
+    if (savedCart.length > 0) {
+      // Map saved cart items to current products for fresh pricing + availability
+      const restored: any[] = [];
+      for (const sc of savedCart) {
+        const product = products.find((p: any) => p._id === sc.product?._id);
+        if (!product || product.quantity < 1) continue;
+        const qty = Math.min(sc.quantity, product.quantity);
+        if (qty < 1) continue;
+        restored.push({
+          product,
+          quantity: qty,
+          subtotal: qty * (product.retailPrice || 0),
+          _price: product.retailPrice || 0,
+        });
+      }
+      // If restoration changed anything, update localStorage
+      if (restored.length !== savedCart.length) {
+        saveCart(restored);
+      }
+      return restored;
+    }
+    return [];
+  });
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'mpesa' | 'debt'>('cash');
@@ -46,14 +73,32 @@ export default function POS() {
   const [newDebtorName, setNewDebtorName] = useState('');
   const [newDebtorPhone, setNewDebtorPhone] = useState('');
   const [showScanner, setShowScanner] = useState(false);
+  const [showMpesaModal, setShowMpesaModal] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const debtorRef = useRef<HTMLInputElement>(null);
+
+  // ── Persist cart to localStorage on every change ──
+  useEffect(() => {
+    if (cart.length > 0) {
+      saveCart(cart);
+    } else {
+      clearCart();
+    }
+  }, [cart, saveCart, clearCart]);
 
   function fmtTime(ts: number) {
     const pref = localStorage.getItem('dl-time-format') || '12h';
     if (pref === '24h') return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
+
+  // ── Offline banner ──
+  const [showOfflineBanner, setShowOfflineBanner] = useState(isOffline);
+  useEffect(() => {
+    setShowOfflineBanner(isOffline);
+    const timer = isOffline ? undefined : setTimeout(() => setShowOfflineBanner(false), 3000);
+    return () => clearTimeout(timer);
+  }, [isOffline]);
 
   // ── Keyboard shortcuts ──
   useEffect(() => {
@@ -105,22 +150,26 @@ export default function POS() {
 
   const getPrice = useCallback((p: any) => p.retailPrice || 0, []);
 
-  // ── Cart methods ──
-  const addToCartDirect = (productId: string) => {
+  // ── Optimistic Cart methods — instant feedback ──
+  const addToCartDirect = useCallback((productId: string) => {
     const product = products.find((p: any) => p._id === productId);
     if (!product || product.quantity < 1) return;
     const price = getPrice(product);
     setCart((prev: any[]) => {
       const existing = prev.find((c: any) => c.product._id === product._id);
       const newQty = existing ? existing.quantity + 1 : 1;
-      if (existing) return prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: newQty, subtotal: newQty * price } : c);
-      return [...prev, { product, quantity: 1, subtotal: price, _price: price }];
+      const updated = existing
+        ? prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: newQty, subtotal: newQty * price, _price: price } : c)
+        : [...prev, { product, quantity: 1, subtotal: price, _price: price }];
+      // Save to localStorage immediately for offline resilience
+      try { localStorage.setItem('dukahub-cart', JSON.stringify(updated)); } catch {}
+      return updated;
     });
     // GA4 event
     trackAddToCart({ item_id: product._id, item_name: product.name, price, quantity: 1 });
-  };
+  }, [products, getPrice, trackAddToCart]);
 
-  const addToCart = () => {
+  const addToCart = useCallback(() => {
     if (!selectedProduct || quantity < 1) return;
     const product = products.find((p: any) => p._id === selectedProduct);
     if (!product || quantity > product.quantity) return;
@@ -128,13 +177,32 @@ export default function POS() {
     setCart((prev: any[]) => {
       const existing = prev.find((c: any) => c.product._id === product._id);
       const newQty = existing ? existing.quantity + quantity : quantity;
-      if (existing) return prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: newQty, subtotal: newQty * price, _price: price } : c);
-      return [...prev, { product, quantity, subtotal: quantity * price, _price: price }];
+      const updated = existing
+        ? prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: newQty, subtotal: newQty * price, _price: price } : c)
+        : [...prev, { product, quantity, subtotal: quantity * price, _price: price }];
+      try { localStorage.setItem('dukahub-cart', JSON.stringify(updated)); } catch {}
+      return updated;
     });
-    // GA4 event
     trackAddToCart({ item_id: product._id, item_name: product.name, price, quantity });
     setSelectedProduct(''); setQuantity(1);
-  };
+  }, [selectedProduct, quantity, products, getPrice, trackAddToCart]);
+
+  const removeFromCart = useCallback((productId: string) => {
+    setCart((prev: any[]) => {
+      const updated = prev.filter((c: any) => c.product._id !== productId);
+      if (updated.length > 0) {
+        try { localStorage.setItem('dukahub-cart', JSON.stringify(updated)); } catch {}
+      } else {
+        try { localStorage.removeItem('dukahub-cart'); } catch {}
+      }
+      return updated;
+    });
+  }, []);
+
+  const clearCartAll = useCallback(() => {
+    setCart([]);
+    try { localStorage.removeItem('dukahub-cart'); } catch {}
+  }, []);
 
   // ── Barcode scan handler ──
   const handleBarcodeScan = (code: string) => {
@@ -152,6 +220,14 @@ export default function POS() {
 
   const subtotal = cart.reduce((s: number, i: any) => s + i.subtotal, 0);
   const total = Math.max(0, subtotal - discount);
+
+  // ── M-Pesa handler ──
+  const handleMpesaComplete = (phone: string) => {
+    setShowMpesaModal(false);
+    setPaymentMethod('mpesa');
+    // Proceed with sale after M-Pesa init
+    setTimeout(() => finalizeSale(), 300);
+  };
 
   // ── Debtor ──
   const handleAddDebtor = () => {
@@ -193,7 +269,7 @@ export default function POS() {
         updateDebtor(selectedDebtor._id, { amount: (currentDebtor.amount || 0) + total, status: 'active' } as any);
       }
     }
-    // Attach UTM marketing data to the transaction payload
+    // Attach UTM marketing data
     const txPayload = appendToPayload({ userId: userId as any, items, total, paymentMethod, discount, ...extraData } as any);
     const txId = addTx(txPayload);
     cart.forEach((c: any) => {
@@ -201,22 +277,16 @@ export default function POS() {
       if (p) updateQuantity(p._id, Math.max(0, p.quantity - c.quantity));
     });
     setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined });
-    // GA4 purchase event
     trackPurchase({
       transaction_id: txId,
       value: total,
       payment_type: paymentMethod,
-      items: items.map((i: any) => ({
-        item_id: i.productId,
-        item_name: i.name,
-        price: i.price,
-        quantity: i.quantity,
-      })),
+      items: items.map((i: any) => ({ item_id: i.productId, item_name: i.name, price: i.price, quantity: i.quantity })),
       utm_data: txPayload.utm_data,
     });
     setSuccessMsg(`Sale finalized! KES ${total.toLocaleString()}`);
     window.dispatchEvent(new Event('salecompleted'));
-    setCart([]); setDiscount(0); setSelectedDebtor(null); setDebtorSearch(''); setLoading(false);
+    setCart([]); clearCart(); setDiscount(0); setSelectedDebtor(null); setDebtorSearch(''); setLoading(false);
   };
 
   // ── Void ──
@@ -237,6 +307,20 @@ export default function POS() {
 
   return (
     <div className="space-y-4 pb-16 lg:pb-0">
+      {/* Offline Banner */}
+      {showOfflineBanner && (
+        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 animate-slide-up-v2">
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 010 12.728m-2.829-2.829a5 5 0 000-7.07m-4.243 4.243a1 1 0 010-1.414" />
+          </svg>
+          <span>
+            {isOffline
+              ? 'You are offline — cart is saved locally. Changes will sync when you reconnect.'
+              : 'Back online — data syncing...'}
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
@@ -244,12 +328,18 @@ export default function POS() {
           <p className="text-xs text-[var(--text-muted)] mt-0.5">Process customer transactions</p>
         </div>
         <div className="flex items-center gap-2">
-          {isGod && <span className="badge-blue text-[10px] px-2">GOD MODE</span>}
+          {isOffline && (
+            <span className="badge-v2-warning text-[10px] px-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1 inline-block animate-pulse" />
+              Offline
+            </span>
+          )}
+          {isGod && <span className="badge-v2-info text-[10px] px-2">GOD MODE</span>}
           <span className="text-[10px] text-[var(--text-muted)] hidden md:block">F1-F8 Quick | F9 Sale | Esc</span>
         </div>
       </div>
 
-      {/* Daily Sales Summary — V2 stat-v2 */}
+      {/* Daily Sales Summary */}
       {todayCount > 0 && (
         <div className="stat-v2 stat-v2-accent flex-row items-center justify-between">
           <div className="flex items-center gap-3">
@@ -269,9 +359,19 @@ export default function POS() {
         </div>
       )}
 
+      {/* Cart Restored Banner */}
+      {savedCart.length > 0 && cart.length === savedCart.length && (
+        <div className="p-2.5 rounded-xl text-xs flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400">
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Cart restored from offline storage — review items before checkout
+        </div>
+      )}
+
       {/* Success message */}
       {successMsg && !receipt && (
-        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 animate-slide-up-v2">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -279,7 +379,7 @@ export default function POS() {
         </div>
       )}
 
-      {/* Void Modal — V2 glass */}
+      {/* Void Modal */}
       {voidTxId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setVoidTxId(null)}>
           <div className="glass-v2-strong rounded-2xl max-w-md w-full p-6 animate-scale-in-v2" onClick={(e) => e.stopPropagation()}>
@@ -297,7 +397,7 @@ export default function POS() {
             <div className="space-y-2 max-h-48 overflow-y-auto mb-4 scrollbar-thin">
               {transactions.slice(0, 10).map((t: any) => (
                 <button key={t._id} onClick={() => voidTransaction(t._id)}
-                  className="w-full text-left p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-all duration-200 item-v2-hover">
+                  className="w-full text-left p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-all duration-200">
                   <div className="flex justify-between text-sm">
                     <span className="text-[var(--text-primary)] font-medium">{new Date(t._creationTime).toLocaleDateString()} {fmtTime(t._creationTime)}</span>
                     <span className="text-red-400 font-semibold">-KES {t.total.toLocaleString()}</span>
@@ -315,14 +415,22 @@ export default function POS() {
         </div>
       )}
 
-      {/* ── V2 Receipt — Modernized ── */}
+      {/* ── M-Pesa Checkout Modal ── */}
+      {showMpesaModal && (
+        <MpesaCheckoutModal
+          total={total}
+          items={cart.map((c: any) => ({ name: c.product.name, quantity: c.quantity, subtotal: c.subtotal }))}
+          onComplete={handleMpesaComplete}
+          onClose={() => setShowMpesaModal(false)}
+        />
+      )}
+
+      {/* ── Receipt Modal ── */}
       {receipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0 animate-scale-in-v2" onClick={() => setReceipt(null)}>
           <div className="glass-v2-strong rounded-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
             <div ref={receiptRef} className="receipt p-5 print:p-3">
-              {/* ── Header ── */}
               <div className="text-center relative">
-                {/* Subtle brand watermark */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
                   <span className="text-[120px] font-black tracking-tighter leading-none" style={{ color: 'var(--brand)' }}>D</span>
                 </div>
@@ -349,7 +457,6 @@ export default function POS() {
                 </div>
               </div>
 
-              {/* ── Items Table ── */}
               <div className="mt-4 mb-3">
                 <div className="flex justify-between text-[9px] font-bold uppercase tracking-[0.15em] pb-1.5 border-b"
                   style={{ color: 'var(--text-muted)', borderColor: 'var(--border-color)' }}>
@@ -370,7 +477,6 @@ export default function POS() {
                 </div>
               </div>
 
-              {/* ── Totals ── */}
               <div className="border-t-2 border-dashed pt-2.5 space-y-1" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
                   <span>Subtotal</span>
@@ -388,7 +494,6 @@ export default function POS() {
                 </div>
               </div>
 
-              {/* ── Payment Details ── */}
               <div className="mt-3 pt-3 border-t-2 border-dashed flex items-center justify-between" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-xs">
@@ -411,7 +516,6 @@ export default function POS() {
                 </div>
               </div>
 
-              {/* ── Footer ── */}
               <div className="mt-4 pt-3 text-center border-t-2 border-dashed" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="w-10 h-0.5 mx-auto mb-2.5 rounded-full" style={{ background: 'var(--gradient-brand)' }} />
                 <p className="text-[10px] font-semibold" style={{ color: 'var(--text-muted)' }}>
@@ -422,17 +526,16 @@ export default function POS() {
                 </p>
               </div>
             </div>
-            
-            {/* ── Action Buttons ── */}
+
             <div className="flex gap-2 p-4 border-t print:hidden" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-              <button onClick={() => window.print()} className="btn-primary flex-1">
+              <button onClick={() => window.print()} className="btn-v2-primary flex-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Print
               </button>
               <button onClick={() => {
                 const text = `${profile?.storeName || 'DukaHub'}\n${receipt.date.toLocaleDateString()} ${fmtTime(receipt.date.getTime())}\n#${receipt.id.slice(-8).toUpperCase()}\n\n${receipt.items.map(i => `${i.name} ×${i.quantity} = KES ${i.subtotal.toLocaleString()}`).join('\n')}\n\nTotal: KES ${receipt.total.toLocaleString()}\nPayment: ${receipt.paymentMethod}${receipt.debtorName ? '\nDebtor: ' + receipt.debtorName : ''}\n\nThank you!`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-              }} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> WhatsApp</button>
-              <button onClick={() => setReceipt(null)} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Close</button>
+              }} className="btn-v2-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> WhatsApp</button>
+              <button onClick={() => setReceipt(null)} className="btn-v2-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Close</button>
             </div>
           </div>
         </div>
@@ -446,10 +549,8 @@ export default function POS() {
 
           {/* Quick Select + Scanner Row */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Barcode Scanner Button */}
             <button onClick={() => setShowScanner(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] shadow-sm hover:opacity-90">
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] shadow-sm hover:opacity-90">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
@@ -458,7 +559,6 @@ export default function POS() {
               <span className="text-[10px] opacity-60">📷</span>
             </button>
 
-            {/* Recent Sales Toggle */}
             <button onClick={() => setShowRecentSales(!showRecentSales)}
               className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
                 showRecentSales
@@ -471,7 +571,6 @@ export default function POS() {
               Recent
             </button>
 
-            {/* Out of stock toggle */}
             <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer ml-auto">
               <input type="checkbox" checked={showOutOfStock} onChange={(e) => setShowOutOfStock(e.target.checked)}
                 className="rounded accent-[var(--text-primary)] w-3.5 h-3.5" />
@@ -500,14 +599,14 @@ export default function POS() {
             </div>
           )}
 
-          {/* Search + Category Filter */}
+          {/* Search */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               <input ref={searchRef} type="text" value={search} onChange={(e) => { setSearch(e.target.value); setShowSearchSuggestions(true); }}
-                className="glass-input w-full pl-9" placeholder="Search products..."
+                className="input-v2 w-full pl-9" placeholder="Search products..."
                 onKeyDown={(e) => { if (e.key === 'Enter' && selectedProduct) { addToCart(); searchRef.current?.focus(); } }}
                 onFocus={() => searchSuggestions.length > 0 && setShowSearchSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)} />
@@ -583,15 +682,15 @@ export default function POS() {
               <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Qty</label>
               <input type="number" min={1} value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                className="input-field"
+                className="input-v2"
                 onKeyDown={(e) => { if (e.key === 'Enter' && selectedProduct) addToCart(); }} />
             </div>
             <button onClick={addToCart} disabled={!selectedProduct}
-              className="btn-primary flex-1">
+              className="btn-v2-primary flex-1">
               Add to Cart {selectedProduct ? '↵' : ''}
             </button>
             <button onClick={() => setShowScanner(true)}
-              className="btn-secondary flex items-center gap-1.5">
+              className="btn-v2-secondary flex items-center gap-1.5">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
@@ -603,8 +702,8 @@ export default function POS() {
 
         {/* ── RIGHT COLUMN: Cart + Payment ── */}
         <div id="checkout-section" className="lg:col-span-2 space-y-3">
-          {/* Cart — V2 card */}
-          <div className="card relative overflow-hidden">
+          {/* Cart Card */}
+          <div className="card-v2 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--brand)] to-[var(--brand-light)]" />
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -617,8 +716,8 @@ export default function POS() {
                 )}
               </div>
               {cart.length > 0 && (
-                <button onClick={() => setCart([])}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 btn-ghost p-1.5">
+                <button onClick={clearCartAll}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 btn-v2-ghost p-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                   </svg>
@@ -639,7 +738,7 @@ export default function POS() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-sm font-semibold text-[var(--accent-primary)]">KES {item.subtotal.toLocaleString()}</span>
-                      <button onClick={() => setCart((prev: any[]) => prev.filter((c: any) => c.product._id !== item.product._id))}
+                      <button onClick={() => removeFromCart(item.product._id)}
                         className="text-[var(--text-muted)] hover:text-red-400 transition-colors p-1">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -651,7 +750,6 @@ export default function POS() {
               </div>
             )}
 
-            {/* Totals */}
             <div className="border-t border-[var(--border-color)] pt-3 space-y-1.5">
               <div className="flex justify-between text-sm text-[var(--text-secondary)]">
                 <span>Subtotal</span><span>KES {subtotal.toLocaleString()}</span>
@@ -660,7 +758,7 @@ export default function POS() {
                 <span className="text-xs text-[var(--text-muted)]">Discount</span>
                 <input type="number" min={0} value={discount}
                   onChange={(e) => setDiscount(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="input-field w-24 text-xs ml-auto text-right" placeholder="KES" />
+                  className="input-v2 w-24 text-xs ml-auto text-right" placeholder="KES" />
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm text-red-400">
@@ -673,22 +771,21 @@ export default function POS() {
             </div>
           </div>
 
-          {/* Payment — V2 card */}
-          <div className="card relative overflow-hidden">
+          {/* Payment Card */}
+          <div className="card-v2 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-[var(--brand)]" />
             <h2 className="text-base font-semibold text-[var(--text-primary)] mb-3">Payment</h2>
 
-            {/* Payment Method — V2 tabs */}
+            {/* Payment Method Tabs */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               {(['cash', 'mpesa', 'debt'] as const).map((m) => (
                 <button key={m} onClick={() => {
                   setPaymentMethod(m);
                   if (m !== 'debt') { setSelectedDebtor(null); setDebtorSearch(''); setShowNewDebtor(false); }
+                  if (m === 'mpesa') { setShowMpesaModal(true); }
                 }}
                   className={`py-3 rounded-xl text-sm font-semibold capitalize transition-all duration-200 ${
-                    paymentMethod === m
-                      ? 'tab-v2-active'
-                      : 'tab-v2'
+                    paymentMethod === m ? 'tab-v2-active' : 'tab-v2'
                   }`}>
                   {m === 'cash' && <>💰 Cash</>}
                   {m === 'mpesa' && <>📱 M-Pesa</>}
@@ -712,13 +809,13 @@ export default function POS() {
                         <p className="text-xs text-amber-400">Outstanding: KES {((debtors.find((d: any) => d._id === selectedDebtor._id)?.amount || 0) + total).toLocaleString()}</p>
                       </div>
                     </div>
-                    <button onClick={() => { setSelectedDebtor(null); setDebtorSearch(''); }} className="btn-ghost p-1 text-xs text-red-400">Change</button>
+                    <button onClick={() => { setSelectedDebtor(null); setDebtorSearch(''); }} className="btn-v2-ghost p-1 text-xs text-red-400">Change</button>
                   </div>
                 ) : (
                   <>
                     <input ref={debtorRef} type="text" value={debtorSearch}
                       onChange={(e) => { setDebtorSearch(e.target.value); setShowDebtorDropdown(true); }}
-                      className="input-field text-sm w-full mb-2" placeholder="Search debtors..."
+                      className="input-v2 text-sm w-full mb-2" placeholder="Search debtors..."
                       onFocus={() => setShowDebtorDropdown(true)}
                       onBlur={() => setTimeout(() => setShowDebtorDropdown(false), 200)} />
                     {showDebtorDropdown && (
@@ -733,29 +830,24 @@ export default function POS() {
                               </button>
                             ))}
                           {debtors.filter((d: any) => d.name.toLowerCase().includes(debtorSearch.toLowerCase())).length === 0 && (
-                            <div className="p-3 text-xs text-[var(--text-muted)] text-center">
-                              No debtors match
-                            </div>
+                            <div className="p-3 text-xs text-[var(--text-muted)] text-center">No debtors match</div>
                           )}
                         </div>
                       </div>
                     )}
-                    {/* Quick add debtor */}
                     <button type="button" onClick={() => setShowNewDebtor(true)}
-                      className="text-xs text-[var(--accent-primary)] hover:underline mt-1">
-                      + Add new debtor
-                    </button>
+                      className="text-xs text-[var(--accent-primary)] hover:underline mt-1">+ Add new debtor</button>
                     {showNewDebtor && (
                       <div className="mt-2 p-2 bg-[var(--bg-surface2)] rounded-lg border border-[var(--border-color)]">
                         <div className="flex gap-2 mb-2">
                           <input type="text" value={newDebtorName} onChange={(e) => setNewDebtorName(e.target.value)}
-                            className="input-field text-sm flex-1" placeholder="Full name" />
+                            className="input-v2 text-sm flex-1" placeholder="Full name" />
                           <input type="tel" value={newDebtorPhone} onChange={(e) => setNewDebtorPhone(e.target.value)}
-                            className="input-field text-sm w-24" placeholder="Phone" />
+                            className="input-v2 text-sm w-24" placeholder="Phone" />
                         </div>
                         <div className="flex gap-2">
-                          <button type="button" onClick={handleAddDebtor} className="btn-primary btn-sm" disabled={!newDebtorName.trim()}>Add & Select</button>
-                          <button type="button" onClick={() => setShowNewDebtor(false)} className="btn-ghost text-xs">Cancel</button>
+                          <button type="button" onClick={handleAddDebtor} className="btn-v2-primary btn-v2-sm" disabled={!newDebtorName.trim()}>Add & Select</button>
+                          <button type="button" onClick={() => setShowNewDebtor(false)} className="btn-v2-ghost text-xs">Cancel</button>
                         </div>
                       </div>
                     )}
@@ -766,7 +858,7 @@ export default function POS() {
 
             {/* Finalize Button */}
             <button onClick={finalizeSale} disabled={cart.length === 0 || loading}
-              className="btn-primary w-full mt-2 text-base py-3">
+              className="btn-v2-primary w-full mt-2 text-base py-3">
               {loading
                 ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
                 : `Complete Sale — KES ${total.toLocaleString()}`}
@@ -784,7 +876,7 @@ export default function POS() {
         />
       )}
 
-      {/* StickyAddCart — mobile floating checkout bar with scroll-aware visibility */}
+      {/* StickyAddCart — mobile floating checkout bar */}
       <StickyAddCart
         visible={cart.length > 0 && !receipt}
         itemCount={cart.length}

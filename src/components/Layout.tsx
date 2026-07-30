@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import ToastAlerts from './ToastAlerts';
+import BottomTabBar from './BottomTabBar';
 
 export default function Layout() {
   return (
@@ -9,10 +10,11 @@ export default function Layout() {
       <div className="fixed inset-0 bg-grid pointer-events-none" />
       <Sidebar />
       <main className="flex-1 overflow-y-auto lg:pt-0 pt-14 scrollbar-thin relative">
-        <div className="p-3 sm:p-5 lg:p-6 max-w-7xl mx-auto min-h-[calc(100vh-56px)] lg:min-h-screen animate-fade-in-v2">
+        <div className="p-3 sm:p-5 lg:p-6 max-w-7xl mx-auto min-h-[calc(100vh-56px)] lg:min-h-screen animate-fade-in-v2 pb-20 lg:pb-6">
           <Outlet />
         </div>
       </main>
+      <BottomTabBar />
       <ToastAlerts />
     </div>
   );

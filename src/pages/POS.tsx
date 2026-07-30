@@ -315,55 +315,121 @@ export default function POS() {
         </div>
       )}
 
-      {/* Receipt Modal — V2 glass */}
+      {/* ── V2 Receipt — Modernized ── */}
       {receipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0 animate-fade-in-v2" onClick={() => setReceipt(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0 animate-scale-in-v2" onClick={() => setReceipt(null)}>
           <div className="glass-v2-strong rounded-2xl max-w-sm w-full overflow-hidden print:rounded-none print:shadow-none print:max-w-full" onClick={(e) => e.stopPropagation()}>
-            <div ref={receiptRef} className="receipt p-6 print:p-4">
-              <div className="text-center border-b-2 border-dashed border-[var(--border-color)] pb-4 mb-4">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-3"
-                  style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
-                  <span className="text-sm font-extrabold text-white">D</span>
+            <div ref={receiptRef} className="receipt p-5 print:p-3">
+              {/* ── Header ── */}
+              <div className="text-center relative">
+                {/* Subtle brand watermark */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none overflow-hidden">
+                  <span className="text-[120px] font-black tracking-tighter leading-none" style={{ color: 'var(--brand)' }}>D</span>
                 </div>
-                <h2 className="text-lg font-bold text-[var(--text-primary)]">{profile?.storeName || 'DukaHub'}</h2>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">Retail Management</p>
-                <p className="text-xs text-[var(--text-muted)] mt-2">{receipt.date.toLocaleDateString()} {fmtTime(receipt.date.getTime())}</p>
-                <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">#{receipt.id.slice(-8).toUpperCase()}</p>
+                <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl mb-2.5"
+                  style={{ background: 'var(--gradient-brand)' }}>
+                  <span className="text-xs font-extrabold text-white">D</span>
+                </div>
+                <h2 className="text-base font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                  {profile?.storeName || 'DukaHub'}
+                </h2>
+                <p className="text-[10px] font-semibold uppercase" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em' }}>
+                  Sales Receipt
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-2 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                  <span>{receipt.date.toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
+                  <span className="font-mono tracking-wide">{fmtTime(receipt.date.getTime())}</span>
+                </div>
+                <div className="mt-1.5">
+                  <span className="inline-block text-[9px] font-mono font-bold px-2 py-0.5 rounded-md"
+                    style={{ background: 'var(--accent-dim)', color: 'var(--text-accent)' }}>
+                    #{receipt.id.slice(-8).toUpperCase()}
+                  </span>
+                </div>
               </div>
-              <div className="space-y-1.5 mb-4">
-                <div className="flex justify-between text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider pb-1 border-b border-[var(--border-color)]">
-                  <span className="flex-1">Item</span><span className="w-10 text-right">Qty</span><span className="w-16 text-right">Price</span><span className="w-18 text-right">Total</span>
+
+              {/* ── Items Table ── */}
+              <div className="mt-4 mb-3">
+                <div className="flex justify-between text-[9px] font-bold uppercase tracking-[0.15em] pb-1.5 border-b"
+                  style={{ color: 'var(--text-muted)', borderColor: 'var(--border-color)' }}>
+                  <span className="flex-[2]">Item</span>
+                  <span className="w-8 text-right">Qty</span>
+                  <span className="w-14 text-right">Price</span>
+                  <span className="w-16 text-right">Total</span>
                 </div>
-                {receipt.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm text-[var(--text-primary)] py-0.5">
-                    <span className="flex-1 truncate">{item.name}</span>
-                    <span className="w-10 text-right text-[var(--text-muted)]">{item.quantity}</span>
-                    <span className="w-16 text-right text-[var(--text-muted)]">{item.price.toLocaleString()}</span>
-                    <span className="w-18 text-right font-medium text-[var(--text-primary)]">{item.subtotal.toLocaleString()}</span>
+                <div className="mt-1.5 space-y-1">
+                  {receipt.items.map((item, i) => (
+                    <div key={i} className="flex justify-between text-xs py-0.5" style={{ color: 'var(--text-primary)' }}>
+                      <span className="flex-[2] truncate pr-2 font-medium">{item.name}</span>
+                      <span className="w-8 text-right" style={{ color: 'var(--text-muted)' }}>{item.quantity}</span>
+                      <span className="w-14 text-right font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>{item.price.toLocaleString()}</span>
+                      <span className="w-16 text-right font-semibold font-mono text-[11px]" style={{ color: 'var(--text-primary)' }}>{item.subtotal.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Totals ── */}
+              <div className="border-t-2 border-dashed pt-2.5 space-y-1" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <span>Subtotal</span>
+                  <span className="font-mono font-medium" style={{ color: 'var(--text-primary)' }}>KES {receipt.subtotal.toLocaleString()}</span>
+                </div>
+                {receipt.discount > 0 && (
+                  <div className="flex justify-between text-xs">
+                    <span style={{ color: 'var(--text-secondary)' }}>Discount</span>
+                    <span className="font-mono font-medium" style={{ color: '#fb7185' }}>-KES {receipt.discount.toLocaleString()}</span>
                   </div>
-                ))}
-              </div>
-              <div className="border-t-2 border-dashed border-[var(--border-color)] pt-3 space-y-1">
-                <div className="flex justify-between text-sm text-[var(--text-secondary)]"><span>Subtotal</span><span>KES {receipt.subtotal.toLocaleString()}</span></div>
-                {receipt.discount > 0 && <div className="flex justify-between text-sm text-red-400"><span>Discount</span><span>-KES {receipt.discount.toLocaleString()}</span></div>}
-                <div className="flex justify-between text-base font-bold text-[var(--text-primary)] pt-1 border-t border-[var(--border-color)]">
-                  <span>Total</span><span>KES {receipt.total.toLocaleString()}</span>
+                )}
+                <div className="flex justify-between items-center pt-1.5 mt-1.5 border-t" style={{ borderColor: 'var(--border-color)' }}>
+                  <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Total Due</span>
+                  <span className="text-base font-extrabold font-mono" style={{ color: 'var(--brand)' }}>KES {receipt.total.toLocaleString()}</span>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t-2 border-dashed border-[var(--border-color)]">
-                <div className="flex justify-between text-sm text-[var(--text-secondary)]"><span>Payment</span><span className="font-medium capitalize text-[var(--text-accent)]">{receipt.paymentMethod}</span></div>
-                {receipt.debtorName && <div className="flex justify-between text-sm text-[var(--text-secondary)] mt-1"><span>Debtor</span><span className="font-medium text-amber-400">{receipt.debtorName}</span></div>}
+
+              {/* ── Payment Details ── */}
+              <div className="mt-3 pt-3 border-t-2 border-dashed flex items-center justify-between" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">
+                    {receipt.paymentMethod === 'cash' ? '💵' : receipt.paymentMethod === 'mpesa' ? '📱' : '📋'}
+                  </span>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Payment</p>
+                    <p className="text-xs font-semibold capitalize" style={{ color: 'var(--text-accent)' }}>{receipt.paymentMethod}</p>
+                  </div>
+                </div>
+                {receipt.debtorName && (
+                  <div className="text-right">
+                    <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Debtor</p>
+                    <p className="text-xs font-semibold" style={{ color: '#fbbf24' }}>{receipt.debtorName}</p>
+                  </div>
+                )}
+                <div className="text-right">
+                  <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Items</p>
+                  <p className="text-xs font-semibold font-mono" style={{ color: 'var(--text-primary)' }}>{receipt.items.length}</p>
+                </div>
               </div>
-              <div className="text-center mt-4 pt-3 border-t-2 border-dashed border-[var(--border-color)]">
-                <p className="text-xs text-[var(--text-muted)] italic">Thank you for your business!</p>
+
+              {/* ── Footer ── */}
+              <div className="mt-4 pt-3 text-center border-t-2 border-dashed" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="w-10 h-0.5 mx-auto mb-2.5 rounded-full" style={{ background: 'var(--gradient-brand)' }} />
+                <p className="text-[10px] font-semibold" style={{ color: 'var(--text-muted)' }}>
+                  Thank you for your patronage!
+                </p>
+                <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-muted)', opacity: 0.5 }}>
+                  DukaHub v2 · Retail OS
+                </p>
               </div>
             </div>
-            <div className="flex gap-2 p-4 bg-[var(--bg-surface)] border-t border-[var(--border-color)] print:hidden">
+            
+            {/* ── Action Buttons ── */}
+            <div className="flex gap-2 p-4 border-t print:hidden" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
               <button onClick={() => window.print()} className="btn-primary flex-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> Print
               </button>
               <button onClick={() => {
-                const text = `${profile?.storeName || 'DukaHub'}\n${receipt.date.toLocaleDateString()} ${fmtTime(receipt.date.getTime())}\n#${receipt.id.slice(-8).toUpperCase()}\n\n${receipt.items.map(i => `${i.name} ×${i.quantity} = KES ${i.subtotal.toLocaleString()}`).join('\n')}\n\nTotal: KES ${receipt.total.toLocaleString()}\nPayment: ${receipt.paymentMethod}${receipt.debtorName ? '\nDebtor: ' + receipt.debtorName : ''}\n\nThank you for your business!`;
+                const text = `${profile?.storeName || 'DukaHub'}\n${receipt.date.toLocaleDateString()} ${fmtTime(receipt.date.getTime())}\n#${receipt.id.slice(-8).toUpperCase()}\n\n${receipt.items.map(i => `${i.name} ×${i.quantity} = KES ${i.subtotal.toLocaleString()}`).join('\n')}\n\nTotal: KES ${receipt.total.toLocaleString()}\nPayment: ${receipt.paymentMethod}${receipt.debtorName ? '\nDebtor: ' + receipt.debtorName : ''}\n\nThank you!`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
               }} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> WhatsApp</button>
               <button onClick={() => setReceipt(null)} className="btn-secondary flex-1"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Close</button>

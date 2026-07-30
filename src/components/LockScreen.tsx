@@ -14,21 +14,15 @@ export default function LockScreen({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(false);
   const securityQuestion = localStorage.getItem('dl-security-q') || '';
 
-  // Check if app lock is enabled on mount
   useEffect(() => {
     if (appLockEnabled) {
       const shouldLock = localStorage.getItem('dl-locked') === 'true';
-      if (shouldLock) {
-        setShowContent(false);
-      } else {
-        setShowContent(true);
-      }
+      setShowContent(!shouldLock);
     } else {
       setShowContent(true);
     }
   }, [appLockEnabled]);
 
-  // Inactivity timer
   useEffect(() => {
     if (!isLocked) return;
     let timer: any;
@@ -90,102 +84,85 @@ export default function LockScreen({ children }: { children: React.ReactNode }) 
   };
 
   const resetAndGoBack = () => {
-    setShowForgot(false);
-    setResetMode(false);
-    setError('');
-    setSecurityAnswer('');
-    setNewPassword('');
-    setConfirmNewPassword('');
+    setShowForgot(false); setResetMode(false); setError('');
+    setSecurityAnswer(''); setNewPassword(''); setConfirmNewPassword('');
   };
 
   if (!showContent) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617] p-4">
-        <div className="fixed inset-0 bg-[radial-gradient(rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
-        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.08)_0%,transparent_60%)]" />
-        <div className="w-full max-w-sm relative">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#080e1a] p-4">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-v2-pattern" />
+        <div className="absolute inset-0 bg-grid opacity-30" />
+        
+        <div className="w-full max-w-sm relative z-10 animate-scale-in-v2">
           <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-2xl mb-4" style={{background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)'}}>
-            <span className="text-3xl font-extrabold text-white">DH</span>
-          </div>
-            <h1 className="text-2xl font-bold text-slate-100">DukaHub</h1>
-            <p className="text-sm text-slate-500 mt-1">App is locked — enter your password</p>
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-2xl mb-5"
+              style={{ background: 'var(--gradient-brand)', boxShadow: '0 0 30px rgba(59,130,246,0.2)' }}>
+              <span className="text-3xl font-extrabold text-white">D</span>
+            </div>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">DukaHub</h1>
+            <p className="text-sm text-[var(--text-muted)] mt-1">App is locked — enter your password</p>
           </div>
 
-          {!showForgot ? (
-            <form onSubmit={handleUnlock} className="space-y-4">
-              <div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field text-center text-lg py-3"
-                  placeholder="App lock password"
-                  autoFocus
-                />
-              </div>
-              {error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">{error}</div>
-              )}
-              <button type="submit" className="btn-primary w-full text-base py-3">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a1.5 1.5 0 10-3 0v3.75m-2.25 8.25h7.5a2.25 2.25 0 002.25-2.25v-6a2.25 2.25 0 00-2.25-2.25h-7.5a2.25 2.25 0 00-2.25 2.25v6a2.25 2.25 0 002.25 2.25z" />
-                </svg>
-                Unlock
-              </button>
-              {securityQuestion && (
-                <button type="button" onClick={() => { setShowForgot(true); setError(''); }} className="w-full text-xs text-[var(--text-muted)] hover:text-cyan-400 transition-colors py-1">
-                  Forgot password?
+          <div className="glass-v2-strong rounded-2xl p-6">
+            {!showForgot ? (
+              <form onSubmit={handleUnlock} className="space-y-4">
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="input-v2 w-full text-center text-lg py-3" placeholder="App lock password" autoFocus />
+                {error && <div className="alert-v2-error">{error}</div>}
+                <button type="submit" className="btn-v2-primary w-full py-3 text-base">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a1.5 1.5 0 10-3 0v3.75m-2.25 8.25h7.5a2.25 2.25 0 002.25-2.25v-6a2.25 2.25 0 00-2.25-2.25h-7.5a2.25 2.25 0 00-2.25 2.25v6a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                  Unlock
                 </button>
-              )}
-            </form>
-          ) : !resetMode ? (
-            <div className="space-y-4">
-              <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
-                <p className="text-xs text-cyan-400/80 text-center mb-3">Answer your security question to reset the app lock.</p>
-                <p className="text-sm font-medium text-[var(--text-primary)] text-center">{securityQuestion}</p>
+                {securityQuestion && (
+                  <button type="button" onClick={() => { setShowForgot(true); setError(''); }}
+                    className="w-full text-xs text-[var(--text-muted)] hover:text-[var(--text-accent)] transition-colors py-1">
+                    Forgot password?
+                  </button>
+                )}
+              </form>
+            ) : !resetMode ? (
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-[var(--accent-dim)] border border-[var(--nav-active-border)]">
+                  <p className="text-xs text-[var(--text-secondary)] text-center mb-2">Answer your security question to reset the app lock.</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)] text-center">{securityQuestion}</p>
+                </div>
+                <input type="text" value={securityAnswer} onChange={(e) => setSecurityAnswer(e.target.value)}
+                  className="input-v2 w-full text-center text-lg py-3" placeholder="Your answer" autoFocus />
+                {error && <div className="alert-v2-error">{error}</div>}
+                <button onClick={handleVerifySecurityAnswer} className="btn-v2-primary w-full py-3" disabled={loading || !securityAnswer.trim()}>
+                  {loading ? <div className="spinner-v2 mx-auto" /> : 'Verify Answer'}
+                </button>
+                <button type="button" onClick={resetAndGoBack}
+                  className="w-full text-xs text-[var(--text-muted)] hover:text-[var(--text-accent)] transition-colors py-1">
+                  ← Back to password
+                </button>
               </div>
-              <div>
-                <input
-                  type="text"
-                  value={securityAnswer}
-                  onChange={(e) => setSecurityAnswer(e.target.value)}
-                  className="input-field text-center text-lg py-3"
-                  placeholder="Your answer"
-                  autoFocus
-                />
+            ) : (
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <svg className="w-6 h-6 text-emerald-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-emerald-400 text-center">Answer correct. Set a new password below.</p>
+                </div>
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  className="input-v2 w-full text-center py-3" placeholder="New password (min 4 chars)" autoFocus />
+                <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  className="input-v2 w-full text-center py-3" placeholder="Confirm new password" />
+                {error && <div className="alert-v2-error">{error}</div>}
+                <button onClick={handleResetPassword} className="btn-v2-primary w-full py-3" disabled={loading || !newPassword || !confirmNewPassword}>
+                  {loading ? <div className="spinner-v2 mx-auto" /> : 'Reset & Unlock'}
+                </button>
               </div>
-              {error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">{error}</div>
-              )}
-              <button onClick={handleVerifySecurityAnswer} className="btn-primary w-full text-base py-3" disabled={loading || !securityAnswer.trim()}>
-                {loading ? 'Verifying...' : 'Verify Answer'}
-              </button>
-              <button type="button" onClick={resetAndGoBack} className="w-full text-xs text-[var(--text-muted)] hover:text-cyan-400 transition-colors py-1">
-                Back to password
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                <svg className="w-6 h-6 text-emerald-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-emerald-400 text-center">Answer correct. Set a new app lock password below.</p>
-              </div>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field text-center py-3" placeholder="New password (min 4 chars)" autoFocus />
-              <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className="input-field text-center py-3" placeholder="Confirm new password" />
-              {error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 text-center">{error}</div>
-              )}
-              <button onClick={handleResetPassword} className="btn-primary w-full text-base py-3" disabled={loading || !newPassword || !confirmNewPassword}>
-                {loading ? 'Resetting...' : 'Reset Password & Unlock'}
-              </button>
-            </div>
-          )}
+            )}
+          </div>
 
-          <p className="text-center text-xs text-[var(--text-muted)] mt-6">
-            Set or change your app lock password in Settings
+          <p className="text-center text-xs text-[var(--text-muted)] mt-6 font-medium">
+            Set or change your app lock in Settings
           </p>
         </div>
       </div>

@@ -4,8 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../App';
 import { useLocalData } from '../hooks/useLocalData';
 
-// Full nav items for admin
-const adminNavItems = [
+const navItems = [
   { path: '/pos', label: 'POS', icon: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3h11.25M9 3v18m-5.25-3h12.75a.75.75 0 00.75-.75V6.75a.75.75 0 00-.75-.75H3.75A.75.75 0 003 6.75v10.5a.75.75 0 00.75.75z" />
@@ -54,9 +53,7 @@ export default function Sidebar() {
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= lowStockThreshold).length;
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'user';
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
-  const navItems = adminNavItems;
 
   // Swipe to open sidebar on mobile
   useEffect(() => {
@@ -71,113 +68,145 @@ export default function Sidebar() {
     return () => { window.removeEventListener('touchstart', handleTouchStart); window.removeEventListener('touchend', handleTouchEnd); };
   }, [open]);
 
-
-
-  const storeNameFromProfile = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
-
-  const linkClass = ({ isActive }: { isActive: boolean }) => isActive ? 'nav-link-active' : 'nav-link';
-
-  const navLinks = navItems.map((item) => {
-    let badge = null;
-    if (item.path === '/inventory' && (lowStockCount > 0 || criticalCount > 0)) {
-      badge = <span className="ml-auto flex items-center gap-1">{criticalCount > 0 && <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/40" />}{lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/40" />}</span>;
-    }
-    return (
-      <NavLink key={item.path} to={item.path} end={item.path === '/pos'} className={linkClass} onClick={() => setOpen(false)}>
-        {item.icon}
-        <span className="flex-1">{item.label}</span>
-        {badge}
-      </NavLink>
-    );
-  });
-
   return (
     <>
-      {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-nav flex items-center justify-between px-4 py-3">
-        <button onClick={() => setOpen(true)} className="p-2 text-[var(--text-secondary)] hover:text-cyan-400 transition-colors rounded-lg hover:bg-white/5">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-        </button>
+      {/* ── V2 Mobile Header ── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-v2-nav flex items-center justify-between px-3 py-2.5 safe-bottom">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>D</div>
-          <span className="font-semibold text-sm text-[var(--text-primary)] truncate max-w-[120px]">{storeName}</span>
-          {isAdmin && <span className="bg-[var(--accent-dim)] text-[var(--text-secondary)] text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[var(--border-color)]">ADMIN</span>}
+          <button onClick={() => setOpen(true)} className="p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--btn-ghost-hover-bg)] hover:text-[var(--text-primary)] transition-all">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm"
+              style={{ background: 'var(--gradient-brand)', color: 'var(--btn-primary-text)' }}>
+              D
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm text-[var(--text-primary)] leading-tight truncate max-w-[110px]">{storeName}</span>
+              <span className="text-[10px] text-[var(--text-muted)] font-medium leading-tight">Retail Management</span>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={toggleTheme} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Toggle theme">
+          <button onClick={toggleTheme} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Toggle theme">
             {theme === 'dark' ? (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              </svg>
             ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              </svg>
             )}
           </button>
-          <button onClick={signOut} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-red-400 hover:bg-white/5 transition-all" title="Sign Out">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+          <button onClick={signOut} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-red-400 hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Sign Out">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
           </button>
         </div>
       </div>
 
       {/* Mobile overlay */}
-      {open && <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />}
+      {open && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in-v2" onClick={() => setOpen(false)} />
+      )}
 
-      {/* Sidebar drawer */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 glass-sidebar transform transition-transform duration-300 ease-out ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}>
-        {/* Desktop header */}
-        <div className="hidden lg:flex items-center gap-3 px-6 py-5 border-b border-[var(--border-white)]">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shadow-sm" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>D</div>
-          <div className="min-w-0">
-            <h1 className="font-bold text-[var(--text-primary)] truncate flex items-center gap-1.5">
-              {storeName}
-
-            </h1>
-            <p className="text-[11px] text-[var(--text-muted)] font-medium">Retail Management</p>
+      {/* ── V2 Sidebar ── */}
+      <aside className={`fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-64 glass-v2-sidebar transform transition-all duration-300 ease-out ${
+        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      } flex flex-col`}>
+        
+        {/* ── V2 Sidebar Header ── */}
+        <div className="hidden lg:flex items-center gap-3 px-5 py-5 border-b border-[var(--border-color)]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shadow-glow"
+            style={{ background: 'var(--gradient-brand)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}>
+            D
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-bold text-[var(--text-primary)] truncate text-base">{storeName}</h1>
+            <p className="text-[11px] text-[var(--text-muted)] font-medium leading-tight">Retail Management · v2</p>
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-thin">{navLinks}</nav>
+        {/* ── V2 Navigation ── */}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-thin">
+          {navItems.map((item) => {
+            let badge = null;
+            if (item.path === '/inventory' && (lowStockCount > 0 || criticalCount > 0)) {
+              badge = (
+                <span className="ml-auto flex items-center gap-1">
+                  {criticalCount > 0 && <span className="w-2 h-2 rounded-full bg-red-500 ring-1 ring-red-500/30" />}
+                  {lowStockCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-500 ring-1 ring-amber-500/30" />}
+                </span>
+              );
+            }
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === '/pos'}
+                className={({ isActive }) => isActive ? 'nav-v2-active' : 'nav-v2'}
+                onClick={() => setOpen(false)}
+              >
+                {item.icon}
+                <span className="flex-1">{item.label}</span>
+                {badge}
+              </NavLink>
+            );
+          })}
+        </nav>
 
-        {/* User section */}
-        <div className="p-4 border-t border-[var(--border-white)] space-y-2 bg-[var(--bg-surface2)]/[0.4]">
-          {/* Data backup section */}
-          <div className="space-y-0.5">
-            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-1">Quick Actions</p>
+        {/* ── V2 User Section ── */}
+        <div className="p-3 border-t border-[var(--border-color)] space-y-2">
+          {/* Quick Actions */}
+          <div className="flex items-center gap-1 px-1">
             <button onClick={() => {
               const current = localStorage.getItem('dl-time-format') || '12h';
               const next = current === '12h' ? '24h' : '12h';
               localStorage.setItem('dl-time-format', next);
               window.dispatchEvent(new Event('timeformatchange'));
-            }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:text-cyan-400 hover:bg-white/5 transition-all duration-200">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <span>{(localStorage.getItem('dl-time-format') || '12h') === '12h' ? '12-Hour Time' : '24-Hour Time'}</span>
+            }} className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {(localStorage.getItem('dl-time-format') || '12h') === '12h' ? '12h' : '24h'}
             </button>
-            <button onClick={toggleTheme} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:text-cyan-400 hover:bg-white/5 transition-all duration-200">
+            <button onClick={toggleTheme} className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all">
               {theme === 'dark' ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                </svg>
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
               )}
-              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
           </div>
 
           {/* User info */}
-          <div className="flex items-center gap-3 px-1 py-2 border-t border-white/5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm shrink-0" style={{background:'var(--btn-primary-bg)', color:'var(--btn-primary-text)'}}>
+          <div className="flex items-center gap-3 px-1 py-0.5">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
+              style={{ background: 'var(--gradient-brand)', color: 'var(--btn-primary-text)' }}>
               {profile?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-tight">{profile?.fullName || 'User'}</p>
-              <p className="text-xs text-[var(--text-muted)] truncate">{profile?.email}</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)] truncate leading-tight">{profile?.fullName || 'User'}</p>
+              <p className="text-[11px] text-[var(--text-muted)] truncate font-medium">{profile?.email}</p>
             </div>
-            {isAdmin && <span className="bg-[var(--accent-dim)] text-[var(--text-secondary)] text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[var(--border-color)] shrink-0">ADMIN</span>}
-
           </div>
 
           {/* Cloud status */}
           <div className="flex items-center gap-2 px-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40" />
-            <span className="text-xs text-[var(--text-muted)] font-medium">Connected to Cloud</span>
+            <span className="relative flex w-2 h-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40" />
+              <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500 ring-1 ring-emerald-500/30" />
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)] font-medium">Connected</span>
           </div>
         </div>
       </aside>

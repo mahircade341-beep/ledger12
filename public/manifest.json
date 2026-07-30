@@ -1,88 +1,34 @@
 {
-  "name": "DukaHub - POS & Retail Management",
-  "short_name": "DukaHub",
-  "description": "Complete retail management system for Kenyan micro-retail shops. Point of Sale, inventory tracking, debtor ledger (Daftari), cash drawer auditing, M-Pesa tracking, and sales analytics — all offline first.",
+  "name": "DukaHub V2 — POS & Retail Management",
+  "short_name": "DukaHub V2",
+  "description": "V2 — Complete retail management system. Point of Sale, inventory tracking, debtor ledger (Daftari), cash drawer auditing, and sales analytics for Kenyan shops.",
   "start_url": "/",
-  "id": "dukahub-v1",
+  "id": "dukahub-v2",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "background_color": "#0b1121",
+  "background_color": "#080e1a",
   "theme_color": "#3b82f6",
   "orientation": "any",
   "categories": ["business", "finance", "productivity", "shopping"],
   "lang": "en-KE",
   "dir": "ltr",
   "scope": "/",
-  "edge_side_panel": {},
   "iarc_rating_id": "",
   "prefer_related_applications": false,
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.dukahub.app",
-      "id": "com.dukahub.app"
-    }
-  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/pos.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Point of Sale — process customer transactions with product search, barcode scanning, and M-Pesa/Debt payment"
-    },
-    {
-      "src": "/screenshots/stock.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Stock Management — track inventory, set wholesale/retail prices, and manage suppliers"
-    },
-    {
-      "src": "/screenshots/insights.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Insights & Audit — sales analytics, profit calculation, and anti-theft cash auditor"
-    },
-    {
-      "src": "/screenshots/daftari.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Daftari Debt Ledger — manage credit customers with partial payment tracking"
-    }
-  ],
-  "handle_links": "preferred",
-  "launch_handler": {
-    "client_mode": "auto"
-  },
   "shortcuts": [
     {
       "name": "New Sale",

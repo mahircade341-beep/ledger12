@@ -8,11 +8,9 @@ export default function Login() {
   const { signUp, signIn, resetPassword, isAuthenticated, signInWithGoogle } = useAuth();
   const [businessType, setBusinessType] = useState<'retail' | 'wholesale'>('retail');
 
-  // Tab: signin | signup | reset
   const [tab, setTab] = useState<'signin' | 'signup'>(() => (searchParams.get('mode') === 'signup' ? 'signup' : 'signin'));
   const [showReset, setShowReset] = useState(false);
 
-  // Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -22,12 +20,10 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) navigate('/pos', { replace: true });
   }, [isAuthenticated, navigate]);
 
-  // Handle sign up
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -37,119 +33,97 @@ export default function Login() {
     }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setLoading(true);
-
     const result = await signUp(email.trim(), password, fullName.trim(), storeName.trim(), businessType);
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-      return;
-    }
-
+    if (result.error) { setError(result.error); setLoading(false); return; }
     setSuccessMsg('Account created! You can now sign in below.');
     setTab('signin');
     setLoading(false);
   };
 
-  // Handle sign in
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!email.trim() || !password.trim()) { setError('Email and password are required'); return; }
     setLoading(true);
-
     const result = await signIn(email.trim(), password);
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-      return;
-    }
+    if (result.error) { setError(result.error); setLoading(false); return; }
     setLoading(false);
   };
 
-  // Handle password reset request
   const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccessMsg('');
+    setError(''); setSuccessMsg('');
     if (!email.trim()) { setError('Enter your email address'); return; }
     setLoading(true);
-
     const result = await resetPassword(email.trim());
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setSuccessMsg('Check your email for the password reset link');
-    }
+    if (result.error) { setError(result.error); } else { setSuccessMsg('Check your email for the reset link'); }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{background:'var(--bg-primary)'}}>
-      {/* Background orbs */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.06)_0%,transparent_60%)]" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-v2-pattern">
+      {/* Background grid */}
       <div className="absolute inset-0 bg-grid pointer-events-none" />
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-500/5 blur-3xl pointer-events-none"
-        style={{ top: '20%', left: '10%' }} />
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-rose-500/5 blur-3xl pointer-events-none"
-        style={{ bottom: '10%', right: '10%' }} />
+      {/* Glow orbs */}
+      <div className="absolute w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'rgba(59,130,246,0.04)', top: '15%', left: '5%' }} />
+      <div className="absolute w-[400px] h-[400px] rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'rgba(59,130,246,0.03)', bottom: '10%', right: '10%' }} />
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo header */}
+      <div className="w-full max-w-md relative z-10 animate-slide-up-v2">
+        {/* V2 Logo Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-4"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
-            <span className="text-2xl font-extrabold text-white">DH</span>
+            style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
+            <span className="text-2xl font-extrabold text-white">D</span>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub <span className="text-[var(--text-muted)] font-medium text-base">v2</span></h1>
           <p className="text-[var(--text-muted)] text-sm mt-1">Cloud-powered retail management for Kenyan shops</p>
         </div>
 
-        <div className="glass-strong rounded-2xl p-6 shadow-xl">
+        <div className="glass-v2-strong rounded-2xl p-5 sm:p-6">
           {showReset ? (
-            /* ── Password Reset ── */
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-[var(--text-primary)] text-center">Reset Password</h2>
               <p className="text-sm text-[var(--text-secondary)] text-center">Enter your email and we'll send you a reset link</p>
               <form onSubmit={handleResetRequest} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Email</label>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Email</label>
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="glass-input w-full" placeholder="you@example.com" autoFocus />
+                    className="input-v2 w-full" placeholder="you@example.com" autoFocus />
                 </div>
-                {error && <p className="text-sm text-red-400 text-center">{error}</p>}
-                {successMsg && <p className="text-sm text-emerald-400 text-center">{successMsg}</p>}
-                <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-                  {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : 'Send Reset Link'}
+                {error && <div className="alert-v2-error text-sm">{error}</div>}
+                {successMsg && <div className="alert-v2-success text-sm">{successMsg}</div>}
+                <button type="submit" disabled={loading} className="btn-v2-primary w-full py-3">
+                  {loading ? <div className="spinner-v2 mx-auto" /> : 'Send Reset Link'}
                 </button>
               </form>
-              <button onClick={() => { setShowReset(false); setError(''); setSuccessMsg(''); }} className="w-full text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1">
+              <button onClick={() => { setShowReset(false); setError(''); setSuccessMsg(''); }}
+                className="w-full text-xs text-[var(--text-muted)] hover:text-[var(--text-accent)] transition-colors py-1">
                 ← Back to sign in
               </button>
             </div>
           ) : (
             <>
-              {/* Tab Switcher */}
-              <div className="flex bg-[var(--bg-elevated)] rounded-lg p-1 mb-6 border border-[var(--border-white)]">
-                <button onClick={() => { setTab('signin'); setError(''); }} className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-all ${tab === 'signin' ? 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Sign In</button>
-                <button onClick={() => { setTab('signup'); setError(''); }} className={`flex-1 py-2.5 rounded-md text-sm font-medium transition-all ${tab === 'signup' ? 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>Sign Up</button>
+              {/* V2 Tab Switcher */}
+              <div className="tabs-v2 mb-5">
+                <button onClick={() => { setTab('signin'); setError(''); }}
+                  className={tab === 'signin' ? 'tab-v2-active' : 'tab-v2'}>Sign In</button>
+                <button onClick={() => { setTab('signup'); setError(''); }}
+                  className={tab === 'signup' ? 'tab-v2-active' : 'tab-v2'}>Sign Up</button>
               </div>
 
-              {/* ── Google OAuth (visible on both tabs) ── */}
-              <div className="relative mb-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[var(--border-white)]" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-[var(--bg-surface)] px-3 text-[var(--text-muted)]">or continue with</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={signInWithGoogle}
-                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-[var(--border-white)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)]/80 text-[var(--text-primary)] text-sm font-medium transition-all hover:border-[var(--border-hover)] hover:shadow-md active:scale-[0.98]"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+              {/* Google OAuth */}
+              <button type="button" onClick={signInWithGoogle}
+                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all active:scale-[0.98]"
+                style={{
+                  background: 'var(--bg-elevated)',
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-primary)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-hover)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -158,136 +132,116 @@ export default function Login() {
                 Continue with Google
               </button>
 
+              {/* Divider */}
+              <div className="divider-v2 my-5">
+                <span>or {tab === 'signin' ? 'sign in' : 'sign up'} with email</span>
+              </div>
+
               {tab === 'signin' ? (
-                <>
-                  {/* ── Divider ── */}
-                  <div className="relative mb-4 mt-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[var(--border-white)]" />
-                    </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="bg-[var(--bg-surface)] px-3 text-[var(--text-muted)]">or sign in with email</span>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                      className="input-v2 w-full" placeholder="you@example.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Password</label>
+                    <div className="relative">
+                      <input type={showPass ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
+                        className="input-v2 w-full pr-10" placeholder="Enter your password" />
+                      <button type="button" onClick={() => setShowPass(!showPass)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          {showPass ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                          ) : (
+                            <><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></>
+                          )}
+                        </svg>
+                      </button>
                     </div>
                   </div>
-
-                  {/* ── Sign In Form ── */}
-                  <form onSubmit={handleSignIn} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Email</label>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                        className="glass-input w-full" placeholder="you@example.com" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Password</label>
-                      <div className="relative">
-                        <input type={showPass ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
-                          className="glass-input w-full pr-10" placeholder="Enter your password" />
-                        <button type="button" onClick={() => setShowPass(!showPass)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            {showPass ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            ) : (
-                              <><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></>
-                            )}
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    {error && <p className="text-sm text-red-400 text-center">{error}</p>}
-                    {successMsg && <p className="text-sm text-emerald-400 text-center">{successMsg}</p>}
-                    <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-                      {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : 'Sign In'}
-                    </button>
-                    <button type="button" onClick={() => { setShowReset(true); setError(''); setSuccessMsg(''); }}
-                      className="w-full text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-                      Forgot password?
-                    </button>
-                  </form>
-                </>
+                  {error && <div className="alert-v2-error text-sm">{error}</div>}
+                  {successMsg && <div className="alert-v2-success text-sm">{successMsg}</div>}
+                  <button type="submit" disabled={loading} className="btn-v2-primary w-full py-3">
+                    {loading ? <div className="spinner-v2 mx-auto" /> : 'Sign In'}
+                  </button>
+                  <button type="button" onClick={() => { setShowReset(true); setError(''); setSuccessMsg(''); }}
+                    className="w-full text-xs text-[var(--text-muted)] hover:text-[var(--text-accent)] transition-colors">
+                    Forgot password?
+                  </button>
+                </form>
               ) : (
-                <>
-                  {/* ── Divider ── */}
-                  <div className="relative mb-4 mt-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-[var(--border-white)]" />
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="form-grid">
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Full Name</label>
+                      <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                        className="input-v2 w-full" placeholder="Your name" autoFocus />
                     </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="bg-[var(--bg-surface)] px-3 text-[var(--text-muted)]">or sign up with email</span>
+                    <div>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Store Name</label>
+                      <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)}
+                        className="input-v2 w-full" placeholder="e.g. Mama's Shop" />
                     </div>
                   </div>
-
-                  {/* ── Sign Up Form ── */}
-                  <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Full Name</label>
-                        <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                          className="glass-input w-full" placeholder="Your name" autoFocus />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Store Name</label>
-                        <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)}
-                          className="glass-input w-full" placeholder="e.g. Mama's Shop" />
-                      </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Business Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button type="button" onClick={() => setBusinessType('retail')}
+                        className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                          businessType === 'retail'
+                            ? 'border-[var(--border-focus)] bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                            : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)] hover:border-[var(--border-hover)]'
+                        }`}>
+                        🏪 Retail
+                      </button>
+                      <button type="button" onClick={() => setBusinessType('wholesale')}
+                        className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                          businessType === 'wholesale'
+                            ? 'border-[var(--border-focus)] bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                            : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)] hover:border-[var(--border-hover)]'
+                        }`}>
+                        📦 Wholesale
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Business Type</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button type="button" onClick={() => setBusinessType('retail')}
-                          className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
-                            businessType === 'retail'
-                              ? 'border-[var(--accent-primary)] bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                              : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)]'
-                          }`}>
-                          🏪 Retail
-                        </button>
-                        <button type="button" onClick={() => setBusinessType('wholesale')}
-                          className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
-                            businessType === 'wholesale'
-                              ? 'border-[var(--accent-primary)] bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                              : 'border-[var(--border-color)] bg-[var(--item-bg)] text-[var(--text-secondary)]'
-                          }`}>
-                          📦 Wholesale
-                        </button>
-                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                      className="input-v2 w-full" placeholder="you@example.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Password (min 6 chars)</label>
+                    <div className="relative">
+                      <input type={showPass ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
+                        className="input-v2 w-full pr-10" placeholder="Create a password" minLength={6} />
+                      <button type="button" onClick={() => setShowPass(!showPass)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          {showPass ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                          ) : (
+                            <><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></>
+                          )}
+                        </svg>
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Email</label>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                        className="glass-input w-full" placeholder="you@example.com" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Password (min 6 chars)</label>
-                      <div className="relative">
-                        <input type={showPass ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)}
-                          className="glass-input w-full pr-10" placeholder="Create a password" minLength={6} />
-                        <button type="button" onClick={() => setShowPass(!showPass)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            {showPass ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            ) : (
-                              <><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></>
-                            )}
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    {error && <p className="text-sm text-red-400 text-center">{error}</p>}
-                    {successMsg && <p className="text-sm text-emerald-400 text-center">{successMsg}</p>}
-                    <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-                      {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : 'Create Account'}
-                    </button>
-
-                  </form>
-                </>
+                  </div>
+                  {error && <div className="alert-v2-error text-sm">{error}</div>}
+                  {successMsg && <div className="alert-v2-success text-sm">{successMsg}</div>}
+                  <button type="submit" disabled={loading} className="btn-v2-primary w-full py-3">
+                    {loading ? <div className="spinner-v2 mx-auto" /> : 'Create Account'}
+                  </button>
+                </form>
               )}
             </>
           )}
         </div>
 
-        <p className="text-center text-xs text-[var(--text-muted)] mt-4 font-medium tracking-wide">DukaHub v1.0</p>
+        <p className="text-center text-xs text-[var(--text-muted)] mt-5 font-medium tracking-wide">
+          DukaHub <span className="text-[var(--text-accent)]">v2</span> · Free for Kenyan shops
+        </p>
       </div>
     </div>
   );

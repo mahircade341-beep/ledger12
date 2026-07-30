@@ -31,6 +31,8 @@ export default function Inventory() {
   const [editLoading, setEditLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const editFieldsValid = editName.trim() !== '' && editRetail > 0;
+
   // Stats
   const totalProducts = products.length;
   const totalStock = products.reduce((s: number, p: any) => s + (p.quantity || 0), 0);
@@ -473,11 +475,11 @@ export default function Inventory() {
                   <input type="number" min={0} value={editRetail} onChange={(e) => setEditRetail(parseInt(e.target.value) || 0)} className="input-field w-full" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier <span className="font-normal text-[var(--text-muted)]">(optional)</span></label>
                   <input type="text" value={editSupplier} onChange={(e) => setEditSupplier(e.target.value)} className="input-field w-full" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier Phone</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier Phone <span className="font-normal text-[var(--text-muted)]">(optional)</span></label>
                   <input type="tel" value={editSupplierPhone} onChange={(e) => setEditSupplierPhone(e.target.value)} className="input-field w-full" />
                 </div>
               </div>
@@ -506,11 +508,16 @@ export default function Inventory() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button onClick={handleEditSave} disabled={editLoading} className="btn-primary flex-1">
+                <button onClick={handleEditSave} disabled={!editFieldsValid || editLoading} className="btn-primary flex-1">
                   {editLoading ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button onClick={() => setEditModal(null)} className="btn-secondary">Cancel</button>
               </div>
+              {!editFieldsValid && (
+                <p className="text-xs text-amber-400 text-center pt-1">
+                  Fill in <strong>Product Name</strong> and <strong>Retail Price</strong> to save
+                </p>
+              )}
             </div>
           </div>
         </div>

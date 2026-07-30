@@ -17,7 +17,7 @@ export default defineConfig({
       },
     },
     target: 'es2020',
-    cssMinify: 'lightningcss',
+    cssMinify: 'esbuild',
     minify: 'esbuild',
   },
   esbuild: {

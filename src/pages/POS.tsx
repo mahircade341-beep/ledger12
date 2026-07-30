@@ -1,6 +1,10 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
+import useAnalytics from '../hooks/useAnalytics';
+import useUtmTracker from '../hooks/useUtmTracker';
+import ProductHeroImage from '../components/ProductHeroImage';
+import StickyAddCart from '../components/StickyAddCart';
 import BarcodeScanner from '../components/BarcodeScanner';
 
 interface ReceiptData {
@@ -17,6 +21,9 @@ export default function POS() {
   const { add: addTx, remove: removeTx } = useLocalData('transactions');
   const { updateQuantity } = useLocalData('products');
   const { data: debtors, add: addDebtor, update: updateDebtor } = useLocalData('debtors');
+
+  const { trackAddToCart, trackBeginCheckout, trackPurchase } = useAnalytics();
+  const { appendToPayload } = useUtmTracker();
 
   const [cart, setCart] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -105,9 +112,12 @@ export default function POS() {
     const price = getPrice(product);
     setCart((prev: any[]) => {
       const existing = prev.find((c: any) => c.product._id === product._id);
-      if (existing) return prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: c.quantity + 1, subtotal: (c.quantity + 1) * price } : c);
+      const newQty = existing ? existing.quantity + 1 : 1;
+      if (existing) return prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: newQty, subtotal: newQty * price } : c);
       return [...prev, { product, quantity: 1, subtotal: price, _price: price }];
     });
+    // GA4 event
+    trackAddToCart({ item_id: product._id, item_name: product.name, price, quantity: 1 });
   };
 
   const addToCart = () => {
@@ -117,9 +127,12 @@ export default function POS() {
     const price = getPrice(product);
     setCart((prev: any[]) => {
       const existing = prev.find((c: any) => c.product._id === product._id);
-      if (existing) return prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: c.quantity + quantity, subtotal: (c.quantity + quantity) * price, _price: price } : c);
+      const newQty = existing ? existing.quantity + quantity : quantity;
+      if (existing) return prev.map((c: any) => c.product._id === product._id ? { ...c, quantity: newQty, subtotal: newQty * price, _price: price } : c);
       return [...prev, { product, quantity, subtotal: quantity * price, _price: price }];
     });
+    // GA4 event
+    trackAddToCart({ item_id: product._id, item_name: product.name, price, quantity });
     setSelectedProduct(''); setQuantity(1);
   };
 
@@ -180,12 +193,27 @@ export default function POS() {
         updateDebtor(selectedDebtor._id, { amount: (currentDebtor.amount || 0) + total, status: 'active' } as any);
       }
     }
-    const txId = addTx({ userId: userId as any, items, total, paymentMethod, discount, ...extraData } as any);
+    // Attach UTM marketing data to the transaction payload
+    const txPayload = appendToPayload({ userId: userId as any, items, total, paymentMethod, discount, ...extraData } as any);
+    const txId = addTx(txPayload);
     cart.forEach((c: any) => {
       const p = products.find((x: any) => x._id === c.product._id);
       if (p) updateQuantity(p._id, Math.max(0, p.quantity - c.quantity));
     });
     setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined });
+    // GA4 purchase event
+    trackPurchase({
+      transaction_id: txId,
+      value: total,
+      payment_type: paymentMethod,
+      items: items.map((i: any) => ({
+        item_id: i.productId,
+        item_name: i.name,
+        price: i.price,
+        quantity: i.quantity,
+      })),
+      utm_data: txPayload.utm_data,
+    });
     setSuccessMsg(`Sale finalized! KES ${total.toLocaleString()}`);
     window.dispatchEvent(new Event('salecompleted'));
     setCart([]); setDiscount(0); setSelectedDebtor(null); setDebtorSearch(''); setLoading(false);
@@ -442,7 +470,7 @@ export default function POS() {
                       ? 'border-[var(--border-hover)] bg-[var(--nav-active-bg)] text-[var(--text-primary)]'
                       : 'border-[var(--border-color)] bg-[var(--item-bg)] hover:border-[var(--border-hover)] text-[var(--text-primary)]'
                 }`}>
-                {p.image && <img src={p.image} alt={p.name} className="w-8 h-8 rounded object-cover mb-1.5" />}
+                {p.image && <ProductHeroImage src={p.image} alt={p.name} className="w-8 h-8 rounded mb-1.5" width={48} height={48} />}
                 <p className="font-medium text-sm truncate">{p.name}</p>
                 <p className="text-xs mt-0.5 text-[var(--accent-primary)]">KES {getPrice(p).toLocaleString()}</p>
                 <p className={`text-xs ${p.quantity > 0 ? 'text-[var(--text-muted)]' : 'text-red-400'}`}>
@@ -654,32 +682,16 @@ export default function POS() {
         />
       )}
 
-      {/* Mobile floating checkout button (visible on small screens when cart has items) */}
-      {cart.length > 0 && !receipt && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 p-3 pb-[env(safe-area-inset-bottom,12px)] lg:hidden bg-gradient-to-t from-[var(--bg-primary)] via-[var(--bg-primary)]/95 to-transparent">
-          <button
-            onClick={() => {
-              const el = document.getElementById('checkout-section');
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
-            style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)' }}
-          >
-            <span className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-              </svg>
-              View Cart ({cart.length})
-            </span>
-            <span className="flex items-center gap-2">
-              <span>KES {total.toLocaleString()}</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
-            </span>
-          </button>
-        </div>
-      )}
+      {/* StickyAddCart — mobile floating checkout bar with scroll-aware visibility */}
+      <StickyAddCart
+        visible={cart.length > 0 && !receipt}
+        itemCount={cart.length}
+        total={total}
+        onCheckout={() => {
+          const el = document.getElementById('checkout-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+      />
     </div>
   );
 }

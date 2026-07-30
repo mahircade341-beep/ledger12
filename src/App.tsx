@@ -63,11 +63,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('dl-theme') as Theme) || 'dark');
+  const [themeRipple, setThemeRipple] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('light', theme === 'light');
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    const html = document.documentElement;
+    html.classList.toggle('light', theme === 'light');
+    html.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('dl-theme', theme);
+
+    // Add transition class for smooth animation, remove after animation completes
+    html.classList.add('theme-transitioning');
+    const timeout = setTimeout(() => {
+      html.classList.remove('theme-transitioning');
+    }, 400);
+
+    // Theme ripple effect
+    setThemeRipple(true);
+    setTimeout(() => setThemeRipple(false), 600);
+
+    return () => clearTimeout(timeout);
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
@@ -85,6 +99,7 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {themeRipple && <div className="theme-ripple" />}
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />

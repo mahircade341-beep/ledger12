@@ -69,40 +69,56 @@ export default function Daftari() {
 
   return (
     <div className="space-y-6">
-      <div className="page-header">
-        <div><h1 className="page-title">Daftari</h1><p className="page-subtitle">Manage debtors and track partial payments</p></div>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary self-start">{showForm ? 'Cancel' : '+ New Debtor'}</button>
+      {/* V2 header */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Daftari</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage debtors and track partial payments</p>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className="btn-v2-primary text-xs h-9">{showForm ? 'Cancel' : '+ New Debtor'}</button>
       </div>
+
+      {/* V2 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="stat-card"><span className="stat-label">Active Debtors</span><span className="stat-value text-cyan-400">{debtors.filter((d) => d.status === 'active').length}</span></div>
-        <div className="stat-card"><span className="stat-label">Cleared</span><span className="stat-value text-emerald-400">{debtors.filter((d) => d.status === 'cleared').length}</span></div>
-        <div className="stat-card col-span-2"><span className="stat-label">Total Outstanding</span><span className="stat-value text-amber-400">KES {totalOutstanding.toLocaleString()}</span></div>
+        <div className="stat-v2"><span className="stat-label-v2">Active Debtors</span><span className="stat-value-v2 text-cyan-400">{debtors.filter((d) => d.status === 'active').length}</span></div>
+        <div className="stat-v2"><span className="stat-label-v2">Cleared</span><span className="stat-value-v2 text-emerald-400">{debtors.filter((d) => d.status === 'cleared').length}</span></div>
+        <div className="stat-v2 stat-v2-accent col-span-2"><span className="stat-label-v2">Total Outstanding</span><span className="stat-value-v2 text-amber-400">KES {totalOutstanding.toLocaleString()}</span></div>
       </div>
+
+      {/* V2 New Debtor form */}
       {showForm && (
-        <div className="card border-cyan-500/20">
+        <div className="card-v2 border-cyan-500/20">
+          <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">New Debtor</h2>
           <form onSubmit={addDebtor} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="Full name *" required />
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field" placeholder="Phone number" />
-            <input type="number" min={0} value={amount} onChange={(e) => setAmount(parseInt(e.target.value) || 0)} className="input-field" placeholder="Amount owing *" required />
-            <div className="flex gap-2"><input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} className="input-field flex-1" placeholder="Notes" /><button type="submit" className="btn-primary">Add</button></div>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-v2" placeholder="Full name *" required />
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-v2" placeholder="Phone number" />
+            <input type="number" min={0} value={amount} onChange={(e) => setAmount(parseInt(e.target.value) || 0)} className="input-v2" placeholder="Amount owing *" required />
+            <div className="flex gap-2"><input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} className="input-v2 flex-1" placeholder="Notes" /><button type="submit" className="btn-v2-primary">Add</button></div>
           </form>
         </div>
       )}
-      <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="input-field max-w-md" placeholder="Search by name or phone..." />
+
+      {/* V2 search */}
+      <div className="relative max-w-md">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} className="input-v2 w-full pl-9" placeholder="Search by name or phone..." />
+      </div>
       <div className="space-y-3">
         {filtered.map((debtor) => {
           const payments = getPayments(debtor._id);
           const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
           const totalOwed = totalPaid + debtor.amount;
           return (
-          <div key={debtor._id} className={`card ${debtor.status === 'cleared' ? 'opacity-60' : ''}`}>
+          <div key={debtor._id} className={`card-v2 ${debtor.status === 'cleared' ? 'opacity-60' : ''}`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-[var(--text-primary)]">{debtor.name}</h3>
-                  <span className={debtor.status === 'active' ? 'badge-amber' : 'badge-emerald'}>{debtor.status}</span>
-                  <button onClick={() => setExpandedId(expandedId === debtor._id ? null : debtor._id)} className="btn-ghost p-1 text-[var(--text-muted)]">
+                  <span className={debtor.status === 'active' ? 'badge-v2-warning' : 'badge-v2-success'}>{debtor.status}</span>
+                  <button onClick={() => setExpandedId(expandedId === debtor._id ? null : debtor._id)} className="btn-ghost p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                     <svg className={`w-4 h-4 transition-transform ${expandedId === debtor._id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
                 </div>
@@ -116,22 +132,22 @@ export default function Daftari() {
               </div>
             </div>
             {debtor.status === 'active' && (
-              <div className="mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-800/60">
+              <div className="mt-3 pt-3 border-t border-[var(--border-color)]">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <input type="number" min={0} step="0.01" value={paymentAmounts[debtor._id] || ''} onChange={(e) => setPaymentAmounts((prev) => ({ ...prev, [debtor._id]: e.target.value }))} className="input-field max-w-[160px]" placeholder="Partial amount" />
-                  <button onClick={() => handleRecordPayment(debtor)} className="btn-primary btn-sm" disabled={!paymentAmounts[debtor._id] || parseFloat(paymentAmounts[debtor._id] || '0') <= 0}>Record Payment</button>
-                  <button onClick={() => handleClearAll(debtor)} className="btn-ghost text-xs text-red-400 hover:text-red-300">Clear All</button>
+                  <input type="number" min={0} step="0.01" value={paymentAmounts[debtor._id] || ''} onChange={(e) => setPaymentAmounts((prev) => ({ ...prev, [debtor._id]: e.target.value }))} className="input-v2 max-w-[160px]" placeholder="Partial amount" />
+                  <button onClick={() => handleRecordPayment(debtor)} className="btn-v2-primary text-xs h-8" disabled={!paymentAmounts[debtor._id] || parseFloat(paymentAmounts[debtor._id] || '0') <= 0}>Record Payment</button>
+                  <button onClick={() => handleClearAll(debtor)} className="btn-v2-danger text-xs h-8">Clear All</button>
                 </div>
               </div>
             )}
-            {/* Payment History with Running Balance */}
+            {/* V2 Payment History with Running Balance */}
             {expandedId === debtor._id && payments.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-800/60">
+              <div className="mt-3 pt-3 border-t border-[var(--border-color)]">
                 <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Payment History ({payments.length})</p>
                 <div className="max-h-52 overflow-y-auto scrollbar-thin">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="text-[var(--text-muted)] border-b border-slate-200/30 dark:border-slate-700/30">
+                      <tr className="text-[var(--text-muted)] border-b border-[var(--border-color)]">
                         <th className="text-left py-1.5 pr-2 font-medium">Date</th>
                         <th className="text-right py-1.5 px-2 font-medium">Payment</th>
                         <th className="text-right py-1.5 pl-2 font-medium">Balance</th>
@@ -146,7 +162,7 @@ export default function Daftari() {
                             .slice(_idx + 1)
                             .reduce((sum, next) => sum - next.amount, totalOwed);
                           return (
-                            <tr key={p._id} className="border-b border-slate-200/20 dark:border-slate-800/20 last:border-0">
+                            <tr key={p._id} className="border-b border-[var(--border-color)] last:border-0">
                               <td className="py-1.5 pr-2 text-[var(--text-secondary)]" title={new Date(p._creationTime).toLocaleDateString() + ' ' + fmtTime(p._creationTime)}>{fmtTimeRelative(p._creationTime)}</td>
                               <td className="py-1.5 px-2 text-right text-emerald-400 font-medium">-KES {p.amount.toLocaleString()}</td>
                               <td className="py-1.5 pl-2 text-right text-[var(--text-secondary)] font-medium">KES {remaining.toLocaleString()}</td>
@@ -160,7 +176,7 @@ export default function Daftari() {
             )}
           </div>
         )})}
-        {filtered.length === 0 && <div className="card text-center py-12"><svg className="w-12 h-12 mx-auto text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg><p className="text-[var(--text-muted)] text-sm mt-3">{search ? 'No debtors match your search' : 'No debtors yet. Add your first debtor!'}</p></div>}
+        {filtered.length === 0 && <div className="card-v2 text-center py-12"><svg className="w-12 h-12 mx-auto text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg><p className="text-[var(--text-muted)] text-sm mt-3">{search ? 'No debtors match your search' : 'No debtors yet. Add your first debtor!'}</p></div>}
       </div>
     </div>
   );

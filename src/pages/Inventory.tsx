@@ -150,8 +150,8 @@ export default function Inventory() {
           <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage your products — edit, delete, and monitor stock levels</p>
         </div>
         <div className="flex items-center gap-1.5">
-          {criticalCount > 0 && <span className="badge-red">{criticalCount} out of stock</span>}
-          {lowStockCount > 0 && <span className="badge-amber">{lowStockCount} low stock</span>}
+          {criticalCount > 0 && <span className="badge-v2-danger">{criticalCount} out of stock</span>}
+          {lowStockCount > 0 && <span className="badge-v2-warning">{lowStockCount} low stock</span>}
         </div>
       </div>
 
@@ -175,23 +175,23 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Stats Cards */}
+      {/* V2 Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="stat-card stat-card-default">
-          <span className="stat-label">Products</span>
-          <span className="stat-value">{totalProducts}</span>
+        <div className="stat-v2">
+          <span className="stat-label-v2">Products</span>
+          <span className="stat-value-v2">{totalProducts}</span>
         </div>
-        <div className="stat-card stat-card-default">
-          <span className="stat-label">Total Stock</span>
-          <span className="stat-value">{totalStock.toLocaleString()}</span>
+        <div className="stat-v2">
+          <span className="stat-label-v2">Total Stock</span>
+          <span className="stat-value-v2">{totalStock.toLocaleString()}</span>
         </div>
-        <div className="stat-card stat-card-default">
-          <span className="stat-label">Stock Value</span>
-          <span className="stat-value text-sm sm:text-lg">KES {totalValue.toLocaleString()}</span>
+        <div className="stat-v2">
+          <span className="stat-label-v2">Stock Value</span>
+          <span className="stat-value-v2 text-sm">KES {totalValue.toLocaleString()}</span>
         </div>
-        <div className={`stat-card ${criticalCount > 0 ? 'stat-card-red' : 'stat-card-emerald'}`}>
-          <span className="stat-label">Out of Stock</span>
-          <span className="stat-value">{criticalCount}</span>
+        <div className={`stat-v2 ${criticalCount > 0 ? 'border-red-500/20 bg-red-500/5' : 'border-emerald-500/20 bg-emerald-500/5'}`}>
+          <span className="stat-label-v2">Out of Stock</span>
+          <span className="stat-value-v2">{criticalCount}</span>
         </div>
       </div>
 
@@ -202,7 +202,7 @@ export default function Inventory() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-            className="glass-input w-full pl-9" placeholder="Search products, barcodes..." />
+            className="input-v2 w-full pl-9" placeholder="Search products, barcodes..." />
         </div>
         <button onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium border transition-all ${
@@ -243,8 +243,9 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* Product Table */}
-      <div className="card">
+      {/* V2 Product Table */}
+      <div className="card-v2">
+        <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="text-base font-semibold text-[var(--text-primary)]">
             All Products ({filteredProducts.length})
@@ -259,15 +260,15 @@ export default function Inventory() {
             <p className="text-sm text-[var(--text-muted)]">No products found</p>
           </div>
         ) : (
-          <div className="table-wrap">
-            <table className="w-full text-sm">
+          <div className="table-wrap">              <table className="w-full text-sm">
               <thead>
-                <tr className="text-[var(--text-muted)] border-b border-[var(--border-white)]">                    <th className="text-left py-2.5 pr-2 font-medium">Product</th>
-                    <th className="text-right py-2.5 px-2 font-medium">Qty</th>
-                    <th className="text-right py-2.5 px-2 font-medium hidden sm:table-cell">Wholesale</th>
-                    <th className="text-right py-2.5 px-2 font-medium">Retail</th>
-                    <th className="text-left py-2.5 px-2 font-medium hidden lg:table-cell">Supplier</th>
-                    <th className="text-right py-2.5 pl-2 font-medium">Actions</th>
+                <tr className="text-[var(--text-muted)] border-b border-[var(--border-color)] text-xs uppercase tracking-wider">
+                  <th className="text-left py-3 pr-2 font-semibold">Product</th>
+                  <th className="text-right py-3 px-2 font-semibold">Qty</th>
+                  <th className="text-right py-3 px-2 font-semibold hidden sm:table-cell">Wholesale</th>
+                  <th className="text-right py-3 px-2 font-semibold">Retail</th>
+                  <th className="text-left py-3 px-2 font-semibold hidden lg:table-cell">Supplier</th>
+                  <th className="text-right py-3 pl-2 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -335,14 +336,15 @@ export default function Inventory() {
         const displayed = showAllLog ? combined : combined.slice(0, 20);
 
         return (
-          <div className="card">
+          <div className="card-v2">
+            <div className="h-0.5 w-full bg-gradient-to-r from-amber-500 to-amber-500/30 rounded-t-xl -mt-[1px] mx-auto" />
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25" />
                 </svg>
                 <h2 className="text-base font-semibold text-[var(--text-primary)]">Stock Adjustment Log</h2>
-                <span className="text-[10px] text-[var(--text-muted)] font-medium bg-[var(--bg-surface3)] px-2 py-0.5 rounded-full">
+                <span className="badge-v2 text-[10px]">
                   {combined.length} entries
                 </span>
               </div>
@@ -425,13 +427,13 @@ export default function Inventory() {
         </div>
       </div>
 
-      {/* ── Edit Modal ── */}
+      {/* ── V2 Edit Modal ── */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setEditModal(null)}>
-          <div className="w-full max-w-lg glass-strong rounded-2xl p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg glass-v2-strong rounded-2xl p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">Edit Product</h2>
-              <button onClick={() => setEditModal(null)} className="btn-ghost p-1.5">
+              <button onClick={() => setEditModal(null)} className="btn-ghost p-1.5 hover:text-red-400 transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -440,21 +442,17 @@ export default function Inventory() {
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Product Name *</label>
-                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="input-field w-full" />
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Product Name <span className="text-[var(--accent-primary)]">*</span></label>
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="input-v2 w-full" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Category</label>
-
-                </div>
-                <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Barcode</label>
                   <div className="flex gap-1.5">
-                    <input type="text" value={editBarcode} onChange={(e) => setEditBarcode(e.target.value)} className="input-field flex-1" />
+                    <input type="text" value={editBarcode} onChange={(e) => setEditBarcode(e.target.value)} className="input-v2 flex-1" />
                     <button type="button" onClick={() => setShowScanner(true)}
-                      className="shrink-0 w-10 rounded-lg border bg-[var(--item-bg)] border-[var(--border-color)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all">
+                      className="shrink-0 w-10 rounded-xl border border-[var(--border-color)] bg-[var(--item-bg)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)] transition-all">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
@@ -464,59 +462,66 @@ export default function Inventory() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity</label>
-                  <input type="number" min={0} value={editQty} onChange={(e) => setEditQty(parseInt(e.target.value) || 0)} className="input-field w-full" />
+                  <input type="number" min={0} value={editQty} onChange={(e) => setEditQty(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES)</label>
-                  <input type="number" min={0} value={editWholesale} onChange={(e) => setEditWholesale(parseInt(e.target.value) || 0)} className="input-field w-full" />
+                  <input type="number" min={0} value={editWholesale} onChange={(e) => setEditWholesale(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail (KES) *</label>
-                  <input type="number" min={0} value={editRetail} onChange={(e) => setEditRetail(parseInt(e.target.value) || 0)} className="input-field w-full" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail (KES) <span className="text-[var(--accent-primary)]">*</span></label>
+                  <input type="number" min={0} value={editRetail} onChange={(e) => setEditRetail(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier <span className="font-normal text-[var(--text-muted)]">(optional)</span></label>
-                  <input type="text" value={editSupplier} onChange={(e) => setEditSupplier(e.target.value)} className="input-field w-full" />
+                  <input type="text" value={editSupplier} onChange={(e) => setEditSupplier(e.target.value)} className="input-v2 w-full" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier Phone <span className="font-normal text-[var(--text-muted)]">(optional)</span></label>
-                  <input type="tel" value={editSupplierPhone} onChange={(e) => setEditSupplierPhone(e.target.value)} className="input-field w-full" />
+                  <input type="tel" value={editSupplierPhone} onChange={(e) => setEditSupplierPhone(e.target.value)} className="input-v2 w-full" />
                 </div>
               </div>
 
-              {/* Image */}
-              <div className="border-t border-[var(--border-white)] pt-3">
-                <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Product Image</p>
-                <div className="flex items-center gap-3">
-                  {editImage ? (
-                    <div className="relative">
-                      <img src={editImage} alt="Preview" className="w-16 h-16 rounded-lg object-cover border border-[var(--border-color)]" />
-                      <button type="button" onClick={() => setEditImage('')} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    </div>
-                  ) : (
-                    <div onClick={() => fileRef.current?.click()} className="w-16 h-16 rounded-lg border-2 border-dashed border-[var(--border-color)] flex items-center justify-center cursor-pointer hover:border-[var(--border-hover)] transition-colors">
-                      <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                      </svg>
-                    </div>
-                  )}
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageEdit} />
-                </div>
+              {/* V2 Image */}
+              <div className="divider-v2">
+                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Product Image</span>
+              </div>
+              <div className="flex items-center gap-3">
+                {editImage ? (
+                  <div className="relative">
+                    <img src={editImage} alt="Preview" className="w-16 h-16 rounded-xl object-cover border border-[var(--border-color)] shadow-sm" />
+                    <button type="button" onClick={() => setEditImage('')} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-transform hover:scale-110">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div onClick={() => fileRef.current?.click()} className="w-16 h-16 rounded-xl border-2 border-dashed border-[var(--border-color)] flex items-center justify-center cursor-pointer hover:border-[var(--accent-primary)] hover:bg-[var(--accent-dim)]/10 transition-all group">
+                    <svg className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[var(--accent-primary)] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                    </svg>
+                  </div>
+                )}
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageEdit} />
+                <span className="text-xs text-[var(--text-muted)]">Upload photo <span className="opacity-60">(optional)</span></span>
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button onClick={handleEditSave} disabled={!editFieldsValid || editLoading} className="btn-primary flex-1">
-                  {editLoading ? 'Saving...' : 'Save Changes'}
+                <button onClick={handleEditSave} disabled={!editFieldsValid || editLoading} className="btn-v2-primary flex-1">
+                  {editLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
+                      Saving...
+                    </span>
+                  ) : 'Save Changes'}
                 </button>
-                <button onClick={() => setEditModal(null)} className="btn-secondary">Cancel</button>
+                <button onClick={() => setEditModal(null)} className="btn-v2-secondary">Cancel</button>
               </div>
               {!editFieldsValid && (
-                <p className="text-xs text-amber-400 text-center pt-1">
-                  Fill in <strong>Product Name</strong> and <strong>Retail Price</strong> to save
-                </p>
+                <div className="alert-v2-warning mt-1">
+                  <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                  <p className="text-xs text-amber-400">Fill in <strong>Product Name</strong> and <strong>Retail Price</strong> to save</p>
+                </div>
               )}
             </div>
           </div>

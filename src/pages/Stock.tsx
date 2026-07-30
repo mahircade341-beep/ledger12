@@ -100,6 +100,7 @@ export default function Stock() {
     setLoading(false);
   };
 
+  const requiredFieldsFilled = name.trim() !== '' && retailPrice > 0 && quantity > 0;
   const totalProducts = products.length;
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= 5).length;
   const outOfStockCount = products.filter((p: any) => p.quantity <= 0).length;
@@ -244,17 +245,17 @@ export default function Stock() {
               </div>
             </div>
 
-            {/* Supplier Info */}
+            {/* Supplier Info — optional */}
             <div className="border-t border-[var(--border-white)] pt-3 mt-1">
-              <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Supplier Info</p>
+              <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Supplier Info <span className="font-normal normal-case text-[var(--text-muted)] opacity-60">(optional)</span></p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Supplier Name</label><input type="text" value={supplier} onChange={(e) => setSupplier(e.target.value)} className="input-field w-full" placeholder="e.g. Bidco" /></div>
-                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Supplier Phone</label><input type="tel" value={supplierPhone} onChange={(e) => setSupplierPhone(e.target.value)} className="input-field w-full" placeholder="e.g. 07XX XXX XXX" /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Name</label><input type="text" value={supplier} onChange={(e) => setSupplier(e.target.value)} className="input-field w-full" placeholder="e.g. Bidco" /></div>
+                <div><label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Phone</label><input type="tel" value={supplierPhone} onChange={(e) => setSupplierPhone(e.target.value)} className="input-field w-full" placeholder="e.g. 07XX XXX XXX" /></div>
               </div>
             </div>
 
             <div className="flex gap-2 pt-2">
-              <button type="submit" disabled={loading} className="btn-primary flex-1">
+              <button type="submit" disabled={!requiredFieldsFilled || loading} className="btn-primary flex-1">
                 {loading ? 'Saving...' : editId ? (
                   <span className="flex items-center justify-center gap-1.5">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -269,6 +270,11 @@ export default function Stock() {
               </button>
               {editId && <button type="button" onClick={resetForm} className="btn-secondary">Cancel</button>}
             </div>
+            {!requiredFieldsFilled && (
+              <p className="text-xs text-amber-400 text-center pt-1">
+                Fill in <strong>Product Name</strong>, <strong>Retail Price</strong>, and <strong>Quantity</strong> to commit stock
+              </p>
+            )}
           </form>
         </div>
       </div>

@@ -31,7 +31,12 @@ export default function Inventory() {
   const [editLoading, setEditLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const editFieldsValid = editName.trim() !== '' && editRetail > 0;
+  // All core fields required — only dealer (supplier) info, barcode, and image are optional
+  const editFieldsValid =
+    editName.trim() !== '' &&
+    editQty >= 0 &&
+    editWholesale > 0 &&
+    editRetail > 0;
 
   // Stats
   const totalProducts = products.length;
@@ -461,16 +466,16 @@ export default function Inventory() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity</label>
-                  <input type="number" min={0} value={editQty} onChange={(e) => setEditQty(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity <span className="text-[var(--accent-primary)]">*</span></label>
+                  <input type="number" min={0} value={editQty} onChange={(e) => setEditQty(parseInt(e.target.value) || 0)} className={`input-v2 w-full ${editQty < 0 ? 'border-amber-500/40' : ''}`} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES)</label>
-                  <input type="number" min={0} value={editWholesale} onChange={(e) => setEditWholesale(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES) <span className="text-[var(--accent-primary)]">*</span></label>
+                  <input type="number" min={1} value={editWholesale} onChange={(e) => setEditWholesale(parseInt(e.target.value) || 0)} className={`input-v2 w-full ${editWholesale <= 0 ? 'border-amber-500/40' : ''}`} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail (KES) <span className="text-[var(--accent-primary)]">*</span></label>
-                  <input type="number" min={0} value={editRetail} onChange={(e) => setEditRetail(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
+                  <input type="number" min={1} value={editRetail} onChange={(e) => setEditRetail(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Supplier <span className="font-normal text-[var(--text-muted)]">(optional)</span></label>
@@ -520,7 +525,7 @@ export default function Inventory() {
               {!editFieldsValid && (
                 <div className="alert-v2-warning mt-1">
                   <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-                  <p className="text-xs text-amber-400">Fill in <strong>Product Name</strong> and <strong>Retail Price</strong> to save</p>
+                  <p className="text-xs text-amber-400">Fill in <strong>Product Name</strong>, <strong>Quantity</strong>, <strong>Wholesale</strong>, and <strong>Retail Price</strong> to save</p>
                 </div>
               )}
             </div>

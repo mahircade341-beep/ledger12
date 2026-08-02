@@ -21,12 +21,19 @@ const TABLE_MAP: Record<string, string> = {
 
 // ── Cross-component sync: broadcast data changes via window events ──
 const EVENT_PREFIX = 'dl-data-changed:';
+const STORAGE_KEY_PREFIX = 'dl-sync:';
 
 function emitDataChanged(table: string) {
   try {
     window.dispatchEvent(new CustomEvent(EVENT_PREFIX + table));
   } catch {
     // silently fail if event dispatch is unavailable
+  }
+  // Also ping localStorage so OTHER browser tabs pick up the change
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + table, String(Date.now()));
+  } catch {
+    // storage may be unavailable (private mode) — events above still cover this tab
   }
 }
 
@@ -96,8 +103,41 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
       });
     });
 
+    // Cross-tab sync: another browser tab wrote to this table
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY_PREFIX + table) {
+        fetchAll(table, supabaseTable).then((mapped) => {
+          if (mountedRef.current) {
+            setData(mapped as unknown as T[]);
+          }
+        });
+      }
+    };
+
+    // Refresh when the tab regains focus — catches writes that landed while away
+    let focusTimer: any;
+    const refreshOnFocus = () => {
+      clearTimeout(focusTimer);
+      focusTimer = setTimeout(() => {
+        fetchAll(table, supabaseTable).then((mapped) => {
+          if (mountedRef.current) {
+            setData(mapped as unknown as T[]);
+          }
+        });
+      }, 150);
+    };
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', refreshOnFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') refreshOnFocus();
+    });
+
     return () => {
       mountedRef.current = false;
+      clearTimeout(focusTimer);
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', refreshOnFocus);
       unsub();
     };
   }, [table, supabaseTable]);
@@ -116,13 +156,15 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
     const supabaseRecord = mapToSupabase(table, record, id);
 
     const newRecord = { ...record, _id: id, _creationTime: Date.now() } as unknown as T;
+    // Optimistic local update — the new item is instantly visible everywhere in this tab
     setData((prev) => [newRecord, ...prev]);
+    // Broadcast immediately so other components (POS, Inventory) refresh without waiting for the network round-trip
+    emitDataChanged(table);
 
     supabase.from(supabaseTable).insert(supabaseRecord).then(({ error }) => {
       if (error) {
         console.error(`Error inserting ${table}:`, error);
       } else {
-        // Broadcast so other components (POS, Inventory) refresh from Supabase
         emitDataChanged(table);
       }
     });
@@ -132,6 +174,7 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
 
   const update = useCallback((id: string, changes: Partial<T>) => {
     setData((prev) => prev.map((r) => r._id === id ? { ...r, ...changes } : r));
+    emitDataChanged(table);
 
     const supabaseChanges = mapChangesToSupabase(table, changes as any);
     supabase.from(supabaseTable).update(supabaseChanges).eq('id', id).then(({ error }) => {
@@ -145,6 +188,7 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
 
   const remove = useCallback((id: string) => {
     setData((prev) => prev.filter((r) => r._id !== id));
+    emitDataChanged(table);
     supabase.from(supabaseTable).delete().eq('id', id).then(({ error }) => {
       if (error) {
         console.error(`Error deleting ${table}:`, error);
@@ -156,6 +200,7 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
 
   const updateQuantity = useCallback((id: string, newQty: number) => {
     setData((prev) => prev.map((r) => r._id === id ? { ...r, quantity: newQty } : r));
+    emitDataChanged(table);
     supabase.from(supabaseTable).update({ quantity: newQty, updated_at: new Date().toISOString() }).eq('id', id).then(({ error }) => {
       if (error) {
         console.error(`Error updating quantity:`, error);
@@ -171,6 +216,7 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
 
   const addAll = useCallback((items: T[]) => {
     setData((prev) => [...items, ...prev]);
+    emitDataChanged(table);
     const records = items.map((item) => mapToSupabase(table, item));
     if (records.length > 0) {
       supabase.from(supabaseTable).insert(records).then(({ error }) => {

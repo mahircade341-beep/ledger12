@@ -100,7 +100,12 @@ export default function Stock() {
     setLoading(false);
   };
 
-  const requiredFieldsFilled = name.trim() !== '' && retailPrice > 0 && quantity > 0;
+  // All core fields required — only dealer (supplier) info, barcode, and image are optional
+  const requiredFieldsFilled =
+    name.trim() !== '' &&
+    quantity > 0 &&
+    wholesalePrice > 0 &&
+    retailPrice > 0;
   const totalProducts = products.length;
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= 5).length;
   const outOfStockCount = products.filter((p: any) => p.quantity <= 0).length;
@@ -239,25 +244,24 @@ export default function Stock() {
                     </svg>
                   </button>
                 </div>
+              </div>                <div>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity <span className="text-[var(--accent-primary)]">*</span></label>
+                <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className={`input-v2 w-full ${quantity <= 0 ? 'border-amber-500/40' : ''}`} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Quantity</label>
-                <input type="number" min={0} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 0)} className="input-v2 w-full" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES)</label>
-                <input type="number" min={0} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className={`input-v2 w-full ${wholesalePrice <= 0 ? 'border-amber-500/40' : ''}`} />
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Wholesale (KES) <span className="text-[var(--accent-primary)]">*</span></label>
+                <input type="number" min={1} value={wholesalePrice} onChange={(e) => setWholesalePrice(parseInt(e.target.value) || 0)} className={`input-v2 w-full ${wholesalePrice <= 0 ? 'border-amber-500/40' : ''}`} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Retail Price (KES) <span className="text-[var(--accent-primary)]">*</span></label>
-                <input type="number" min={0} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-v2 w-full" required />
+                <input type="number" min={1} value={retailPrice} onChange={(e) => setRetailPrice(parseInt(e.target.value) || 0)} className="input-v2 w-full" required />
               </div>
             </div>
 
-            {wholesalePrice <= 0 && retailPrice > 0 && (
+            {wholesalePrice <= 0 && (
               <div className="alert-v2-warning">
                 <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-                <p className="text-xs text-amber-400/90">No wholesale price set — profit tracking will be incomplete for this product.</p>
+                <p className="text-xs text-amber-400/90">Wholesale price is required — it powers profit tracking in Insights.</p>
               </div>
             )}
 
@@ -319,7 +323,7 @@ export default function Stock() {
               <div className="alert-v2-warning mt-1">
                 <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
                 <p className="text-xs text-amber-400">
-                  Fill in <strong>Product Name</strong>, <strong>Retail Price</strong>, and <strong>Quantity</strong> to commit stock
+                  Fill in <strong>Product Name</strong>, <strong>Quantity</strong>, <strong>Wholesale</strong>, and <strong>Retail Price</strong> to commit stock
                 </p>
               </div>
             )}

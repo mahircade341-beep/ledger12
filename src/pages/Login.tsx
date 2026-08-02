@@ -78,7 +78,7 @@ export default function Login() {
             <span className="text-2xl font-extrabold text-white">D</span>
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub <span className="text-[var(--text-muted)] font-medium text-base">v2</span></h1>
-          <p className="text-[var(--text-muted)] text-sm mt-1">Cloud-powered retail management for Kenyan shops</p>
+          <p className="text-[var(--text-secondary)] text-sm mt-1">Track inventory, record cash &amp; M-Pesa sales, and see your daily profits in real time.</p>
         </div>
 
         <div className="glass-v2-strong rounded-2xl p-5 sm:p-6">
@@ -240,7 +240,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-xs text-[var(--text-muted)] mt-5 font-medium tracking-wide">
-          DukaHub <span className="text-[var(--text-accent)]">v2</span> · Free for Kenyan shops
+          DukaHub <span className="text-[var(--text-accent)]">v2</span> · Free forever for Kenyan shops — no card required
         </p>
       </div>
     </div>

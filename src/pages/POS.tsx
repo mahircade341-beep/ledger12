@@ -519,7 +519,7 @@ export default function POS() {
                   Thank you for your patronage!
                 </p>
                 <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-muted)', opacity: 0.5 }}>
-                  DukaHub v3 · Retail OS
+                  DukaHub · Retail OS
                 </p>
               </div>
             </div>

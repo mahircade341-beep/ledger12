@@ -66,19 +66,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 // Per-route document titles: fixes the static single title so tabs, history,
 // and search results show the actual page name.
 const ROUTE_TITLES: Record<string, string> = {
-  '/': 'DukaHub V3 — POS & Retail Management for Kenyan Shops',
-  '/login': 'Sign In · DukaHub V3',
-  '/terms': 'Terms of Service · DukaHub V3',
-  '/privacy': 'Privacy Policy · DukaHub V3',
-  '/pos': 'Point of Sale · DukaHub V3',
-  '/inventory': 'Inventory · DukaHub V3',
-  '/stock': 'Stock Management · DukaHub V3',
-  '/daftari': 'Daftari (Debtors) · DukaHub V3',
-  '/cash-drawer': 'Cash Drawer · DukaHub V3',
-  '/insights': 'Insights & Reports · DukaHub V3',
-  '/settings': 'Settings · DukaHub V3',
-  '/reset-password': 'Reset Password · DukaHub V3',
-  '/onboarding': 'Welcome · DukaHub V3',
+  '/': 'DukaHub — POS & Retail Management for Kenyan Shops',
+  '/login': 'Sign In · DukaHub',
+  '/terms': 'Terms of Service · DukaHub',
+  '/privacy': 'Privacy Policy · DukaHub',
+  '/pos': 'Point of Sale · DukaHub',
+  '/inventory': 'Inventory · DukaHub',
+  '/stock': 'Stock Management · DukaHub',
+  '/daftari': 'Daftari (Debtors) · DukaHub',
+  '/cash-drawer': 'Cash Drawer · DukaHub',
+  '/insights': 'Insights & Reports · DukaHub',
+  '/settings': 'Settings · DukaHub',
+  '/reset-password': 'Reset Password · DukaHub',
+  '/onboarding': 'Welcome · DukaHub',
 };
 
 /**

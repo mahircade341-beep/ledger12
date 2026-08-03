@@ -129,7 +129,7 @@ export default function Sidebar() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="font-bold text-[var(--text-primary)] truncate text-base">{storeName}</h1>
-            <p className="text-[11px] text-[var(--text-muted)] font-medium leading-tight">Retail Management · v3</p>
+            <p className="text-[11px] text-[var(--text-muted)] font-medium leading-tight">Retail Management</p>
           </div>
         </div>
 

@@ -63,6 +63,6 @@
   <!-- Subtle bottom text -->
   <text x="1024" y="2620" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
         font-size="14" font-weight="400" fill="rgba(148,163,184,0.25)" letter-spacing="2">
-    v3.0 · Retail Operating System
+    Retail Operating System
   </text>
 </svg>

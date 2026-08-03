@@ -144,13 +144,12 @@ export default function Settings() {
   };
 
   const exportCsv = () => {
-    const headers = ['Date', 'Time', 'Receipt', 'Payment', 'M-Pesa Phone', 'Items', 'Total', 'Discount', 'Debtor'];
+    const headers = ['Date', 'Time', 'Receipt', 'Payment', 'Items', 'Total', 'Discount', 'Debtor'];
     const rows = transactions.map((t: any) => ({
       Date: new Date(t._creationTime).toLocaleDateString('en-KE'),
       Time: fmtTime(t._creationTime),
       Receipt: (t._id || '').slice(-8).toUpperCase(),
       Payment: t.paymentMethod,
-      'M-Pesa Phone': t.mpesaPhone ? t.mpesaPhone.replace(/^254/, '0') : '',
       Items: (t.items || []).map((i: any) => `${i.name} x${i.quantity}`).join(' | '),
       Total: t.total,
       Discount: t.discount || 0,

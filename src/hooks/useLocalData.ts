@@ -308,7 +308,6 @@ function mapFromSupabase(table: string, item: any): any {
         pricing: item.pricing || 'retail',
         debtorId: item.debtorId || '',
         debtorName: item.debtorName || '',
-        mpesaPhone: item.mpesa_phone || '',
       };
     case 'debtors':
       return {
@@ -352,7 +351,7 @@ function mapToSupabase(table: string, record: any, id?: string): any {
     case 'products':
       return { ...base, name: record.name || '', quantity: record.quantity || 0, wholesale_price: record.wholesalePrice || 0, retail_price: record.retailPrice || 0, barcode: record.barcode || '', image: record.image || '', supplier: record.supplier || '', supplier_phone: record.supplierPhone || '' };
     case 'transactions':
-      return { ...base, items: record.items || [], total: record.total || 0, payment_method: record.paymentMethod || 'cash', discount: record.discount || 0, pricing: record.pricing || 'retail', debtorId: record.debtorId || '', debtorName: record.debtorName || '', mpesa_phone: record.mpesaPhone || '' };
+      return { ...base, items: record.items || [], total: record.total || 0, payment_method: record.paymentMethod || 'cash', discount: record.discount || 0, pricing: record.pricing || 'retail', debtorId: record.debtorId || '', debtorName: record.debtorName || '' };
     case 'debtors':
       return { ...base, name: record.name || '', phone: record.phone || '', amount: record.amount || 0, notes: record.notes || '', status: record.status || 'active' };
     case 'debtPayments':
@@ -371,7 +370,7 @@ function mapChangesToSupabase(table: string, changes: any): any {
     case 'products':
       return { name: changes.name, quantity: changes.quantity, wholesale_price: changes.wholesalePrice, retail_price: changes.retailPrice, barcode: changes.barcode, image: changes.image, supplier: changes.supplier, supplier_phone: changes.supplierPhone, updated_at: new Date().toISOString() };
     case 'transactions':
-      return { items: changes.items, total: changes.total, payment_method: changes.paymentMethod, discount: changes.discount, pricing: changes.pricing, debtorId: changes.debtorId, debtorName: changes.debtorName, mpesa_phone: changes.mpesaPhone };
+      return { items: changes.items, total: changes.total, payment_method: changes.paymentMethod, discount: changes.discount, pricing: changes.pricing, debtorId: changes.debtorId, debtorName: changes.debtorName };
     case 'debtors':
       return { name: changes.name, phone: changes.phone, amount: changes.amount, notes: changes.notes, status: changes.status, updated_at: new Date().toISOString() };
     case 'debtPayments':

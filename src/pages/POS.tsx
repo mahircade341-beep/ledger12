@@ -7,7 +7,6 @@ import ProductHeroImage from '../components/ProductHeroImage';
 import StickyAddCart from '../components/StickyAddCart';
 import BarcodeScanner from '../components/BarcodeScanner';
 import useCartPersistence from '../hooks/useCartPersistence';
-import MpesaCheckoutModal from '../components/MpesaCheckoutModal';
 import { useSyncStatus } from '../hooks/useSyncStatus';
 
 interface ReceiptData {
@@ -15,7 +14,6 @@ interface ReceiptData {
   items: { name: string; quantity: number; price: number; subtotal: number }[];
   total: number; subtotal: number; discount: number; paymentMethod: string; date: Date;
   debtorName?: string;
-  mpesaPhone?: string;
 }
 
 export default function POS() {
@@ -98,7 +96,6 @@ export default function POS() {
   const { online } = useSyncStatus();
   const wasOfflineRef = useRef(online);
   const [showOfflineBanner, setShowOfflineBanner] = useState(!online);
-  const [showMpesa, setShowMpesa] = useState(false);
   useEffect(() => {
     if (online === wasOfflineRef.current) return;
     wasOfflineRef.current = online;
@@ -122,7 +119,7 @@ export default function POS() {
         if (idx < inStock.length) addToCartDirect(inStock[idx]._id);
         return;
       }
-      if (e.key === 'F9' && cart.length > 0 && !loading) { e.preventDefault(); beginCheckout(); return; }
+      if (e.key === 'F9' && cart.length > 0 && !loading) { e.preventDefault(); finalizeSale(); return; }
       if (e.key === 'F10') { e.preventDefault(); setVoidTxId(transactions.length > 0 ? transactions[0]._id : null); return; }
       if (e.key === 'Escape') { setSelectedProduct(''); searchRef.current?.blur(); return; }
     };
@@ -253,13 +250,7 @@ export default function POS() {
   };
 
   // ── Finalize ──
-  const beginCheckout = () => {
-    if (cart.length === 0 || !userId) return;
-    if (paymentMethod === 'mpesa') { setShowMpesa(true); return; }
-    finalizeSale();
-  };
-
-  const finalizeSale = (mpesaPhone?: string) => {
+  const finalizeSale = () => {
     if (cart.length === 0 || !userId) return;
     if (paymentMethod === 'debt' && !selectedDebtor) {
       alert('Select a debtor or add a new one for debt sales');
@@ -273,7 +264,6 @@ export default function POS() {
       wholesalePrice: c.product.wholesalePrice, subtotal: c.subtotal,
     }));
     const extraData: any = {};
-    if (paymentMethod === 'mpesa' && mpesaPhone) extraData.mpesaPhone = mpesaPhone;
     if (paymentMethod === 'debt' && selectedDebtor) {
       extraData.debtorId = selectedDebtor._id;
       extraData.debtorName = selectedDebtor.name;
@@ -289,7 +279,7 @@ export default function POS() {
       const p = products.find((x: any) => x._id === c.product._id);
       if (p) updateQuantity(p._id, Math.max(0, p.quantity - c.quantity));
     });
-    setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined, mpesaPhone: paymentMethod === 'mpesa' ? mpesaPhone : undefined });
+    setReceipt({ id: txId, items, total, subtotal, discount, paymentMethod, date: new Date(), debtorName: paymentMethod === 'debt' ? selectedDebtor?.name : undefined });
     trackPurchase({
       transaction_id: txId,
       value: total,
@@ -518,7 +508,7 @@ export default function POS() {
                   </span>
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Payment</p>
-                    <p className="text-xs font-semibold capitalize" style={{ color: 'var(--text-accent)' }}>{receipt.paymentMethod}{receipt.mpesaPhone ? ` · ${receipt.mpesaPhone.replace(/^254/, '0')}` : ''}</p>
+                    <p className="text-xs font-semibold capitalize" style={{ color: 'var(--text-accent)' }}>{receipt.paymentMethod}</p>
                   </div>
                 </div>
                 {receipt.debtorName && (
@@ -877,7 +867,7 @@ export default function POS() {
             )}
 
             {/* Finalize Button */}
-            <button onClick={beginCheckout} disabled={cart.length === 0 || loading}
+            <button onClick={finalizeSale} disabled={cart.length === 0 || loading}
               className="btn-v2-primary w-full mt-2 text-base py-3">
               {loading
                 ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
@@ -897,18 +887,6 @@ export default function POS() {
       )}
 
       {/* StickyAddCart — mobile floating checkout bar */}
-      {/* M-Pesa checkout */}
-      {showMpesa && (
-        <MpesaCheckoutModal
-          total={total}
-          items={cart.map((c: any) => ({ name: c.product.name, quantity: c.quantity, subtotal: c.subtotal }))}
-          offline={!online}
-          onComplete={(phone) => { setShowMpesa(false); finalizeSale(phone); }}
-          onPayCash={() => { setShowMpesa(false); setPaymentMethod('cash'); finalizeSale(); }}
-          onClose={() => setShowMpesa(false)}
-        />
-      )}
-
       <StickyAddCart
         visible={cart.length > 0 && !receipt}
         itemCount={cart.length}

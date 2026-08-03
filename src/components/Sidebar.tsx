@@ -90,7 +90,7 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={toggleTheme} className="theme-toggle-btn p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Toggle theme">
+          <button onClick={toggleTheme} className="theme-toggle-btn p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Toggle theme" aria-label="Toggle theme">
             <span className={`theme-toggle-icon ${theme === 'dark' ? 'entering-light' : 'entering-dark'}`}>
               {theme === 'dark' ? (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -103,7 +103,7 @@ export default function Sidebar() {
               )}
             </span>
           </button>
-          <button onClick={signOut} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-red-400 hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Sign Out">
+          <button onClick={signOut} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-red-400 hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Sign Out" aria-label="Sign Out">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>

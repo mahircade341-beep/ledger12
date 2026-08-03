@@ -15,6 +15,7 @@ import Inventory from './pages/Inventory';
 import Settings from './pages/Settings';
 import ResetPassword from './pages/ResetPassword';
 import Onboarding from './pages/Onboarding';
+import useAnalytics from './hooks/useAnalytics';
 
 type Theme = 'dark' | 'light';
 interface ThemeCtx { theme: Theme; toggleTheme: () => void }
@@ -62,6 +63,41 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <LockScreen>{children}</LockScreen>;
 }
 
+// Per-route document titles: fixes the static single title so tabs, history,
+// and search results show the actual page name.
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'DukaHub V2 — POS & Retail Management for Kenyan Shops',
+  '/login': 'Sign In · DukaHub V2',
+  '/terms': 'Terms of Service · DukaHub V2',
+  '/privacy': 'Privacy Policy · DukaHub V2',
+  '/pos': 'Point of Sale · DukaHub V2',
+  '/inventory': 'Inventory · DukaHub V2',
+  '/stock': 'Stock Management · DukaHub V2',
+  '/daftari': 'Daftari (Debtors) · DukaHub V2',
+  '/cash-drawer': 'Cash Drawer · DukaHub V2',
+  '/insights': 'Insights & Reports · DukaHub V2',
+  '/settings': 'Settings · DukaHub V2',
+  '/reset-password': 'Reset Password · DukaHub V2',
+  '/onboarding': 'Welcome · DukaHub V2',
+};
+
+/**
+ * SeoTracker — fires a page_view on every route change (dataLayer + Supabase)
+ * and keeps document.title in sync with the current page.
+ */
+function SeoTracker() {
+  const location = useLocation();
+  const { trackPageView } = useAnalytics();
+
+  useEffect(() => {
+    const title = ROUTE_TITLES[location.pathname] || ROUTE_TITLES['/'];
+    if (document.title !== title) document.title = title;
+    trackPageView(location.pathname + location.search);
+  }, [location.pathname, location.search, trackPageView]);
+
+  return null;
+}
+
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('dl-theme') as Theme) || 'dark');
@@ -102,6 +138,7 @@ export default function App() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {themeRipple && <div className="theme-ripple" />}
+      <SeoTracker />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/terms" element={<TermsPage />} />

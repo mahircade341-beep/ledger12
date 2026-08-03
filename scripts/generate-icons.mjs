@@ -89,4 +89,18 @@ for (const { width, height, name } of splashSizes) {
   console.log(`    ✓ ${(pngBuffer.length / 1024).toFixed(1)} KB`);
 }
 
-console.log(`\n✅ All ${splashSizes.length} splash screens generated!`);
+// ── Open Graph Share Card (1200x630) ──
+console.log('\nGenerating Open Graph share card (1200x630)...');
+const ogDir = join(root, 'public/og');
+try { mkdirSync(ogDir, { recursive: true }); } catch {}
+const ogSvg = readFileSync(join(ogDir, 'og.svg'), 'utf-8');
+const ogPng = new Resvg(ogSvg, {
+  fitTo: { mode: 'width', value: 1200 },
+  background: 'rgba(0,0,0,0)',
+  imageRendering: 1,
+  shapeRendering: 2,
+}).render().asPng();
+writeFileSync(join(ogDir, 'og-image.png'), ogPng);
+console.log(`  ✓ og-image.png (1200x630) — ${(ogPng.length / 1024).toFixed(1)} KB`);
+
+console.log(`\n✅ All ${splashSizes.length} splash screens + OG card generated!`);

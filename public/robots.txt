@@ -1,16 +1,14 @@
-# DukaLedger Pro - Web Crawler Rules
-# https://ledger12.netlify.app/
+# DukaHub V2 - Web Crawler Rules
+# https://dukahub12.vercel.app/
 
 User-agent: *
 Allow: /
 Allow: /login
-Allow: /staff
-Allow: /pos
-Allow: /stock
-Allow: /daftari
+Allow: /terms
+Allow: /privacy
 
 Disallow: /reset-password
 Disallow: /settings
-Disallow: /premium
+Disallow: /onboarding
 
-Sitemap: https://ledger12.netlify.app/sitemap.xml
+Sitemap: https://dukahub12.vercel.app/sitemap.xml

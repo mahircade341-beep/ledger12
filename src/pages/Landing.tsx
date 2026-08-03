@@ -173,6 +173,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-ios26 text-[var(--text-primary)] relative overflow-x-hidden">
+      <a href="#top" className="skip-link">Skip to content</a>
       <AnimatedBackground />
 
       {/* ── Sticky Nav ── */}
@@ -200,7 +201,7 @@ export default function Landing() {
       </header>
 
       {/* ── Hero ── */}
-      <section id="top" className="relative pt-16 pb-20 sm:pt-24 sm:pb-28">
+      <section id="top" tabIndex={-1} className="relative pt-16 pb-20 sm:pt-24 sm:pb-28">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <div className="inline-flex items-center gap-2 badge-v2-success text-xs mb-6 animate-fade-in-v2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

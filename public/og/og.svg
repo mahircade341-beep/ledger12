@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="50%" style="stop-color:#0c1322"/>
+      <stop offset="100%" style="stop-color:#080e1a"/>
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="50%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <radialGradient id="glowBlue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(59,130,246,0.28)"/>
+      <stop offset="100%" style="stop-color:rgba(59,130,246,0)"/>
+    </radialGradient>
+    <radialGradient id="glowViolet" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(139,92,246,0.18)"/>
+      <stop offset="100%" style="stop-color:rgba(139,92,246,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Ambient glows -->
+  <circle cx="180" cy="90" r="380" fill="url(#glowBlue)"/>
+  <circle cx="1040" cy="560" r="420" fill="url(#glowViolet)"/>
+
+  <!-- D Logo tile -->
+  <g transform="translate(140,315)">
+    <rect x="-95" y="-95" width="190" height="190" rx="40" fill="url(#brandGrad)"
+          filter="drop-shadow(0 12px 40px rgba(59,130,246,0.45))"/>
+    <rect x="-83" y="-83" width="166" height="166" rx="32" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2"/>
+    <g transform="translate(0,0)">
+      <path d="M-42 -62 L-42 62 C-42 62 -12 72 20 62 C58 48 76 18 76 -4 C76 -26 58 -56 20 -62 C-12 -68 -42 -62 -42 -62 Z"
+            fill="white" opacity="0.95"/>
+    </g>
+  </g>
+
+  <!-- Brand name -->
+  <text x="330" y="300" font-family="sans-serif" font-size="86" font-weight="800" fill="#ffffff" letter-spacing="-1">DukaHub</text>
+  <rect x="548" y="242" width="96" height="52" rx="26" fill="url(#brandGrad)"/>
+  <text x="596" y="278" font-family="sans-serif" font-size="30" font-weight="700" fill="#ffffff" text-anchor="middle">V2</text>
+
+  <!-- Tagline -->
+  <text x="332" y="372" font-family="sans-serif" font-size="34" fill="#93c5fd">POS · Inventory · Daftari for Kenyan shops</text>
+
+  <!-- Free pill -->
+  <g transform="translate(332,440)">
+    <rect width="360" height="64" rx="32" fill="rgba(16,185,129,0.14)" stroke="rgba(16,185,129,0.45)" stroke-width="2"/>
+    <text x="180" y="41" font-family="sans-serif" font-size="26" font-weight="600" fill="#34d399" text-anchor="middle">Free forever — no card required</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="332" y="560" font-family="sans-serif" font-size="22" fill="#64748b">dukahub12.vercel.app</text>
+</svg>

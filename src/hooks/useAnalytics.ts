@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
+import { supabase } from '../lib/supabase';
 
 type DataLayer = Record<string, unknown>;
 
 declare global {
   interface Window {
     dataLayer: DataLayer[];
+    sa_event?: (event: string, data?: DataLayer) => void;
   }
 }
 
@@ -51,16 +53,62 @@ interface BeginCheckoutParams {
   coupon?: string;
 }
 
+/**
+ * Stable per-browser session id. Used to dedupe page views without
+ * storing any personal data (Kenya DPA-friendly).
+ */
+let sessionId = '';
+try {
+  sessionId = localStorage.getItem('dl-analytics-session') || '';
+  if (!sessionId) {
+    sessionId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem('dl-analytics-session', sessionId);
+  }
+} catch {
+  // Private mode / storage blocked — analytics degrade gracefully
+}
+
 function pushEvent(event: string, params: DataLayer) {
   if (typeof window === 'undefined') return;
+
+  // 1) Standard dataLayer push (ready for GTM/GA4 later)
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
     event,
     ecommerce: params,
   });
+
+  // 2) Simple Analytics custom events (page views are tracked automatically
+  //    by the script — skip them to avoid double counting)
+  if (event !== 'page_view') {
+    try {
+      window.sa_event?.(event, params);
+    } catch {
+      // never block the UI on analytics
+    }
+  }
+
+  // 2) Persist to Supabase (fire-and-forget; never block the UI on analytics).
+  //    Only runs when the DB table exists (see supabase-migration.sql).
+  try {
+    if (import.meta.env.VITE_SUPABASE_URL) {
+      void supabase.from('analytics_events').insert({
+        event,
+        path: window.location.pathname + window.location.search,
+        referrer: document.referrer || '',
+        session_id: sessionId,
+      });
+    }
+  } catch {
+    // Analytics must never break the app
+  }
 }
 
 export default function useAnalytics() {
+  const trackPageView = useCallback((path: string) => {
+    pushEvent('page_view', { path });
+  }, []);
+
   const trackItemView = useCallback((product: ViewItemParams) => {
     pushEvent('view_item', {
       currency: 'KES',
@@ -121,5 +169,5 @@ export default function useAnalytics() {
     });
   }, []);
 
-  return { trackItemView, trackAddToCart, trackBeginCheckout, trackPurchase };
+  return { trackPageView, trackItemView, trackAddToCart, trackBeginCheckout, trackPurchase };
 }

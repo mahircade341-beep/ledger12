@@ -148,6 +148,22 @@ CREATE POLICY "categories_select" ON categories FOR SELECT USING (auth.uid() = u
 CREATE POLICY "categories_insert" ON categories FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "categories_delete" ON categories FOR DELETE USING (auth.uid() = user_id);
 
+-- 7. ANALYTICS EVENTS (privacy-friendly: no personal data stored)
+-- Insert-only for anon/authenticated; no SELECT policy, so events stay
+-- invisible to clients and are readable only by the service role / owner.
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event TEXT NOT NULL,
+  path TEXT DEFAULT '',
+  referrer TEXT DEFAULT '',
+  session_id TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "analytics_events_insert_anon" ON analytics_events FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "analytics_events_insert_auth" ON analytics_events FOR INSERT TO authenticated WITH CHECK (true);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_created ON analytics_events(created_at DESC);
+
 -- Enable realtime for all tables
 ALTER publication supabase_realtime ADD TABLE profiles;
 ALTER publication supabase_realtime ADD TABLE products;

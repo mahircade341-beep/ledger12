@@ -238,8 +238,9 @@ function LegalShell({
 }) {
   return (
     <div className="relative min-h-screen bg-[var(--bg-primary)]">
+      <a href="#main-content" className="skip-link">Skip to content</a>
       <AnimatedBackground />
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div id="main-content" tabIndex={-1} className="relative z-10 flex flex-col min-h-screen">
         {/* Sticky nav */}
         <header className="sticky top-0 z-40 glass-v2-nav border-b border-[var(--border-color)]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">

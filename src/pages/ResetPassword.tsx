@@ -42,7 +42,7 @@ export default function ResetPassword() {
         style={{ background: 'rgba(59,130,246,0.03)', bottom: '10%', right: '10%' }} />
 
       <div className="w-full max-w-md relative z-10 animate-slide-up-v2">
-        {/* V2 Logo Header */}
+        {/* V10 Logo Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-4"
             style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
@@ -102,7 +102,7 @@ export default function ResetPassword() {
         </div>
 
         <p className="text-center text-xs text-[var(--text-muted)] mt-5 font-medium tracking-wide">
-          DukaHub <span className="text-[var(--text-accent)]">v2</span> · Free for Kenyan shops
+          DukaHub · Free for Kenyan shops
         </p>
       </div>
     </div>

@@ -1,10 +1,17 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import ToastAlerts from './ToastAlerts';
 import InstallBanner from './InstallBanner';
 import AnimatedBackground from './AnimatedBackground';
+import { startAutoSync } from '../lib/syncEngine';
 
 export default function Layout() {
+  // Auto-flush offline edits to the cloud whenever a connection returns.
+  useEffect(() => {
+    startAutoSync();
+  }, []);
+
   return (
     <div className="min-h-screen flex bg-ios26">
       <a href="#main-content" className="skip-link">Skip to content</a>

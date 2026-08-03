@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../App';
 import { useLocalData } from '../hooks/useLocalData';
+import { useSyncStatus } from '../hooks/useSyncStatus';
+import { syncNow } from '../lib/syncEngine';
 
 const navItems = [
   { path: '/pos', label: 'POS', icon: (
@@ -49,11 +51,31 @@ export default function Sidebar() {
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { data: products } = useLocalData('products');
+  const sync = useSyncStatus();
   const navigate = useNavigate();
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= lowStockThreshold).length;
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
+
+  const handleSyncNow = () => {
+    if (navigator.onLine) syncNow();
+  };
+
+  const lastSyncLabel = sync.lastSyncedAt
+    ? new Date(sync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : null;
+  const syncLabel = sync.syncing
+    ? 'Backing up…'
+    : !sync.online && sync.pending > 0
+      ? `Offline · ${sync.pending} change${sync.pending === 1 ? '' : 's'} pending`
+      : !sync.online
+        ? 'Offline — saved on device'
+        : sync.pending > 0
+          ? 'Backing up…'
+          : lastSyncLabel
+            ? `Backed up ${lastSyncLabel}`
+            : 'All backed up';
 
   // Swipe to open sidebar on mobile
   useEffect(() => {
@@ -70,27 +92,27 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── V2 Mobile Header ── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-v2-nav flex items-center justify-between px-3 py-2.5 safe-bottom">
+      {/* ── V10 Mobile Header ── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-chrome-nav flex items-center justify-between px-3 py-2.5 safe-bottom">
         <div className="flex items-center gap-2">
-          <button onClick={() => setOpen(true)} className="p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--btn-ghost-hover-bg)] hover:text-[var(--text-primary)] transition-all">
+          <button onClick={() => setOpen(true)} className="p-2 rounded-xl text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-title)] transition-all">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm"
-              style={{ background: 'var(--gradient-aurora)', color: 'var(--btn-primary-text)' }}>
+              style={{ background: 'var(--gradient-brand-mark)', color: 'var(--mark-text)' }}>
               D
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold text-sm text-[var(--text-primary)] leading-tight truncate max-w-[110px]">{storeName}</span>
-              <span className="text-[10px] text-[var(--text-muted)] font-medium leading-tight">Retail Management</span>
+              <span className="font-semibold text-sm text-[var(--nav-title)] leading-tight truncate max-w-[110px]">{storeName}</span>
+              <span className="text-[10px] text-[var(--nav-text-muted)] font-medium leading-tight">Retail Management</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={toggleTheme} className="theme-toggle-btn p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Toggle theme" aria-label="Toggle theme">
+          <button onClick={toggleTheme} className="theme-toggle-btn p-2 rounded-xl text-[var(--nav-text)] hover:text-[var(--nav-title)] hover:bg-[var(--nav-hover-bg)] transition-all" title="Toggle theme" aria-label="Toggle theme">
             <span className={`theme-toggle-icon ${theme === 'dark' ? 'entering-light' : 'entering-dark'}`}>
               {theme === 'dark' ? (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -103,7 +125,7 @@ export default function Sidebar() {
               )}
             </span>
           </button>
-          <button onClick={signOut} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Sign Out" aria-label="Sign Out">
+          <button onClick={signOut} className="p-2 rounded-xl text-[var(--nav-text)] hover:text-[var(--color-danger)] hover:bg-[var(--nav-hover-bg)] transition-all" title="Sign Out" aria-label="Sign Out">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>
@@ -116,24 +138,24 @@ export default function Sidebar() {
         <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in-v2" onClick={() => setOpen(false)} />
       )}
 
-      {/* ── V2 Sidebar ── */}
-      <aside className={`fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-64 glass-v2-sidebar transform transition-all duration-300 ease-out ${
+      {/* ── V10 Sidebar ── */}
+      <aside className={`fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-64 glass-chrome-sidebar transform transition-all duration-300 ease-out ${
         open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } flex flex-col`}>
         
-        {/* ── V2 Sidebar Header ── */}
-        <div className="hidden lg:flex items-center gap-3 px-5 py-5 border-b border-[var(--border-color)]">
+        {/* ── V10 Sidebar Header ── */}
+        <div className="hidden lg:flex items-center gap-3 px-5 py-5 border-b border-[var(--nav-border)]">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shadow-glow"
-            style={{ background: 'var(--gradient-aurora)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}>
+            style={{ background: 'var(--gradient-brand-mark)', color: 'var(--mark-text)', boxShadow: 'var(--btn-primary-shadow)' }}>
             D
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="font-bold text-[var(--text-primary)] truncate text-base">{storeName}</h1>
-            <p className="text-[11px] text-[var(--text-muted)] font-medium leading-tight">Retail Management</p>
+            <h1 className="font-bold text-[var(--nav-title)] truncate text-base">{storeName}</h1>
+            <p className="text-[11px] text-[var(--nav-text-muted)] font-medium leading-tight">Retail Management</p>
           </div>
         </div>
 
-        {/* ── V2 Navigation ── */}
+        {/* ── V10 Navigation ── */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-thin">
           {navItems.map((item) => {
             let badge = null;
@@ -161,8 +183,8 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* ── V2 User Section ── */}
-        <div className="p-3 border-t border-[var(--border-color)] space-y-2">
+        {/* ── V10 User Section ── */}
+        <div className="p-3 border-t border-[var(--nav-border)] space-y-2">
           {/* Quick Actions */}
           <div className="flex items-center gap-1 px-1">
             <button onClick={() => {
@@ -170,7 +192,7 @@ export default function Sidebar() {
               const next = current === '12h' ? '24h' : '12h';
               localStorage.setItem('dl-time-format', next);
               window.dispatchEvent(new Event('timeformatchange'));
-            }} className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all">
+            }} className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-[var(--nav-text)] hover:text-[var(--nav-title)] hover:bg-[var(--nav-hover-bg)] transition-all">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -195,23 +217,39 @@ export default function Sidebar() {
           {/* User info */}
           <div className="flex items-center gap-3 px-1 py-0.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: 'var(--gradient-aurora)', color: 'var(--btn-primary-text)' }}>
+              style={{ background: 'var(--gradient-brand-mark)', color: 'var(--mark-text)' }}>
               {profile?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-primary)] truncate leading-tight">{profile?.fullName || 'User'}</p>
-              <p className="text-[11px] text-[var(--text-muted)] truncate font-medium">{profile?.email}</p>
+              <p className="text-sm font-semibold text-[var(--nav-title)] truncate leading-tight">{profile?.fullName || 'User'}</p>
+              <p className="text-[11px] text-[var(--nav-text-muted)] truncate font-medium">{profile?.email}</p>
             </div>
           </div>
 
-          {/* Cloud status */}
-          <div className="flex items-center gap-2 px-1">
-            <span className="relative flex w-2 h-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40" />
-              <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500 ring-1 ring-emerald-500/30" />
+          {/* Sync status */}
+          <button
+            onClick={handleSyncNow}
+            title={navigator.onLine ? 'Sync now' : 'You are offline — changes are saved on this device'}
+            className="flex items-center gap-2 px-1 w-full text-left group">
+            <span className="relative flex w-2 h-2 shrink-0">
+              {sync.syncing ? (
+                <span className="relative inline-flex rounded-full w-2 h-2 bg-sky-400 animate-pulse" />
+              ) : sync.online && sync.pending === 0 ? (
+                <>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40" />
+                  <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500 ring-1 ring-emerald-500/30" />
+                </>
+              ) : (
+                <>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-40" />
+                  <span className="relative inline-flex rounded-full w-2 h-2 bg-amber-400 ring-1 ring-amber-400/30" />
+                </>
+              )}
             </span>
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">Connected</span>
-          </div>
+            <span className="text-[11px] text-[var(--nav-text-muted)] font-medium truncate group-hover:text-[var(--nav-title)] transition-colors">
+              {syncLabel}
+            </span>
+          </button>
         </div>
       </aside>
     </>

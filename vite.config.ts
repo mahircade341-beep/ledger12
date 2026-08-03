@@ -9,15 +9,15 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icons/*.png'],
       manifest: {
-        name: 'DukaHub V2 — POS & Retail Management',
-        short_name: 'DukaHub V2',
+        name: 'DukaHub — POS & Retail Management',
+        short_name: 'DukaHub',
         description: 'Complete retail management system for Kenyan micro-retail shops. POS, inventory, Daftari, cash drawer, and analytics.',
         start_url: '/',
-        id: 'dukahub-v2',
+        id: 'dukahub-v10',
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
-        background_color: '#080e1a',
-        theme_color: '#3b82f6',
+        background_color: '#0a192f',
+        theme_color: '#0a192f',
         orientation: 'any',
         categories: ['business', 'finance', 'productivity'],
         lang: 'en-KE',
@@ -34,6 +34,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Serve the cached app shell for any in-app route while offline.
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,avif,json}'],
         runtimeCaching: [
           {

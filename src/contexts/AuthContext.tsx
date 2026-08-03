@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
+import { clearUserData } from '../lib/localStore';
 
 interface Profile {
   userId: string;
@@ -86,29 +87,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const needsOnboarding = !!user && !profile?.storeName && localStorage.getItem('dl-onboarded') !== 'true';
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
 
-  // Fetch user profile from supabase
+  // Fetch user profile from supabase (falls back to the cached copy when offline,
+  // so a signed-in user can keep using the app without a connection).
   const refreshProfile = async () => {
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) return;
-    setUser(currentUser);
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .single();
-    if (prof) {
-      const p: Profile = {
-        userId: currentUser.id,
-        email: currentUser.email || '',
-        fullName: prof.full_name || '',
-        storeName: prof.store_name || '',
-        role: prof.role || 'user',
-        businessType: prof.business_type || 'retail',
-      };
-      setProfile(p);
-      if (prof.store_name) localStorage.setItem('dl-store-name', prof.store_name);
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return;
+      setUser(currentUser);
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .single();
+      if (prof) {
+        const p: Profile = {
+          userId: currentUser.id,
+          email: currentUser.email || '',
+          fullName: prof.full_name || '',
+          storeName: prof.store_name || '',
+          role: prof.role || 'user',
+          businessType: prof.business_type || 'retail',
+        };
+        setProfile(p);
+        if (prof.store_name) localStorage.setItem('dl-store-name', prof.store_name);
+        setItem('dl-profile-cache', JSON.stringify(p));
+      } else {
+        applyCachedProfile();
+      }
+      setIsProfileLoaded(true);
+    } catch {
+      // Offline / network failure — use the last known profile from the device.
+      applyCachedProfile();
+      setIsProfileLoaded(true);
     }
-    setIsProfileLoaded(true);
+  };
+
+  const applyCachedProfile = () => {
+    const cached = getItem('dl-profile-cache');
+    if (!cached) return;
+    try {
+      const p = JSON.parse(cached) as Profile;
+      setProfile(p);
+      if (p.storeName) setItem('dl-store-name', p.storeName);
+    } catch {
+      // corrupted cache — ignore
+    }
   };
 
   // Initialize auth state
@@ -174,8 +197,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     removeItem('dl-store-name');
+    removeItem('dl-profile-cache');
     setIsLocked(false);
     removeItem('dl-locked');
+
+    // Wipe this user's on-device cache + pending writes so the next sign-in
+    // starts from a clean, account-scoped copy.
+    const uid = user?.id;
+    if (uid) clearUserData(uid);
 
     // Sign out from Supabase
     await supabase.auth.signOut();

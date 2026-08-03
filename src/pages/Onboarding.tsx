@@ -35,6 +35,10 @@ export default function Onboarding() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!navigator.onLine) {
+      setError('You need an internet connection to finish setting up your account. Once it\'s ready, DukaHub works fully offline.');
+      return;
+    }
     setError('');
     if (!fullName.trim() || !storeName.trim()) {
       setError('Both fields are required');
@@ -65,7 +69,7 @@ export default function Onboarding() {
         style={{ background: 'rgba(244,63,94,0.05)', bottom: '10%', right: '10%' }} />
 
       <div className="w-full max-w-md relative z-10">
-        {/* V2 Header */}
+        {/* V10 Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)] to-blue-500 shadow-lg shadow-[var(--accent-primary)]/25 mb-4">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -80,7 +84,7 @@ export default function Onboarding() {
           </p>
         </div>
 
-        {/* V2 Form card */}
+        {/* V10 Form card */}
         <div className="glass-v2-strong rounded-2xl p-6 shadow-xl border border-[var(--border-color)]">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}

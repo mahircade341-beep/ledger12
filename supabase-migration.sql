@@ -1,5 +1,5 @@
 -- ============================================================
--- DukaHub - Supabase Database Schema (v1.0)
+-- DukaHub - Supabase Database Schema (v10.0)
 -- Run this in your Supabase SQL Editor (Dashboard > SQL Editor)
 -- ============================================================
 
@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   pricing TEXT DEFAULT 'retail',
   "debtorId" TEXT DEFAULT '',
   "debtorName" TEXT DEFAULT '',
+  mpesa_phone TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
@@ -88,6 +89,9 @@ CREATE POLICY "transactions_select" ON transactions FOR SELECT USING (auth.uid()
 CREATE POLICY "transactions_insert" ON transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "transactions_update" ON transactions FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "transactions_delete" ON transactions FOR DELETE USING (auth.uid() = user_id);
+
+-- M-Pesa payer phone recorded with each mobile-money sale
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS mpesa_phone TEXT DEFAULT '';
 
 -- 3. DEBTORS
 CREATE TABLE IF NOT EXISTS debtors (

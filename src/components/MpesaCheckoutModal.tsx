@@ -1,24 +1,33 @@
 import { useState, useRef, useEffect } from 'react';
+import { sendStkPush } from '../lib/mpesa';
 
 interface MpesaCheckoutModalProps {
   total: number;
   items: any[];
+  /** True when the device has no connection — M-Pesa can't send an STK push. */
+  offline?: boolean;
   onComplete: (phone: string) => void;
+  /** Offered while offline: record the sale as cash instead. */
+  onPayCash?: () => void;
   onClose: () => void;
 }
 
+type Step = 'phone' | 'confirm' | 'sending' | 'sent' | 'failed';
+
 /**
- * M-Pesa checkout modal with step-by-step flow:
+ * M-Pesa checkout modal:
  * 1. Enter phone number (07XX XXX XXX)
- * 2. Review amount
- * 3. "Waiting for STK Push" state
- * 
- * Structured and ready for Daraja API integration.
+ * 2. Review amount → sends a real Daraja STK push via the edge function
+ *    (graceful demo fallback until live credentials are configured)
+ * 3. Waiting / sent / failed states
  */
-export default function MpesaCheckoutModal({ total, items, onComplete, onClose }: MpesaCheckoutModalProps) {
-  const [step, setStep] = useState<'phone' | 'confirm' | 'sending' | 'sent'>('phone');
+export default function MpesaCheckoutModal({ total, items, offline, onComplete, onPayCash, onClose }: MpesaCheckoutModalProps) {
+  const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
+  const [sendError, setSendError] = useState('');
+  const [checkoutRequestId, setCheckoutRequestId] = useState('');
+  const [demoMode, setDemoMode] = useState(false);
   const phoneRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +93,11 @@ export default function MpesaCheckoutModal({ total, items, onComplete, onClose }
     return 'Enter a valid Kenyan phone number (e.g. 0712 345 678)';
   };
 
+  const normalizedPhone = () => {
+    const digits = phone.replace(/\D/g, '');
+    return digits.startsWith('0') ? '254' + digits.slice(1) : digits;
+  };
+
   const handlePhoneSubmit = () => {
     const err = validatePhone(phone);
     if (err) {
@@ -94,18 +108,28 @@ export default function MpesaCheckoutModal({ total, items, onComplete, onClose }
     setStep('confirm');
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setStep('sending');
-    // Simulate STK push send
-    setTimeout(() => {
+    setSendError('');
+    const reference = `DH${Date.now().toString(36).toUpperCase().slice(-8)}`;
+    const res = await sendStkPush({
+      phone: normalizedPhone(),
+      amount: total,
+      reference,
+      description: 'DukaHub sale',
+    });
+    if (res.ok) {
+      setCheckoutRequestId(res.checkoutRequestId || '');
+      setDemoMode(res.simulated);
       setStep('sent');
-    }, 1500);
+    } else {
+      setSendError(res.message || 'Payment request failed');
+      setStep('failed');
+    }
   };
 
   const handleDone = () => {
-    const digits = phone.replace(/\D/g, '');
-    const normalized = digits.startsWith('0') ? '254' + digits.slice(1) : digits;
-    onComplete(normalized);
+    onComplete(normalizedPhone());
   };
 
   const formatKES = (val: number) => `KES ${val.toLocaleString()}`;
@@ -142,6 +166,21 @@ export default function MpesaCheckoutModal({ total, items, onComplete, onClose }
         <div className="p-5 space-y-4">
           {step === 'phone' && (
             <>
+              {/* Offline notice */}
+              {offline && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <p className="text-xs text-[var(--color-warning)] flex items-center gap-1.5 font-medium">
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 010 12.728m-2.829-2.829a5 5 0 000-7.07m-4.243 4.243a1 1 0 010-1.414" />
+                    </svg>
+                    You're offline — M-Pesa needs an internet connection
+                  </p>
+                  <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                    Your cart is safe on this device. Record this sale as cash now and it will back up when you're back online.
+                  </p>
+                </div>
+              )}
+
               {/* Phone Input */}
               <div>
                 <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">
@@ -194,11 +233,16 @@ export default function MpesaCheckoutModal({ total, items, onComplete, onClose }
 
               {/* Action */}
               <button
-                onClick={handlePhoneSubmit}
+                onClick={offline && onPayCash ? onPayCash : handlePhoneSubmit}
                 className="btn-v2-success w-full py-3 text-base"
               >
-                Continue — {formatKES(total)}
+                {offline && onPayCash ? 'Record as Cash Instead' : `Continue — ${formatKES(total)}`}
               </button>
+              {offline && (
+                <button onClick={handlePhoneSubmit} className="w-full text-center text-xs text-[var(--text-muted)] underline underline-offset-2">
+                  Try M-Pesa anyway
+                </button>
+              )}
 
               {/* Security note */}
               <p className="text-[10px] text-center text-[var(--text-muted)]">
@@ -273,15 +317,38 @@ export default function MpesaCheckoutModal({ total, items, onComplete, onClose }
                 </div>
                 <div className="flex justify-between text-xs mt-1">
                   <span className="text-[var(--text-muted)]">Reference</span>
-                  <span className="text-[var(--text-primary)] font-mono">DH-{Date.now().toString(36).toUpperCase().slice(-6)}</span>
+                  <span className="text-[var(--text-primary)] font-mono truncate">{checkoutRequestId || `DH-${Date.now().toString(36).toUpperCase().slice(-6)}`}</span>
                 </div>
               </div>
+
+              {demoMode && (
+                <div className="mt-3 p-2.5 rounded-lg text-[11px] text-left bg-amber-500/10 border border-amber-500/20 text-[var(--color-warning)]">
+                  <span className="font-semibold">Demo mode</span> — no live M-Pesa service connected yet, so no real STK push was sent.
+                  This sale will still be recorded as M-Pesa. See <span className="font-mono">docs/mpesa-daraja.md</span> to enable live payments.
+                </div>
+              )}
 
               <div className="flex gap-2 mt-5">
                 <button onClick={onClose} className="btn-v2-secondary flex-1">Close</button>
                 <button onClick={handleDone} className="btn-v2-success flex-1">
                   Complete Sale
                 </button>
+              </div>
+            </div>
+          )}
+
+          {step === 'failed' && (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-8 h-8 text-[var(--color-danger)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Payment Not Sent</h3>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{sendError}</p>
+              <div className="flex gap-2 mt-5">
+                <button onClick={() => setStep('phone')} className="btn-v2-secondary flex-1">Back</button>
+                <button onClick={() => setStep('confirm')} className="btn-v2-primary flex-1">Retry</button>
               </div>
             </div>
           )}

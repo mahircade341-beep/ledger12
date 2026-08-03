@@ -112,7 +112,7 @@ export default function Stock() {
 
   return (
     <div className="space-y-6">
-      {/* V2 Header with stats */}
+      {/* V10 Header with stats */}
       <div>
         <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
           <div>
@@ -120,7 +120,7 @@ export default function Stock() {
             <p className="text-xs text-[var(--text-muted)] mt-0.5">Add new products or restock existing inventory</p>
           </div>
         </div>
-        {/* V2 Stat cards */}
+        {/* V10 Stat cards */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="stat-v2">
             <span className="stat-label-v2">Total Products</span>
@@ -150,7 +150,7 @@ export default function Stock() {
         </div>
       </div>
 
-      {/* V2 Search existing products to restock */}
+      {/* V10 Search existing products to restock */}
       <div className="relative">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -167,7 +167,7 @@ export default function Stock() {
           )}
         </div>
 
-        {/* V2 Quick product results */}
+        {/* V10 Quick product results */}
         {filteredProducts.length > 0 && (
           <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-lg glass-v2">
             {filteredProducts.map((p: any) => (
@@ -205,10 +205,10 @@ export default function Stock() {
         )}
       </div>
 
-      {/* V2 Add Stock Form */}
+      {/* V10 Add Stock Form */}
       <div className="w-full">
         <div className="card-v2">
-          {/* V2 header with gradient accent bar */}
+          {/* V10 header with gradient accent bar */}
           <div className="h-0.5 w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-primary)]/30 rounded-t-xl -mt-[1px] mx-auto" />
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-blue-500 flex items-center justify-center shadow-lg shadow-[var(--accent-primary)]/20">
@@ -265,7 +265,7 @@ export default function Stock() {
               </div>
             )}
 
-            {/* V2 Product Image */}
+            {/* V10 Product Image */}
             <div className="divider-v2">
               <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Product Image</span>
             </div>
@@ -289,7 +289,7 @@ export default function Stock() {
               <span className="text-xs text-[var(--text-muted)]">Upload product photo <span className="opacity-60">(optional)</span></span>
             </div>
 
-            {/* V2 Supplier Info — optional */}
+            {/* V10 Supplier Info — optional */}
             <div className="divider-v2">
               <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Supplier Info <span className="font-normal normal-case opacity-60">(optional)</span></span>
             </div>

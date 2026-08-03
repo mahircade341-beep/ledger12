@@ -46,7 +46,7 @@ export default function CashDrawer() {
 
   return (
     <div className="space-y-6">
-      {/* V2 header */}
+      {/* V10 header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Cash Drawer</h1>
@@ -54,7 +54,7 @@ export default function CashDrawer() {
         </div>
       </div>
 
-      {/* V2 stat cards */}
+      {/* V10 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="stat-v2"><span className="stat-label-v2">Drawdowns</span><span className="stat-value-v2 text-[var(--color-info)]">KES {totals.drawdown.toLocaleString()}</span></div>
         <div className="stat-v2"><span className="stat-label-v2">Restocks</span><span className="stat-value-v2 text-[var(--color-warning)]">KES {totals.restock.toLocaleString()}</span></div>
@@ -64,7 +64,7 @@ export default function CashDrawer() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          {/* V2 Log New Entry card */}
+          {/* V10 Log New Entry card */}
           <div className="card-v2">
             <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Log New Entry</h2>
@@ -82,7 +82,7 @@ export default function CashDrawer() {
             </form>
           </div>
 
-          {/* V2 Ledger Summary card */}
+          {/* V10 Ledger Summary card */}
           <div className="card-v2">
             <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
             <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Ledger Summary</h3>
@@ -98,7 +98,7 @@ export default function CashDrawer() {
           </div>
         </div>
 
-        {/* V2 Ledger Feed card */}
+        {/* V10 Ledger Feed card */}
         <div className="lg:col-span-3">
           <div className="card-v2">
             <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />

@@ -180,7 +180,7 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* V2 Stats Cards */}
+      {/* V10 Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="stat-v2">
           <span className="stat-label-v2">Products</span>
@@ -248,7 +248,7 @@ export default function Inventory() {
         </div>
       )}
 
-      {/* V2 Product Table */}
+      {/* V10 Product Table */}
       <div className="card-v2">
         <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -432,7 +432,7 @@ export default function Inventory() {
         </div>
       </div>
 
-      {/* ── V2 Edit Modal ── */}
+      {/* ── V10 Edit Modal ── */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setEditModal(null)}>
           <div className="w-full max-w-lg glass-v2-strong rounded-2xl p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -487,7 +487,7 @@ export default function Inventory() {
                 </div>
               </div>
 
-              {/* V2 Image */}
+              {/* V10 Image */}
               <div className="divider-v2">
                 <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Product Image</span>
               </div>

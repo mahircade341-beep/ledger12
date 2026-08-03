@@ -15,7 +15,7 @@ const FEATURES = [
     icon: '🛒',
     title: 'Lightning-Fast POS',
     desc: 'Ring up sales in seconds with keyboard shortcuts, barcode scanning, and automatic stock deduction. No more queues at the counter.',
-    gradient: 'from-blue-500 to-indigo-600',
+    gradient: 'from-blue-600 to-blue-800',
   },
   {
     icon: '📦',
@@ -27,25 +27,25 @@ const FEATURES = [
     icon: '📱',
     title: 'M-Pesa Ready',
     desc: 'Record M-Pesa, cash, and credit (Daftari) sales side by side. Your daily float reconciles itself — every shilling accounted for.',
-    gradient: 'from-green-500 to-emerald-700',
+    gradient: 'from-teal-500 to-teal-700',
   },
   {
     icon: '🧾',
     title: 'Instant Receipts',
     desc: 'Print or share a clean, branded receipt for every sale. Your shop name, your prices, zero math errors.',
-    gradient: 'from-amber-500 to-orange-600',
+    gradient: 'from-slate-600 to-slate-800',
   },
   {
     icon: '📊',
     title: 'Know Your Profit',
     desc: 'Daily profit, margins, and cash audits without spreadsheets. See what you actually earned — not what you think you earned.',
-    gradient: 'from-violet-500 to-purple-600',
+    gradient: 'from-cyan-500 to-blue-700',
   },
   {
     icon: '📒',
     title: 'Daftari Debt Ledger',
     desc: 'Track customers who buy on credit, record payments, and get reminded who owes you. No more torn notebook pages.',
-    gradient: 'from-rose-500 to-pink-600',
+    gradient: 'from-emerald-600 to-blue-800',
   },
 ];
 
@@ -181,8 +181,8 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg"
-              style={{ background: 'var(--gradient-aurora)', boxShadow: 'var(--btn-primary-shadow)' }}>
-              <span className="text-lg font-extrabold text-white">D</span>
+              style={{ background: 'var(--gradient-brand-mark)', boxShadow: 'var(--btn-primary-shadow)' }}>
+              <span className="text-lg font-extrabold text-[var(--mark-text)]">D</span>
             </div>
             <span className="font-bold text-lg tracking-tight">DukaHub</span>
           </a>
@@ -215,11 +215,11 @@ export default function Landing() {
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] max-w-3xl mx-auto animate-spring-up">
             Stop losing stock. Track every{' '}
-            <span className="bg-gradient-to-r from-[var(--color-success)] to-[var(--color-info)] bg-clip-text text-transparent">M-Pesa shilling</span>.
+            <span className="bg-gradient-to-r from-[var(--color-success)] to-[var(--color-info)] bg-clip-text text-transparent">shilling</span>.
           </h1>
           <p className="mt-5 text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed animate-spring-up" style={{ animationDelay: '80ms' }}>
             Ring up sales in seconds, watch stock and profit update live, and reconcile
-            every M-Pesa shilling — from your phone or laptop. Built for how Kenyan dukas actually run.
+            every shilling — from your phone or laptop. Built for how Kenyan dukas actually run.
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 animate-spring-up" style={{ animationDelay: '160ms' }}>
@@ -282,8 +282,8 @@ export default function Landing() {
                     <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
                       <span>Total</span><span className="font-mono">KES 975</span>
                     </div>
-                    <div className="mt-1.5 rounded-lg py-1.5 text-center text-[11px] font-bold text-white"
-                      style={{ background: 'var(--gradient-aurora)', boxShadow: 'var(--btn-primary-shadow)' }}>
+                    <div className="mt-1.5 rounded-lg py-1.5 text-center text-[11px] font-bold text-[var(--mark-text)]"
+                      style={{ background: 'var(--gradient-brand-mark)', boxShadow: 'var(--btn-primary-shadow)' }}>
                       Charge KES 975
                     </div>
                   </div>

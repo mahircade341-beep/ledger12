@@ -1,4 +1,4 @@
-# DukaHub V2 - Web Crawler Rules
+# DukaHub - Web Crawler Rules
 # https://dukahub12.vercel.app/
 
 User-agent: *

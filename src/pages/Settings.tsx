@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTheme } from '../App';
 import { useAuth } from '../contexts/AuthContext';
-import { useLocalData } from '../hooks/useLocalData';
+import { useLocalData, genId } from '../hooks/useLocalData';
 
 function fmtTime(ts: number) {
   const pref = localStorage.getItem('dl-time-format') || '12h';
@@ -12,7 +12,12 @@ function fmtTime(ts: number) {
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { profile, signOut, userId, appLockEnabled, setAppPassword, removeAppPassword, updateStoreName } = useAuth();
-  const { data: products } = useLocalData('products');
+  const { data: products, addAll: addAllProducts } = useLocalData('products');
+  const { data: transactions, addAll: addAllTransactions } = useLocalData('transactions');
+  const { data: debtors, addAll: addAllDebtors } = useLocalData('debtors');
+  const { data: debtPayments, addAll: addAllDebtPayments } = useLocalData('debtPayments');
+  const { data: payouts, addAll: addAllPayouts } = useLocalData('payouts');
+  const { data: stockAdjustments, addAll: addAllStockAdjustments } = useLocalData('stockAdjustments');
   const isAdmin = profile?.role === 'admin' || profile?.role === 'user';
 
   const [timeFormat, setTimeFormat] = useState(localStorage.getItem('dl-time-format') || '12h');
@@ -119,13 +124,43 @@ export default function Settings() {
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
 
   const exportData = () => {
-    const keys = ['dl-auth', 'dl-profiles', 'dl-products', 'dl-transactions', 'dl-debtors', 'dl-debt-payments', 'dl-payouts', 'dl-categories', 'dl-theme'];
-    const data: Record<string, any> = {};
-    keys.forEach((k) => { try { const v = localStorage.getItem(k); if (v) data[k] = JSON.parse(v); } catch {} });
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const payload = {
+      app: 'dukahub',
+      version: '10.0.0',
+      exportedAt: new Date().toISOString(),
+      storeName: profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub',
+      tables: { products, transactions, debtors, debtPayments, payouts, stockAdjustments },
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
     a.download = `dukahub-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  const escapeCsv = (v: any) => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const exportCsv = () => {
+    const headers = ['Date', 'Time', 'Receipt', 'Payment', 'M-Pesa Phone', 'Items', 'Total', 'Discount', 'Debtor'];
+    const rows = transactions.map((t: any) => ({
+      Date: new Date(t._creationTime).toLocaleDateString('en-KE'),
+      Time: fmtTime(t._creationTime),
+      Receipt: (t._id || '').slice(-8).toUpperCase(),
+      Payment: t.paymentMethod,
+      'M-Pesa Phone': t.mpesaPhone ? t.mpesaPhone.replace(/^254/, '0') : '',
+      Items: (t.items || []).map((i: any) => `${i.name} x${i.quantity}`).join(' | '),
+      Total: t.total,
+      Discount: t.discount || 0,
+      Debtor: t.debtorName || '',
+    }));
+    const csv = [headers.join(','), ...rows.map((r) => headers.map((h) => escapeCsv((r as any)[h])).join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = `dukahub-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click(); URL.revokeObjectURL(url);
   };
 
@@ -164,14 +199,28 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
-        const data = JSON.parse(ev.target?.result as string);
-        const valid = ['dl-products', 'dl-transactions', 'dl-debtors', 'dl-payouts'];
+        const parsed = JSON.parse(ev.target?.result as string);
+        const t = parsed?.tables || parsed;
+        const pick = (key: string, legacy: string): any[] => {
+          const arr = t[key] ?? t[legacy];
+          return Array.isArray(arr)
+            ? arr.map((r: any) => ({ ...r, userId: userId as any, _id: r._id || genId(), _creationTime: r._creationTime || Date.now() }))
+            : [];
+        };
+        const tables: { rows: any[]; add: (items: any[]) => void }[] = [
+          { rows: pick('products', 'dl-products'), add: addAllProducts },
+          { rows: pick('transactions', 'dl-transactions'), add: addAllTransactions },
+          { rows: pick('debtors', 'dl-debtors'), add: addAllDebtors },
+          { rows: pick('debtPayments', 'dl-debt-payments'), add: addAllDebtPayments },
+          { rows: pick('payouts', 'dl-payouts'), add: addAllPayouts },
+          { rows: pick('stockAdjustments', 'dl-stock-adjustments'), add: addAllStockAdjustments },
+        ];
         let count = 0;
-        valid.forEach((k) => { if (data[k]) { localStorage.setItem(k, JSON.stringify(data[k])); count++; } });
-        setImportStatus(`Imported ${count} tables — reload to see changes`);
-        setTimeout(() => setImportStatus(''), 4000);
+        tables.forEach((m) => { if (m.rows.length > 0) { m.add(m.rows); count++; } });
+        setImportStatus(count > 0 ? `Imported ${count} tables — saved on this device and queued for cloud backup` : 'No data found in that file');
+        setTimeout(() => setImportStatus(''), 6000);
       } catch { setImportStatus('Invalid file'); setTimeout(() => setImportStatus(''), 3000); }
     };
     reader.readAsText(file);
@@ -180,7 +229,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      {/* V2 header */}
+      {/* V10 header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Settings</h1>
@@ -189,7 +238,7 @@ export default function Settings() {
         {saved && <span className="badge-v2-success animate-fade-in">Saved</span>}
       </div>
 
-      {/* V2 Appearance card */}
+      {/* V10 Appearance card */}
       <div className="card-v2 border-blue-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center gap-3 mb-4">
@@ -220,7 +269,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* V2 Preferences card */}
+      {/* V10 Preferences card */}
       <div className="card-v2 border-cyan-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center gap-3 mb-4">
@@ -269,7 +318,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* V2 Data Management card */}
+      {/* V10 Data Management card */}
       <div className="card-v2 border-emerald-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 to-emerald-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center gap-3 mb-4">
@@ -281,15 +330,19 @@ export default function Settings() {
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Data & Backup</h2>
         </div>
         <div className="space-y-3">
-          <p className="text-xs text-[var(--text-muted)]">All data is stored locally on this device. Export to back up or transfer between devices.</p>
+          <p className="text-xs text-[var(--text-muted)]">Your data lives on this device and backs up to your account whenever you're online. Export a full backup or the sales ledger as a spreadsheet at any time.</p>
           <div className="flex flex-wrap gap-2">
             <button onClick={exportData} className="btn-v2-primary text-xs h-9">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-              Export Data
+              Backup (JSON)
+            </button>
+            <button onClick={exportCsv} className="btn-v2-primary text-xs h-9">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859M9 3.75v15m6-15v15" /></svg>
+              Sales CSV
             </button>
             <label className="btn-v2-secondary text-xs h-9 cursor-pointer">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-              Import Data
+              Import Backup
               <input type="file" accept=".json" className="hidden" onChange={importData} />
             </label>
           </div>
@@ -297,15 +350,16 @@ export default function Settings() {
           <div className="divider-v2">
             <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Storage Info</span>
           </div>
-          <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
             <span className="badge-v2">Products: {products.length}</span>
+            <span className="badge-v2">Sales: {transactions.length}</span>
             <span className="badge-v2-warning">Low: {lowStockCount}</span>
             <span className="badge-v2-danger">Out: {criticalCount}</span>
           </div>
         </div>
       </div>
 
-      {/* V2 Security card */}
+      {/* V10 Security card */}
       <div className="card-v2 border-violet-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-violet-500 to-violet-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center gap-3 mb-4">
@@ -394,7 +448,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* V2 Store Profile card */}
+      {/* V10 Store Profile card */}
       <div className="card-v2 border-blue-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center gap-3 mb-4">
@@ -408,7 +462,7 @@ export default function Settings() {
         <EditStoreName />
       </div>
 
-      {/* V2 Account card */}
+      {/* V10 Account card */}
       <div className="card-v2 border-violet-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-violet-500 to-violet-500/30 rounded-t-xl -mt-[1px] mx-auto" />
         <div className="flex items-center gap-3 mb-4">

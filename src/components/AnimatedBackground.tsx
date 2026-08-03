@@ -36,18 +36,18 @@ export default function AnimatedBackground() {
 
     const colors = isDark
       ? [
-          'rgba(59, 130, 246, 0.20)',
-          'rgba(99, 102, 241, 0.15)',
-          'rgba(139, 92, 246, 0.12)',
-          'rgba(59, 130, 246, 0.10)',
-          'rgba(96, 165, 250, 0.18)',
+          'rgba(16, 185, 129, 0.20)',
+          'rgba(45, 212, 191, 0.15)',
+          'rgba(96, 165, 250, 0.12)',
+          'rgba(16, 185, 129, 0.10)',
+          'rgba(52, 211, 153, 0.18)',
         ]
       : [
-          'rgba(37, 99, 235, 0.12)',
-          'rgba(79, 70, 229, 0.08)',
-          'rgba(99, 102, 241, 0.06)',
-          'rgba(59, 130, 246, 0.08)',
-          'rgba(96, 165, 250, 0.10)',
+          'rgba(16, 185, 129, 0.12)',
+          'rgba(13, 148, 136, 0.08)',
+          'rgba(37, 99, 235, 0.06)',
+          'rgba(16, 185, 129, 0.08)',
+          'rgba(52, 211, 153, 0.10)',
         ];
 
     // Create orbs with origin (resting) positions + current (animated) positions

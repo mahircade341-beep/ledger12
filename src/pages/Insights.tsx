@@ -142,7 +142,7 @@ export default function Insights() {
 
   return (
     <div className="space-y-6">
-      {/* V2 header */}
+      {/* V10 header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Insights</h1>
@@ -161,7 +161,7 @@ export default function Insights() {
         </div>
       </div>
 
-      {/* V2 KPI row */}
+      {/* V10 KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="stat-v2 stat-v2-accent">
           <div className="flex items-center justify-between w-full">
@@ -209,7 +209,7 @@ export default function Insights() {
         </div>
       )}
 
-      {/* V2 cards grid */}
+      {/* V10 cards grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card-v2">
           <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 to-emerald-500/30 rounded-t-xl -mt-[1px] mx-auto" />
@@ -231,7 +231,7 @@ export default function Insights() {
           </div>
         </div>
 
-        {/* V2 Profit Breakdown */}
+        {/* V10 Profit Breakdown */}
         <div className="card-v2 border-emerald-500/20">
           <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 to-emerald-500/30 rounded-t-xl -mt-[1px] mx-auto" />
           <div className="flex items-center justify-between mb-4">
@@ -262,7 +262,7 @@ export default function Insights() {
           </div>
         </div>
 
-        {/* V2 Anti-Theft Cash Auditor */}
+        {/* V10 Anti-Theft Cash Auditor */}
         <div className="card-v2 border-amber-500/20">
           <div className="h-0.5 w-full bg-gradient-to-r from-amber-500 to-amber-500/30 rounded-t-xl -mt-[1px] mx-auto" />
           <div className="flex items-center justify-between mb-4">
@@ -294,7 +294,7 @@ export default function Insights() {
           </div>
         </div>
 
-        {/* V2 Accounts Receivable Card */}
+        {/* V10 Accounts Receivable Card */}
         <div className="card-v2 border-blue-500/20">
           <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-500/30 rounded-t-xl -mt-[1px] mx-auto" />
           <div className="flex items-center justify-between mb-4">

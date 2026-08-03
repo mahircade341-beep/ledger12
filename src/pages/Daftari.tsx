@@ -69,7 +69,7 @@ export default function Daftari() {
 
   return (
     <div className="space-y-6">
-      {/* V2 header */}
+      {/* V10 header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Daftari</h1>
@@ -78,14 +78,14 @@ export default function Daftari() {
         <button onClick={() => setShowForm(!showForm)} className="btn-v2-primary text-xs h-9">{showForm ? 'Cancel' : '+ New Debtor'}</button>
       </div>
 
-      {/* V2 stat cards */}
+      {/* V10 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="stat-v2"><span className="stat-label-v2">Active Debtors</span><span className="stat-value-v2 text-[var(--color-info)]">{debtors.filter((d) => d.status === 'active').length}</span></div>
         <div className="stat-v2"><span className="stat-label-v2">Cleared</span><span className="stat-value-v2 text-[var(--color-success)]">{debtors.filter((d) => d.status === 'cleared').length}</span></div>
         <div className="stat-v2 stat-v2-accent col-span-2"><span className="stat-label-v2">Total Outstanding</span><span className="stat-value-v2 text-[var(--color-warning)]">KES {totalOutstanding.toLocaleString()}</span></div>
       </div>
 
-      {/* V2 New Debtor form */}
+      {/* V10 New Debtor form */}
       {showForm && (
         <div className="card-v2 border-cyan-500/20">
           <div className="h-0.5 w-full bg-gradient-to-r from-cyan-500 to-cyan-500/30 rounded-t-xl -mt-[1px] mx-auto" />
@@ -99,7 +99,7 @@ export default function Daftari() {
         </div>
       )}
 
-      {/* V2 search */}
+      {/* V10 search */}
       <div className="relative max-w-md">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -140,7 +140,7 @@ export default function Daftari() {
                 </div>
               </div>
             )}
-            {/* V2 Payment History with Running Balance */}
+            {/* V10 Payment History with Running Balance */}
             {expandedId === debtor._id && payments.length > 0 && (
               <div className="mt-3 pt-3 border-t border-[var(--border-color)]">
                 <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">Payment History ({payments.length})</p>

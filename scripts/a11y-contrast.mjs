@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * DukaHub V2 — WCAG contrast audit (equivalent of Lighthouse "Color Contrast" + axe color-contrast).
+ * DukaHub — WCAG contrast audit (equivalent of Lighthouse "Color Contrast" + axe color-contrast).
  * Parses the design tokens in src/index.css and computes contrast ratios for the
  * meaningful text-on-background pairs, in both dark and light themes.
  *
@@ -110,10 +110,16 @@ const PAIRS = [
   { fg: '--color-danger', bg: '--color-danger', base: '--bg-surface', tint: 0.1, label: 'danger alert text' },
   { fg: '--color-warning', bg: '--color-warning', base: '--bg-surface', tint: 0.1, label: 'warning alert text' },
   // Secondary buttons / tabs (text on tinted button bg over surface)
-  { fg: '--text-secondary', bg: '--btn-secondary-bg', base: '--bg-surface', label: 'secondary button text' },
+  { fg: '--btn-secondary-text', bg: '--btn-secondary-bg', base: '--bg-surface', label: 'secondary button text' },
   { fg: '--btn-primary-text', bg: '--btn-primary-bg', label: 'primary button text' },
   // Inputs
   { fg: '--text-primary', bg: '--glass-input-bg', base: '--bg-surface', label: 'input text' },
+  // Liquid chrome (midnight navy dashboard nav/sidebar)
+  { fg: '--nav-title', bg: '--chrome-bg', label: 'nav title on chrome' },
+  { fg: '--nav-text', bg: '--chrome-bg', label: 'nav link on chrome' },
+  { fg: '--nav-text-active', bg: '--chrome-bg', label: 'nav active on chrome' },
+  { fg: '--nav-text-muted', bg: '--chrome-bg', label: 'nav muted on chrome' },
+  { fg: '--text-secondary', bg: '--glass-nav-bg', base: '--bg-primary', label: 'public nav link on glass' },
 ];
 
 const results = [];

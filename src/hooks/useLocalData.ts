@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, getCurrentUserId } from '../lib/supabase';
+import { loadTableRows, saveTableRows, pushOps, getOutbox } from '../lib/localStore';
+import type { SyncOp } from '../lib/localStore';
+import { TABLE_MAP, syncNow } from '../lib/syncEngine';
 
 type TableName = 'products' | 'transactions' | 'debtors' | 'debtPayments' | 'payouts' | 'stockAdjustments';
 
@@ -8,16 +11,6 @@ interface AppRecord {
   _creationTime: number;
   [key: string]: any;
 }
-
-// Map our table names to Supabase table names
-const TABLE_MAP: Record<string, string> = {
-  products: 'products',
-  transactions: 'transactions',
-  debtors: 'debtors',
-  debtPayments: 'debt_payments',
-  payouts: 'payouts',
-  stockAdjustments: 'stock_adjustments',
-};
 
 // ── Cross-component sync: broadcast data changes via window events ──
 const EVENT_PREFIX = 'dl-data-changed:';
@@ -76,41 +69,102 @@ async function fetchAll(table: string, supabaseTable: string): Promise<any[]> {
   }));
 }
 
+/**
+ * Offline-first data hook.
+ *
+ * Reads: served instantly from the on-device cache, then refreshed from the
+ * cloud whenever a connection is available.
+ * Writes: applied optimistically to the UI and persisted on-device, then queued
+ * into the outbox. The queue is flushed to the account immediately when online
+ * and automatically the moment the connection returns (see syncEngine).
+ */
 export function useLocalData<T extends AppRecord>(table: TableName) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const supabaseTable = TABLE_MAP[table];
   const mountedRef = useRef(true);
+  const userIdRef = useRef<string | null>(null);
+  const dataRef = useRef<T[]>([]);
 
-  // ── Load from Supabase on mount + listen for cross-component sync events ──
+  // Keep state + a live mirror in sync, and persist every change on-device.
+  const applyData = useCallback((next: T[]) => {
+    dataRef.current = next;
+    setData(next);
+    const userId = userIdRef.current;
+    if (userId) {
+      saveTableRows(userId, table, next).catch(() => {});
+    }
+  }, [table]);
+
+  // Instant local read so the UI paints before any network round-trip.
+  const hydrateFromCache = useCallback(async (userId: string) => {
+    const rows = await loadTableRows(userId, table);
+    if (mountedRef.current && rows) {
+      dataRef.current = rows as unknown as T[];
+      setData(rows as unknown as T[]);
+      setLoading(false);
+    }
+  }, [table]);
+
+  // Network pull → becomes the new local truth.
+  const pullFromServer = useCallback(async (userId: string) => {
+    const mapped = await fetchAll(table, supabaseTable);
+    if (mountedRef.current) {
+      dataRef.current = mapped as unknown as T[];
+      setData(mapped as unknown as T[]);
+      setLoading(false);
+    }
+    await saveTableRows(userId, table, mapped);
+    return mapped;
+  }, [table, supabaseTable]);
+
+  const refreshData = useCallback(async (userId: string | null) => {
+    if (!userId) {
+      // No session (e.g. public pages) — plain network read, as before.
+      const mapped = await fetchAll(table, supabaseTable);
+      if (mountedRef.current) {
+        dataRef.current = mapped as unknown as T[];
+        setData(mapped as unknown as T[]);
+        setLoading(false);
+      }
+      return;
+    }
+
+    await hydrateFromCache(userId);
+
+    if (navigator.onLine) {
+      // Flush any queued local changes for this table BEFORE overwriting local
+      // state with server truth, so offline edits are never clobbered.
+      const pending = await getOutbox(userId);
+      if (pending.some((op) => op.table === table)) {
+        await syncNow();
+      }
+      await pullFromServer(userId);
+    } else if (mountedRef.current) {
+      setLoading(false);
+    }
+  }, [table, supabaseTable, hydrateFromCache, pullFromServer]);
+
+  // ── Load on mount + listen for cross-component sync events ──
   useEffect(() => {
     mountedRef.current = true;
     setLoading(true);
 
-    fetchAll(table, supabaseTable).then((mapped) => {
-      if (mountedRef.current) {
-        setData(mapped as unknown as T[]);
-        setLoading(false);
-      }
-    });
+    (async () => {
+      const userId = await getCurrentUserId();
+      if (!mountedRef.current) return;
+      userIdRef.current = userId;
+      await refreshData(userId);
+    })();
 
-    // Listen for data-change events from other instances (Stock, POS, etc.)
     const unsub = listenDataChanged(table, () => {
-      fetchAll(table, supabaseTable).then((mapped) => {
-        if (mountedRef.current) {
-          setData(mapped as unknown as T[]);
-        }
-      });
+      refreshData(userIdRef.current);
     });
 
     // Cross-tab sync: another browser tab wrote to this table
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY_PREFIX + table) {
-        fetchAll(table, supabaseTable).then((mapped) => {
-          if (mountedRef.current) {
-            setData(mapped as unknown as T[]);
-          }
-        });
+        refreshData(userIdRef.current);
       }
     };
 
@@ -119,11 +173,7 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
     const refreshOnFocus = () => {
       clearTimeout(focusTimer);
       focusTimer = setTimeout(() => {
-        fetchAll(table, supabaseTable).then((mapped) => {
-          if (mountedRef.current) {
-            setData(mapped as unknown as T[]);
-          }
-        });
+        refreshData(userIdRef.current);
       }, 150);
     };
 
@@ -140,16 +190,23 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
       window.removeEventListener('focus', refreshOnFocus);
       unsub();
     };
-  }, [table, supabaseTable]);
+  }, [table, supabaseTable, refreshData]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const mapped = await fetchAll(table, supabaseTable);
-    if (mountedRef.current) {
-      setData(mapped as unknown as T[]);
-      setLoading(false);
+    await refreshData(userIdRef.current);
+  }, [refreshData]);
+
+  // Queue an op for cloud backup and push it immediately when online.
+  const queueOp = useCallback((op: Omit<SyncOp, 'seq'>) => {
+    const userId = userIdRef.current;
+    if (!userId) return;
+    const full: SyncOp = { ...op, seq: Date.now() + Math.random() };
+    pushOps(userId, [full]).catch(() => {});
+    if (navigator.onLine) {
+      syncNow().catch(() => {});
     }
-  }, [table, supabaseTable]);
+  }, []);
 
   const add = useCallback((record: Omit<T, '_id' | '_creationTime'>): string => {
     const id = genId();
@@ -157,82 +214,68 @@ export function useLocalData<T extends AppRecord>(table: TableName) {
 
     const newRecord = { ...record, _id: id, _creationTime: Date.now() } as unknown as T;
     // Optimistic local update — the new item is instantly visible everywhere in this tab
-    setData((prev) => [newRecord, ...prev]);
+    applyData([newRecord, ...dataRef.current]);
     // Broadcast immediately so other components (POS, Inventory) refresh without waiting for the network round-trip
     emitDataChanged(table);
 
-    supabase.from(supabaseTable).insert(supabaseRecord).then(({ error }) => {
-      if (error) {
-        console.error(`Error inserting ${table}:`, error);
-      } else {
-        emitDataChanged(table);
-      }
-    });
+    queueOp({ kind: 'insert', table, id, payload: supabaseRecord });
 
     return id;
-  }, [table, supabaseTable]);
+  }, [table, applyData, queueOp]);
 
   const update = useCallback((id: string, changes: Partial<T>) => {
-    setData((prev) => prev.map((r) => r._id === id ? { ...r, ...changes } : r));
+    applyData(dataRef.current.map((r) => (r._id === id ? { ...r, ...changes } : r)));
     emitDataChanged(table);
 
     const supabaseChanges = mapChangesToSupabase(table, changes as any);
-    supabase.from(supabaseTable).update(supabaseChanges).eq('id', id).then(({ error }) => {
-      if (error) {
-        console.error(`Error updating ${table}:`, error);
-      } else {
-        emitDataChanged(table);
-      }
-    });
-  }, [table, supabaseTable]);
+    queueOp({ kind: 'update', table, id, payload: supabaseChanges });
+  }, [table, applyData, queueOp]);
 
   const remove = useCallback((id: string) => {
-    setData((prev) => prev.filter((r) => r._id !== id));
+    applyData(dataRef.current.filter((r) => r._id !== id));
     emitDataChanged(table);
-    supabase.from(supabaseTable).delete().eq('id', id).then(({ error }) => {
-      if (error) {
-        console.error(`Error deleting ${table}:`, error);
-      } else {
-        emitDataChanged(table);
-      }
-    });
-  }, [table, supabaseTable]);
+    queueOp({ kind: 'delete', table, id });
+  }, [table, applyData, queueOp]);
 
   const updateQuantity = useCallback((id: string, newQty: number) => {
-    setData((prev) => prev.map((r) => r._id === id ? { ...r, quantity: newQty } : r));
+    applyData(dataRef.current.map((r) => (r._id === id ? { ...r, quantity: newQty } : r)));
     emitDataChanged(table);
-    supabase.from(supabaseTable).update({ quantity: newQty, updated_at: new Date().toISOString() }).eq('id', id).then(({ error }) => {
-      if (error) {
-        console.error(`Error updating quantity:`, error);
-      } else {
-        emitDataChanged(table);
-      }
+    queueOp({
+      kind: 'update',
+      table,
+      id,
+      payload: { quantity: newQty, updated_at: new Date().toISOString() },
     });
-  }, [table, supabaseTable]);
+  }, [table, applyData, queueOp]);
 
   const getById = useCallback((id: string): T | undefined => {
     return data.find((r) => r._id === id);
   }, [data]);
 
   const addAll = useCallback((items: T[]) => {
-    setData((prev) => [...items, ...prev]);
+    applyData([...items, ...dataRef.current]);
     emitDataChanged(table);
-    const records = items.map((item) => mapToSupabase(table, item));
-    if (records.length > 0) {
-      supabase.from(supabaseTable).insert(records).then(({ error }) => {
-        if (error) {
-          console.error(`Error bulk inserting ${table}:`, error);
-        } else {
-          emitDataChanged(table);
-        }
-      });
+    if (items.length > 0) {
+      const records = items.map((item) => mapToSupabase(table, item));
+      const ops: SyncOp[] = records.map((payload, i) => ({
+        kind: 'insert',
+        table,
+        id: (items[i] as any)._id,
+        payload,
+        seq: Date.now() + i + Math.random(),
+      }));
+      const userId = userIdRef.current;
+      if (userId) {
+        pushOps(userId, ops).catch(() => {});
+        if (navigator.onLine) syncNow().catch(() => {});
+      }
     }
-  }, [table, supabaseTable]);
+  }, [table, applyData]);
 
   const clearAll = useCallback(() => {
-    setData([]);
+    applyData([]);
     emitDataChanged(table);
-  }, [table]);
+  }, [table, applyData]);
 
   return { data, add, update, remove, updateQuantity, getById, refresh, addAll, clearAll, loading };
 }
@@ -265,6 +308,7 @@ function mapFromSupabase(table: string, item: any): any {
         pricing: item.pricing || 'retail',
         debtorId: item.debtorId || '',
         debtorName: item.debtorName || '',
+        mpesaPhone: item.mpesa_phone || '',
       };
     case 'debtors':
       return {
@@ -308,7 +352,7 @@ function mapToSupabase(table: string, record: any, id?: string): any {
     case 'products':
       return { ...base, name: record.name || '', quantity: record.quantity || 0, wholesale_price: record.wholesalePrice || 0, retail_price: record.retailPrice || 0, barcode: record.barcode || '', image: record.image || '', supplier: record.supplier || '', supplier_phone: record.supplierPhone || '' };
     case 'transactions':
-      return { ...base, items: record.items || [], total: record.total || 0, payment_method: record.paymentMethod || 'cash', discount: record.discount || 0, pricing: record.pricing || 'retail', debtorId: record.debtorId || '', debtorName: record.debtorName || '' };
+      return { ...base, items: record.items || [], total: record.total || 0, payment_method: record.paymentMethod || 'cash', discount: record.discount || 0, pricing: record.pricing || 'retail', debtorId: record.debtorId || '', debtorName: record.debtorName || '', mpesa_phone: record.mpesaPhone || '' };
     case 'debtors':
       return { ...base, name: record.name || '', phone: record.phone || '', amount: record.amount || 0, notes: record.notes || '', status: record.status || 'active' };
     case 'debtPayments':
@@ -327,7 +371,7 @@ function mapChangesToSupabase(table: string, changes: any): any {
     case 'products':
       return { name: changes.name, quantity: changes.quantity, wholesale_price: changes.wholesalePrice, retail_price: changes.retailPrice, barcode: changes.barcode, image: changes.image, supplier: changes.supplier, supplier_phone: changes.supplierPhone, updated_at: new Date().toISOString() };
     case 'transactions':
-      return { items: changes.items, total: changes.total, payment_method: changes.paymentMethod, discount: changes.discount, pricing: changes.pricing, debtorId: changes.debtorId, debtorName: changes.debtorName };
+      return { items: changes.items, total: changes.total, payment_method: changes.paymentMethod, discount: changes.discount, pricing: changes.pricing, debtorId: changes.debtorId, debtorName: changes.debtorName, mpesa_phone: changes.mpesaPhone };
     case 'debtors':
       return { name: changes.name, phone: changes.phone, amount: changes.amount, notes: changes.notes, status: changes.status, updated_at: new Date().toISOString() };
     case 'debtPayments':

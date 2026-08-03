@@ -100,10 +100,10 @@ export default function ToastAlerts() {
           key={toast.id}
           className={`pointer-events-auto animate-fade-in p-3 rounded-xl border shadow-xl backdrop-blur-md transition-all duration-300 ${
             toast.type === 'critical'
-              ? 'bg-red-500/10 border-red-500/20 text-red-400'
+              ? 'bg-red-500/10 border-red-500/20 text-[var(--color-danger)]'
               : toast.type === 'stock'
-              ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-              : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+              ? 'bg-amber-500/10 border-amber-500/20 text-[var(--color-warning)]'
+              : 'bg-cyan-500/10 border-cyan-500/20 text-[var(--color-info)]'
           }`}
         >
           <div className="flex items-start gap-2">

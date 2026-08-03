@@ -144,10 +144,10 @@ export default function LockScreen({ children }: { children: React.ReactNode }) 
             ) : (
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <svg className="w-6 h-6 text-emerald-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-6 h-6 text-[var(--color-success)] mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p className="text-sm text-emerald-400 text-center">Answer correct. Set a new password below.</p>
+                  <p className="text-sm text-[var(--color-success)] text-center">Answer correct. Set a new password below.</p>
                 </div>
                 <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
                   className="input-v2 w-full text-center py-3" placeholder="New password (min 4 chars)" autoFocus />

@@ -7,8 +7,8 @@
     </linearGradient>
     <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#60a5fa"/>
-      <stop offset="50%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#1d4ed8"/>
+      <stop offset="50%" style="stop-color:#818cf8"/>
+      <stop offset="100%" style="stop-color:#22d3ee"/>
     </linearGradient>
     <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:rgba(96,165,250,0.15)"/>
@@ -63,6 +63,6 @@
   <!-- Subtle bottom text -->
   <text x="1024" y="2620" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
         font-size="14" font-weight="400" fill="rgba(148,163,184,0.25)" letter-spacing="2">
-    v2.0 · Retail Operating System
+    v3.0 · Retail Operating System
   </text>
 </svg>

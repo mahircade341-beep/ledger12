@@ -151,7 +151,7 @@ export default function Onboarding() {
             </div>
 
             {error && (
-              <div className="alert-v2 p-3 border-red-500/20 bg-red-500/5 text-red-400 text-sm text-center">
+              <div className="alert-v2 p-3 border-red-500/20 bg-red-500/5 text-[var(--color-danger)] text-sm text-center">
                 {error}
               </div>
             )}

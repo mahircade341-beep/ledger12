@@ -91,13 +91,13 @@ export default function Login() {
         style={{ background: 'rgba(59,130,246,0.03)', bottom: '10%', right: '10%' }} />
 
       <div className="w-full max-w-md relative z-10 animate-slide-up-v2">
-        {/* V2 Logo Header */}
+        {/* V3 Logo Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-2xl mb-4"
             style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
             <span className="text-2xl font-extrabold text-white">D</span>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub <span className="text-[var(--text-muted)] font-medium text-base">v2</span></h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">DukaHub <span className="text-[var(--text-muted)] font-medium text-base">v3</span></h1>
           <p className="text-[var(--text-secondary)] text-sm mt-1">Track inventory, record cash &amp; M-Pesa sales, and see your daily profits in real time.</p>
         </div>
 
@@ -266,7 +266,7 @@ export default function Login() {
                       </span>
                     </label>
                     {consentError && (
-                      <p className="mt-1.5 text-xs text-red-400">You must accept the Terms and Privacy Policy to create an account.</p>
+                      <p className="mt-1.5 text-xs text-[var(--color-danger)]">You must accept the Terms and Privacy Policy to create an account.</p>
                     )}
                   </div>
                   <button type="submit" disabled={loading} className="btn-v2-primary w-full py-3">

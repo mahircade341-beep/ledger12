@@ -87,7 +87,7 @@ export default function Settings() {
             </div>
           )}
         </div>
-        {storeNameError && <p className="text-xs text-red-400">{storeNameError}</p>}
+        {storeNameError && <p className="text-xs text-[var(--color-danger)]">{storeNameError}</p>}
         {!showStoreNameEditor && (
           <div className="flex items-center gap-2 px-1">
             <span className="text-xs text-[var(--text-muted)]">Receipt preview:</span>
@@ -206,7 +206,7 @@ export default function Settings() {
               <p className="text-sm font-medium text-[var(--text-primary)]">Theme</p>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Switch between dark and light mode</p>
             </div>
-            <button onClick={toggleTheme} className={`theme-toggle-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${theme === 'dark' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm' : 'bg-slate-200 text-slate-700 border border-slate-300'}`}>
+            <button onClick={toggleTheme} className={`theme-toggle-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${theme === 'dark' ? 'bg-cyan-500/10 text-[var(--color-info)] border border-cyan-500/20 shadow-sm' : 'bg-slate-200 text-slate-700 border border-slate-300'}`}>
               <span className={`theme-toggle-icon ${theme === 'dark' ? 'entering-light' : 'entering-dark'}`}>
                 {theme === 'dark' ? (
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
@@ -251,13 +251,13 @@ export default function Settings() {
               <p className="text-xs text-[var(--text-muted)] mt-0.5">Alert when stock drops below this number</p>
               <div className="flex items-center gap-1 mt-1">
                 <span className="text-[10px] text-[var(--text-muted)]">Current:</span>
-                <span className="text-xs font-medium text-amber-400">{threshold} units</span>
+                <span className="text-xs font-medium text-[var(--color-warning)]">{threshold} units</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-1">
               <div className="flex items-center gap-2 p-1.5 bg-[var(--bg-surface2)] rounded-xl">
                 <input type="range" min={1} max={50} value={threshold} onChange={(e) => handleThreshold(parseInt(e.target.value))} className="w-28 accent-amber-500" />
-                <span className="text-sm font-bold text-amber-400 w-8 text-right">{threshold}</span>
+                <span className="text-sm font-bold text-[var(--color-warning)] w-8 text-right">{threshold}</span>
               </div>
               <p className="text-[10px] text-[var(--text-muted)]">
                 {lowStockCount > 0 || criticalCount > 0
@@ -293,7 +293,7 @@ export default function Settings() {
               <input type="file" accept=".json" className="hidden" onChange={importData} />
             </label>
           </div>
-          {importStatus && <p className="text-xs text-emerald-500">{importStatus}</p>}
+          {importStatus && <p className="text-xs text-[var(--color-success)]">{importStatus}</p>}
           <div className="divider-v2">
             <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Storage Info</span>
           </div>
@@ -354,7 +354,7 @@ export default function Settings() {
                 </div>
               </div>
               <div className="divider-v2">
-                <span className="text-xs font-semibold text-cyan-400">Password Recovery <span className="font-normal text-[var(--text-muted)]">(Required)</span></span>
+                <span className="text-xs font-semibold text-[var(--color-info)]">Password Recovery <span className="font-normal text-[var(--text-muted)]">(Required)</span></span>
               </div>
               <p className="text-xs text-[var(--text-muted)]">Set a security question so you can recover your password if you forget it. Your answer is stored securely (hashed).</p>
               <div className="space-y-3">
@@ -382,7 +382,7 @@ export default function Settings() {
                   <input type="text" value={securityA} onChange={(e) => setSecurityA(e.target.value)} className="input-v2 w-full" placeholder="Your answer (case-insensitive)" required />
                 </div>
               </div>
-              {appPassError && <p className="text-xs text-red-400">{appPassError}</p>}
+              {appPassError && <p className="text-xs text-[var(--color-danger)]">{appPassError}</p>}
               <div className="flex gap-2">
                 <button type="submit" disabled={appPassLoading} className="btn-v2-primary text-xs h-9">
                   {appPassLoading ? 'Setting...' : 'Enable App Lock'}

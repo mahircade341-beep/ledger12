@@ -164,16 +164,16 @@ export default function Inventory() {
       {lowStockCount > 0 && (
         <div className="p-3 bg-gradient-to-r from-amber-500/10 to-red-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="w-5 h-5 text-[var(--color-warning)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            <span className="text-sm text-amber-400 font-medium">{lowStockCount} product{lowStockCount !== 1 ? 's' : ''} running low</span>
+            <span className="text-sm text-[var(--color-warning)] font-medium">{lowStockCount} product{lowStockCount !== 1 ? 's' : ''} running low</span>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-[var(--text-muted)] whitespace-nowrap">Threshold:</label>
             <div className="flex items-center gap-1.5">
               <input type="range" min={1} max={50} value={threshold} onChange={(e) => handleThresholdChange(parseInt(e.target.value))} className="w-20 accent-amber-500" />
-              <span className="text-xs font-medium text-amber-400 w-6">{threshold}</span>
+              <span className="text-xs font-medium text-[var(--color-warning)] w-6">{threshold}</span>
             </div>
             <button onClick={() => setLowStockOnly(true)} className="btn-secondary btn-sm text-xs">View All</button>
           </div>
@@ -291,8 +291,8 @@ export default function Inventory() {
                       </div>
                     </td>
                     <td className={`py-2.5 px-2 text-right font-medium ${
-                      p.quantity <= 0 ? 'text-red-400' :
-                      p.quantity <= lowStockThreshold ? 'text-amber-400' :
+                      p.quantity <= 0 ? 'text-[var(--color-danger)]' :
+                      p.quantity <= lowStockThreshold ? 'text-[var(--color-warning)]' :
                       'text-[var(--text-secondary)]'
                     }`}>{p.quantity}</td>
                     <td className="py-2.5 px-2 text-right text-[var(--text-muted)] hidden sm:table-cell">KES {p.wholesalePrice?.toLocaleString() || '0'}</td>
@@ -305,7 +305,7 @@ export default function Inventory() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                           </svg>
                         </button>
-                        <button onClick={() => handleDelete(p._id, p.name)} className="btn-ghost p-1.5 text-red-400 hover:text-red-300" title="Delete" aria-label="Delete product">
+                        <button onClick={() => handleDelete(p._id, p.name)} className="btn-ghost p-1.5 text-[var(--color-danger)] hover:text-red-300" title="Delete" aria-label="Delete product">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                           </svg>
@@ -369,7 +369,7 @@ export default function Inventory() {
                   <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-[var(--nav-hover-bg)] transition-colors group">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                        isPositive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+                        isPositive ? 'bg-emerald-500/15 text-[var(--color-success)]' : 'bg-red-500/15 text-[var(--color-danger)]'
                       }`}>
                         {isPositive ? (
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -384,14 +384,14 @@ export default function Inventory() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-[var(--text-primary)] truncate">{m.name}</p>
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] font-semibold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                          <span className={`text-[10px] font-semibold ${isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
                             {isPositive ? '+' : ''}{m.quantity}
                           </span>
                           <span className="text-[10px] text-[var(--text-muted)]">•</span>
                           <span className={`text-[10px] font-medium ${
-                            m.type === 'restock' ? 'text-emerald-400/70' :
-                            m.type === 'adjustment' ? 'text-amber-400/70' :
-                            'text-red-400/70'
+                            m.type === 'restock' ? 'text-[var(--color-success)]' :
+                            m.type === 'adjustment' ? 'text-[var(--color-warning)]' :
+                            'text-[var(--color-danger)]'
                           }`}>
                             {m.type === 'restock' ? 'Restock' : m.type === 'adjustment' ? 'Adjustment' : 'Sale'}
                           </span>
@@ -438,7 +438,7 @@ export default function Inventory() {
           <div className="w-full max-w-lg glass-v2-strong rounded-2xl p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">Edit Product</h2>
-              <button onClick={() => setEditModal(null)} className="btn-ghost p-1.5 hover:text-red-400 transition-colors" aria-label="Close">
+              <button onClick={() => setEditModal(null)} className="btn-ghost p-1.5 hover:text-[var(--color-danger)] transition-colors" aria-label="Close">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -524,8 +524,8 @@ export default function Inventory() {
               </div>
               {!editFieldsValid && (
                 <div className="alert-v2-warning mt-1">
-                  <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-                  <p className="text-xs text-amber-400">Fill in <strong>Product Name</strong>, <strong>Quantity</strong>, <strong>Wholesale</strong>, and <strong>Retail Price</strong> to save</p>
+                  <svg className="w-4 h-4 text-[var(--color-warning)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                  <p className="text-xs text-[var(--color-warning)]">Fill in <strong>Product Name</strong>, <strong>Quantity</strong>, <strong>Wholesale</strong>, and <strong>Retail Price</strong> to save</p>
                 </div>
               )}
             </div>

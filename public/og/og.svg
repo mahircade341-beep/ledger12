@@ -7,8 +7,8 @@
     </linearGradient>
     <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#60a5fa"/>
-      <stop offset="50%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#1d4ed8"/>
+      <stop offset="50%" style="stop-color:#818cf8"/>
+      <stop offset="100%" style="stop-color:#22d3ee"/>
     </linearGradient>
     <radialGradient id="glowBlue" cx="50%" cy="50%" r="50%">
       <stop offset="0%" style="stop-color:rgba(59,130,246,0.28)"/>
@@ -41,7 +41,7 @@
   <!-- Brand name -->
   <text x="330" y="300" font-family="sans-serif" font-size="86" font-weight="800" fill="#ffffff" letter-spacing="-1">DukaHub</text>
   <rect x="548" y="242" width="96" height="52" rx="26" fill="url(#brandGrad)"/>
-  <text x="596" y="278" font-family="sans-serif" font-size="30" font-weight="700" fill="#ffffff" text-anchor="middle">V2</text>
+  <text x="596" y="278" font-family="sans-serif" font-size="30" font-weight="700" fill="#ffffff" text-anchor="middle">V3</text>
 
   <!-- Tagline -->
   <text x="332" y="372" font-family="sans-serif" font-size="34" fill="#93c5fd">POS · Inventory · Daftari for Kenyan shops</text>

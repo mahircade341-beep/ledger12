@@ -181,10 +181,10 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg"
-              style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
+              style={{ background: 'var(--gradient-aurora)', boxShadow: 'var(--btn-primary-shadow)' }}>
               <span className="text-lg font-extrabold text-white">D</span>
             </div>
-            <span className="font-bold text-lg tracking-tight">DukaHub <span className="text-[var(--text-muted)] font-medium text-sm">v2</span></span>
+            <span className="font-bold text-lg tracking-tight">DukaHub <span className="text-[var(--text-muted)] font-medium text-sm">v3</span></span>
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
             <a href="#features" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Features</a>
@@ -203,18 +203,23 @@ export default function Landing() {
       {/* ── Hero ── */}
       <section id="top" tabIndex={-1} className="relative pt-16 pb-20 sm:pt-24 sm:pb-28">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 badge-v2-success text-xs mb-6 animate-fade-in-v2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Free for Kenyan shops · No card required
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 text-xs mb-6 animate-fade-in-v2">
+            <span className="inline-flex items-center gap-2 badge-v2-success">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse" />
+              Free for Kenyan shops · No card required
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold text-[var(--text-secondary)] bg-[var(--accent-dim)] border border-[var(--border-hover)]">
+              <span className="text-gradient-aurora font-extrabold">DukaHub V3</span> — Faster checkout · Deeper insights
+            </span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] max-w-3xl mx-auto animate-spring-up">
             Stop losing stock. Track every{' '}
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">M-Pesa shilling</span>.
+            <span className="bg-gradient-to-r from-[var(--color-success)] to-[var(--color-info)] bg-clip-text text-transparent">M-Pesa shilling</span>.
           </h1>
           <p className="mt-5 text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed animate-spring-up" style={{ animationDelay: '80ms' }}>
-            Manage your shop from your phone or laptop. Track inventory, record cash &amp; M-Pesa sales,
-            and see your daily profits in real time — built for how Kenyan dukas actually run.
+            The sharper V3: ring up sales in seconds, watch stock and profit update live, and reconcile
+            every M-Pesa shilling — from your phone or laptop. Built for how Kenyan dukas actually run.
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 animate-spring-up" style={{ animationDelay: '160ms' }}>
@@ -229,7 +234,7 @@ export default function Landing() {
           </div>
 
           <p className="mt-5 text-xs text-[var(--text-muted)] animate-fade-in-v2">
-            Setup takes under 1 minute · Works offline · Your data stays yours
+            Setup takes under 1 minute · Works offline · Your data stays yours · Free forever
           </p>
 
           {/* ── Product mockup ── */}
@@ -278,7 +283,7 @@ export default function Landing() {
                       <span>Total</span><span className="font-mono">KES 975</span>
                     </div>
                     <div className="mt-1.5 rounded-lg py-1.5 text-center text-[11px] font-bold text-white"
-                      style={{ background: 'var(--gradient-brand)', boxShadow: 'var(--btn-primary-shadow)' }}>
+                      style={{ background: 'var(--gradient-aurora)', boxShadow: 'var(--btn-primary-shadow)' }}>
                       Charge KES 975
                     </div>
                   </div>
@@ -299,7 +304,7 @@ export default function Landing() {
             { v: '45+', l: 'Counties across Kenya' },
           ].map((s) => (
             <div key={s.l}>
-              <p className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-[var(--accent-secondary)] to-emerald-400 bg-clip-text text-transparent">{s.v}</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-gradient-aurora">{s.v}</p>
               <p className="text-[11px] text-[var(--text-muted)] mt-0.5">{s.l}</p>
             </div>
           ))}
@@ -311,7 +316,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Everything a modern duka needs</h2>
-            <p className="mt-3 text-[var(--text-secondary)]">Built for the counter, the shelf, and the phone in your pocket.</p>
+            <p className="mt-3 text-[var(--text-secondary)]">V3 is faster at the counter and sharper on profit insights — everything below runs on your phone or laptop.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -366,7 +371,7 @@ export default function Landing() {
                 className={`card-v2 p-6 transition-all duration-500 ${
                   revealed.includes(`t${i}`) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}>
-                <div className="flex gap-1 mb-3 text-amber-400 text-sm">★★★★★</div>
+                <div className="flex gap-1 mb-3 text-[var(--color-warning)] text-sm">★★★★★</div>
                 <blockquote className="text-sm text-[var(--text-secondary)] leading-relaxed">“{t.quote}”</blockquote>
                 <figcaption className="mt-5 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--accent-primary)] to-emerald-500 flex items-center justify-center text-sm font-bold text-white shrink-0">
@@ -392,14 +397,14 @@ export default function Landing() {
           </div>
           <div className="max-w-md mx-auto">
             <div className="card-v2 p-8 text-center relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[var(--accent-primary)] via-emerald-400 to-[var(--accent-primary)]" />
+              <div className="absolute top-0 inset-x-0 h-1" style={{ background: 'var(--gradient-aurora)' }} />
               <div className="text-5xl font-extrabold mb-1">KES 0</div>
               <p className="text-sm text-[var(--text-muted)] mb-5">per month · forever · for Kenyan shops</p>
               <ul className="text-sm text-[var(--text-secondary)] space-y-2.5 mb-7 text-left max-w-xs mx-auto">
-                <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> Unlimited products &amp; transactions</li>
-                <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> POS, inventory, Daftari &amp; insights</li>
-                <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> Offline mode &amp; home-screen app</li>
-                <li className="flex items-center gap-2"><span className="text-emerald-400">✓</span> No credit card, ever</li>
+                <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> Unlimited products &amp; transactions</li>
+                <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> POS, inventory, Daftari &amp; insights</li>
+                <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> Offline mode &amp; home-screen app</li>
+                <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> No credit card, ever</li>
               </ul>
               <Link to="/login?mode=signup" className="btn-v2-primary w-full py-3.5">
                 Create your free shop
@@ -492,7 +497,7 @@ export default function Landing() {
                     <p className="font-semibold text-sm">WhatsApp support</p>
                     <p className="text-xs text-[var(--text-muted)] font-mono">{SUPPORT_WA_DISPLAY} · Mon–Sat, 8am–8pm</p>
                   </div>
-                  <span className="ml-auto text-[var(--text-muted)] group-hover:text-emerald-400 transition-colors">→</span>
+                  <span className="ml-auto text-[var(--text-muted)] group-hover:text-[var(--color-success)] transition-colors">→</span>
                 </a>
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
@@ -504,7 +509,7 @@ export default function Landing() {
                     <p className="font-semibold text-sm">Email</p>
                     <p className="text-xs text-[var(--text-muted)] font-mono truncate">{SUPPORT_EMAIL}</p>
                   </div>
-                  <span className="ml-auto text-[var(--text-muted)] group-hover:text-blue-400 transition-colors">→</span>
+                  <span className="ml-auto text-[var(--text-muted)] group-hover:text-[var(--text-accent)] transition-colors">→</span>
                 </a>
               </div>
               <div className="mt-6 badge-v2-info">
@@ -588,7 +593,7 @@ export default function Landing() {
           style={{ background: 'radial-gradient(circle at 50% 120%, rgba(59,130,246,0.15), transparent 60%)' }} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center relative">
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-            Your duka, running like a <span className="bg-gradient-to-r from-[var(--accent-secondary)] to-emerald-400 bg-clip-text text-transparent">business</span>
+            Your duka, running like a <span className="text-gradient-aurora">business</span>
           </h2>
           <p className="mt-4 text-lg text-[var(--text-secondary)]">Join over 1,000 Kenyan shop owners who stopped guessing and started knowing.</p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -612,7 +617,7 @@ export default function Landing() {
                   style={{ background: 'var(--gradient-brand)' }}>
                   <span className="text-sm font-extrabold text-white">D</span>
                 </div>
-                <span className="font-bold">DukaHub v2</span>
+                <span className="font-bold">DukaHub v3</span>
               </div>
               <p className="text-xs text-[var(--text-muted)] leading-relaxed max-w-xs">
                 The simple POS and retail management system built for Kenyan shops. Free forever.

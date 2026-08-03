@@ -39,7 +39,7 @@
     --item-hover-bg: rgba(39, 53, 72, 0.5);
 
     /* ── Buttons ── */
-    --btn-primary-bg: #3b82f6;
+    --btn-primary-bg: #2563eb;
     --btn-primary-text: #ffffff;
     --btn-primary-shadow: 0 2px 12px rgba(59, 130, 246, 0.25);
     --btn-primary-hover-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
@@ -55,9 +55,15 @@
     /* ── Text ── */
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-muted: #7f90a9;
     --text-inverse: #0f172a;
     --text-accent: #60a5fa;
+
+    /* ── Semantic colors (WCAG AA theme-aware) ── */
+    --color-success: #34d399;
+    --color-danger: #f87171;
+    --color-warning: #fbbf24;
+    --color-info: #22d3ee;
 
     /* ── Borders ── */
     --border-color: rgba(148, 163, 184, 0.08);
@@ -89,7 +95,10 @@
     --selection-color: #ffffff;
 
     /* ── Gradient Presets ── */
-    --gradient-brand: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    --gradient-brand: linear-gradient(135deg, #2563eb, #1d4ed8);
+    --gradient-aurora: linear-gradient(120deg, #60a5fa 0%, #818cf8 45%, #22d3ee 100%);
+    --gradient-aurora-soft: linear-gradient(120deg, rgba(96,165,250,0.16), rgba(129,140,248,0.12) 45%, rgba(34,211,238,0.14));
+    --aurora-glow: radial-gradient(130% 130% at 30% 15%, rgba(96,165,250,0.16) 0%, rgba(129,140,248,0.10) 40%, rgba(34,211,238,0.08) 65%, transparent 72%);
     --gradient-surface: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.4) 100%);
   }
 
@@ -127,7 +136,7 @@
     --item-hover-bg: rgba(226, 232, 240, 0.6);
 
     /* ── Buttons ── */
-    --btn-primary-bg: #2563eb;
+    --btn-primary-bg: #1d4ed8;
     --btn-primary-text: #ffffff;
     --btn-primary-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
     --btn-primary-hover-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
@@ -143,9 +152,15 @@
     /* ── Text ── */
     --text-primary: #0f172a;
     --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-muted: #556170;
     --text-inverse: #ffffff;
     --text-accent: #2563eb;
+
+    /* ── Semantic colors (WCAG AA theme-aware) ── */
+    --color-success: #065f46;
+    --color-danger: #b91c1c;
+    --color-warning: #92400e;
+    --color-info: #155e75;
 
     /* ── Borders ── */
     --border-color: rgba(0, 0, 0, 0.05);
@@ -175,7 +190,10 @@
     --body-bg: #f0f4f8;
     --selection-bg: rgba(37, 99, 235, 0.12);
     --selection-color: #ffffff;
-    --gradient-brand: linear-gradient(135deg, #2563eb, #1d4ed8);
+    --gradient-brand: linear-gradient(135deg, #1d4ed8, #1e40af);
+    --gradient-aurora: linear-gradient(120deg, #2563eb 0%, #7c3aed 50%, #0e7490 100%);
+    --gradient-aurora-soft: linear-gradient(120deg, rgba(37,99,235,0.10), rgba(124,58,237,0.08) 45%, rgba(14,116,144,0.10));
+    --aurora-glow: radial-gradient(130% 130% at 30% 15%, rgba(37,99,235,0.10) 0%, rgba(124,58,237,0.07) 40%, rgba(14,116,144,0.06) 65%, transparent 72%);
     --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 100%);
   }
 
@@ -351,7 +369,15 @@
   }
   .btn-v2-primary:hover:not(:disabled) {
     box-shadow: var(--btn-primary-hover-shadow);
-    opacity: 0.92;
+    transform: translateY(-1px);
+    filter: saturate(1.08);
+    opacity: 0.96;
+  }
+  .text-gradient-aurora {
+    background: var(--gradient-aurora);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .btn-v2-secondary {
     @apply btn-v2;
@@ -415,10 +441,10 @@
     border-radius: 12px;
     font-size: 0.875rem;
     font-weight: 600;
-    background: var(--nav-active-bg);
-    color: var(--brand);
+    background: var(--gradient-aurora-soft);
+    color: var(--text-accent);
     border: 1px solid var(--nav-active-border);
-    box-shadow: 0 0 12px var(--accent-glow);
+    box-shadow: 0 0 14px var(--brand-glow);
   }
 
   /* ── V2 Badges ── */
@@ -433,9 +459,9 @@
     letter-spacing: 0.01em;
   }
   .badge-v2-primary { @apply badge-v2; background: var(--btn-primary-bg); color: var(--btn-primary-text); }
-  .badge-v2-success { @apply badge-v2; background: rgba(5, 150, 105, 0.12); color: #10b981; border: 1px solid rgba(5, 150, 105, 0.2); }
-  .badge-v2-danger { @apply badge-v2; background: rgba(220, 38, 38, 0.12); color: #ef4444; border: 1px solid rgba(220, 38, 38, 0.2); }
-  .badge-v2-warning { @apply badge-v2; background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+  .badge-v2-success { @apply badge-v2; background: rgba(5, 150, 105, 0.12); color: var(--color-success); border: 1px solid rgba(5, 150, 105, 0.2); }
+  .badge-v2-danger { @apply badge-v2; background: rgba(220, 38, 38, 0.12); color: var(--color-danger); border: 1px solid rgba(220, 38, 38, 0.2); }
+  .badge-v2-warning { @apply badge-v2; background: rgba(245, 158, 11, 0.12); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.2); }
   .badge-v2-info { @apply badge-v2; background: var(--accent-dim); color: var(--text-accent); border: 1px solid var(--nav-active-border); }
 
   /* ── V2 Stat Cards ── */
@@ -452,12 +478,19 @@
     border-radius: 0 3px 3px 0;
   }
   .stat-v2-default::before { background: var(--text-primary); }
-  .stat-v2-success::before { background: #10b981; }
-  .stat-v2-danger::before { background: #ef4444; }
-  .stat-v2-accent::before { background: var(--brand); }
-  .stat-v2-warning::before { background: #f59e0b; }
+  .stat-v2-success::before { background: var(--color-success); }
+  .stat-v2-danger::before { background: var(--color-danger); }
+  .stat-v2-accent::before { background: var(--gradient-aurora); }
+  .stat-v2-warning::before { background: var(--color-warning); }
   .stat-label-v2 { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
   .stat-value-v2 { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+  .stat-v2-accent .stat-value-v2 {
+    background: var(--gradient-aurora);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .aurora-glow { background: var(--aurora-glow); }
 
   /* ── V2 Items ── */
   .item-v2 {
@@ -556,13 +589,13 @@
     @apply alert-v2;
     background: rgba(5, 150, 105, 0.1);
     border: 1px solid rgba(5, 150, 105, 0.2);
-    color: #34d399;
+    color: var(--color-success);
   }
   .alert-v2-error {
     @apply alert-v2;
     background: rgba(220, 38, 38, 0.1);
     border: 1px solid rgba(220, 38, 38, 0.2);
-    color: #f87171;
+    color: var(--color-danger);
   }
   .alert-v2-info {
     @apply alert-v2;
@@ -574,7 +607,7 @@
     @apply alert-v2;
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
+    color: var(--color-warning);
   }
 
   /* ── V2 Table ── */

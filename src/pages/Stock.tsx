@@ -129,19 +129,19 @@ export default function Stock() {
           {outOfStockCount > 0 && (
             <div className="stat-v2 border border-red-500/20 bg-red-500/5">
               <span className="stat-label-v2">Out of Stock</span>
-              <span className="stat-value-v2 text-red-400">{outOfStockCount}</span>
+              <span className="stat-value-v2 text-[var(--color-danger)]">{outOfStockCount}</span>
             </div>
           )}
           {lowStockCount > 0 && (
             <div className="stat-v2 border border-amber-500/20 bg-amber-500/5">
               <span className="stat-label-v2">Low Stock</span>
-              <span className="stat-value-v2 text-amber-400">{lowStockCount}</span>
+              <span className="stat-value-v2 text-[var(--color-warning)]">{lowStockCount}</span>
             </div>
           )}
           {outOfStockCount === 0 && lowStockCount === 0 && (
             <div className="stat-v2 stat-v2-accent col-span-2">
               <span className="stat-label-v2">Status</span>
-              <span className="stat-value-v2 text-emerald-400 flex items-center gap-1">
+              <span className="stat-value-v2 text-[var(--color-success)] flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 All Stocked
               </span>
@@ -161,7 +161,7 @@ export default function Stock() {
               className="input-v2 w-full pl-9" placeholder="Search existing products to restock..." />
           </div>
           {search && (
-            <button onClick={() => setSearch('')} className="btn-ghost p-2 text-xs text-[var(--text-muted)] hover:text-red-400 transition-colors">
+            <button onClick={() => setSearch('')} className="btn-ghost p-2 text-xs text-[var(--text-muted)] hover:text-[var(--color-danger)] transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           )}
@@ -182,7 +182,7 @@ export default function Stock() {
                   <p className="font-medium text-[var(--text-primary)] truncate">{p.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="badge-v2">
-                      Stock: <strong className={p.quantity <= 0 ? 'text-red-400' : 'text-emerald-400'}>{p.quantity}</strong>
+                      Stock: <strong className={p.quantity <= 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}>{p.quantity}</strong>
                     </span>
                     {p.barcode && <span className="text-xs font-mono text-[var(--text-muted)]">{p.barcode}</span>}
                   </div>
@@ -260,8 +260,8 @@ export default function Stock() {
 
             {wholesalePrice <= 0 && (
               <div className="alert-v2-warning">
-                <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-                <p className="text-xs text-amber-400/90">Wholesale price is required — it powers profit tracking in Insights.</p>
+                <svg className="w-4 h-4 text-[var(--color-warning)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                <p className="text-xs text-[var(--color-warning)]">Wholesale price is required — it powers profit tracking in Insights.</p>
               </div>
             )}
 
@@ -321,8 +321,8 @@ export default function Stock() {
             </div>
             {!requiredFieldsFilled && (
               <div className="alert-v2-warning mt-1">
-                <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-                <p className="text-xs text-amber-400">
+                <svg className="w-4 h-4 text-[var(--color-warning)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                <p className="text-xs text-[var(--color-warning)]">
                   Fill in <strong>Product Name</strong>, <strong>Quantity</strong>, <strong>Wholesale</strong>, and <strong>Retail Price</strong> to commit stock
                 </p>
               </div>

@@ -302,7 +302,7 @@ export default function POS() {
     <div className="space-y-4 pb-16 lg:pb-0">
       {/* Offline Banner */}
       {showOfflineBanner && (
-        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 animate-slide-up-v2">
+        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-[var(--color-warning)] animate-slide-up-v2">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 010 12.728m-2.829-2.829a5 5 0 000-7.07m-4.243 4.243a1 1 0 010-1.414" />
           </svg>
@@ -354,7 +354,7 @@ export default function POS() {
 
       {/* Cart Restored Banner */}
       {savedCart.length > 0 && cart.length === savedCart.length && (
-        <div className="p-2.5 rounded-xl text-xs flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400">
+        <div className="p-2.5 rounded-xl text-xs flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-[var(--text-accent)]">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -364,7 +364,7 @@ export default function POS() {
 
       {/* Success message */}
       {successMsg && !receipt && (
-        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 animate-slide-up-v2">
+        <div className="p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-[var(--color-success)] animate-slide-up-v2">
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -385,7 +385,7 @@ export default function POS() {
           <div className="glass-v2-strong rounded-2xl max-w-md w-full p-6 animate-scale-in-v2" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center">
-                <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-4 h-4 text-[var(--color-danger)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>
               </div>
@@ -400,7 +400,7 @@ export default function POS() {
                   className="w-full text-left p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 transition-all duration-200">
                   <div className="flex justify-between text-sm">
                     <span className="text-[var(--text-primary)] font-medium">{new Date(t._creationTime).toLocaleDateString()} {fmtTime(t._creationTime)}</span>
-                    <span className="text-red-400 font-semibold">-KES {t.total.toLocaleString()}</span>
+                    <span className="text-[var(--color-danger)] font-semibold">-KES {t.total.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="badge-v2-info text-[10px]">{t.items.length} items</span>
@@ -519,7 +519,7 @@ export default function POS() {
                   Thank you for your patronage!
                 </p>
                 <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-muted)', opacity: 0.5 }}>
-                  DukaHub v2 · Retail OS
+                  DukaHub v3 · Retail OS
                 </p>
               </div>
             </div>
@@ -615,7 +615,7 @@ export default function POS() {
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left hover:bg-[var(--nav-hover-bg)] transition-colors border-b border-[var(--border-color)] last:border-0">
                       <span className="flex-1 text-[var(--text-primary)] font-medium">{p.name}</span>
                       <span className="text-xs text-[var(--accent-primary)] font-semibold">KES {getPrice(p).toLocaleString()}</span>
-                      {p.quantity > 0 ? <span className="text-xs text-[var(--text-muted)]">{p.quantity} left</span> : <span className="text-xs text-red-400">Out</span>}
+                      {p.quantity > 0 ? <span className="text-xs text-[var(--text-muted)]">{p.quantity} left</span> : <span className="text-xs text-[var(--color-danger)]">Out</span>}
                     </button>
                   ))}
                 </div>
@@ -661,7 +661,7 @@ export default function POS() {
                 {p.image && <ProductHeroImage src={p.image} alt={p.name} className="w-8 h-8 rounded mb-1.5" width={48} height={48} />}
                 <p className="font-medium text-sm truncate">{p.name}</p>
                 <p className="text-xs mt-0.5 text-[var(--accent-primary)]">KES {getPrice(p).toLocaleString()}</p>
-                <p className={`text-xs ${p.quantity > 0 ? 'text-[var(--text-muted)]' : 'text-red-400'}`}>
+                <p className={`text-xs ${p.quantity > 0 ? 'text-[var(--text-muted)]' : 'text-[var(--color-danger)]'}`}>
                   {p.quantity > 0 ? `${p.quantity} in stock` : 'Out of stock'}
                 </p>
               </button>
@@ -714,7 +714,7 @@ export default function POS() {
               </div>
               {cart.length > 0 && (
                 <button onClick={clearCartAll}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 btn-v2-ghost p-1.5">
+                  className="text-xs text-[var(--color-danger)] hover:text-red-300 transition-colors flex items-center gap-1 btn-v2-ghost p-1.5">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                   </svg>
@@ -723,7 +723,10 @@ export default function POS() {
               )}
             </div>
             {cart.length === 0 ? (
-              <p className="text-sm text-[var(--text-muted)] text-center py-6">Cart is empty — add products to get started</p>
+              <div className="py-6 text-center aurora-glow rounded-xl">
+                <div className="text-2xl mb-1.5">🛒</div>
+                <p className="text-sm text-[var(--text-muted)]">Cart is empty — add products to get started</p>
+              </div>
             ) : (
               <div className="space-y-1.5 max-h-52 overflow-y-auto scrollbar-thin mb-3">
                 {cart.map((item: any) => (
@@ -736,7 +739,7 @@ export default function POS() {
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-sm font-semibold text-[var(--accent-primary)]">KES {item.subtotal.toLocaleString()}</span>
                       <button onClick={() => removeFromCart(item.product._id)}
-                        className="text-[var(--text-muted)] hover:text-red-400 transition-colors p-1">
+                        className="text-[var(--text-muted)] hover:text-[var(--color-danger)] transition-colors p-1">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -758,7 +761,7 @@ export default function POS() {
                   className="input-v2 w-24 text-xs ml-auto text-right" placeholder="KES" />
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-sm text-red-400">
+                <div className="flex justify-between text-sm text-[var(--color-danger)]">
                   <span>Discount</span><span>-KES {discount.toLocaleString()}</span>
                 </div>
               )}
@@ -798,15 +801,15 @@ export default function POS() {
                 {selectedDebtor ? (
                   <div className="flex items-center justify-between p-2 bg-[var(--bg-surface2)] rounded-lg">
                     <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg className="w-4 h-4 text-[var(--color-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                       </svg>
                       <div>
                         <p className="text-sm font-medium text-[var(--text-primary)]">{selectedDebtor.name}</p>
-                        <p className="text-xs text-amber-400">Outstanding: KES {((debtors.find((d: any) => d._id === selectedDebtor._id)?.amount || 0) + total).toLocaleString()}</p>
+                        <p className="text-xs text-[var(--color-warning)]">Outstanding: KES {((debtors.find((d: any) => d._id === selectedDebtor._id)?.amount || 0) + total).toLocaleString()}</p>
                       </div>
                     </div>
-                    <button onClick={() => { setSelectedDebtor(null); setDebtorSearch(''); }} className="btn-v2-ghost p-1 text-xs text-red-400">Change</button>
+                    <button onClick={() => { setSelectedDebtor(null); setDebtorSearch(''); }} className="btn-v2-ghost p-1 text-xs text-[var(--color-danger)]">Change</button>
                   </div>
                 ) : (
                   <>
@@ -823,7 +826,7 @@ export default function POS() {
                               <button key={d._id} type="button" onMouseDown={() => { setSelectedDebtor(d); setDebtorSearch(''); setShowDebtorDropdown(false); }}
                                 className="w-full flex items-center gap-3 px-3 py-2 text-sm text-left hover:bg-[var(--nav-hover-bg)] transition-colors border-b border-[var(--border-color)] last:border-0">
                                 <span className="flex-1 text-[var(--text-primary)]">{d.name}</span>
-                                <span className="text-xs text-amber-400">KES {d.amount.toLocaleString()}</span>
+                                <span className="text-xs text-[var(--color-warning)]">KES {d.amount.toLocaleString()}</span>
                               </button>
                             ))}
                           {debtors.filter((d: any) => d.name.toLowerCase().includes(debtorSearch.toLowerCase())).length === 0 && (

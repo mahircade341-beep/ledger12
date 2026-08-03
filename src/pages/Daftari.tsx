@@ -80,9 +80,9 @@ export default function Daftari() {
 
       {/* V2 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="stat-v2"><span className="stat-label-v2">Active Debtors</span><span className="stat-value-v2 text-cyan-400">{debtors.filter((d) => d.status === 'active').length}</span></div>
-        <div className="stat-v2"><span className="stat-label-v2">Cleared</span><span className="stat-value-v2 text-emerald-400">{debtors.filter((d) => d.status === 'cleared').length}</span></div>
-        <div className="stat-v2 stat-v2-accent col-span-2"><span className="stat-label-v2">Total Outstanding</span><span className="stat-value-v2 text-amber-400">KES {totalOutstanding.toLocaleString()}</span></div>
+        <div className="stat-v2"><span className="stat-label-v2">Active Debtors</span><span className="stat-value-v2 text-[var(--color-info)]">{debtors.filter((d) => d.status === 'active').length}</span></div>
+        <div className="stat-v2"><span className="stat-label-v2">Cleared</span><span className="stat-value-v2 text-[var(--color-success)]">{debtors.filter((d) => d.status === 'cleared').length}</span></div>
+        <div className="stat-v2 stat-v2-accent col-span-2"><span className="stat-label-v2">Total Outstanding</span><span className="stat-value-v2 text-[var(--color-warning)]">KES {totalOutstanding.toLocaleString()}</span></div>
       </div>
 
       {/* V2 New Debtor form */}
@@ -124,10 +124,10 @@ export default function Daftari() {
                 </div>
                 {debtor.phone && <p className="text-xs text-[var(--text-muted)] mt-0.5">{debtor.phone}</p>}
                 {debtor.notes && <p className="text-xs text-[var(--text-muted)] mt-1">{debtor.notes}</p>}
-                {payments.length > 0 && <p className="text-xs text-emerald-400 mt-1">KES {totalPaid.toLocaleString()} paid so far</p>}
+                {payments.length > 0 && <p className="text-xs text-[var(--color-success)] mt-1">KES {totalPaid.toLocaleString()} paid so far</p>}
               </div>
               <div className="text-right">
-                <p className={`text-xl font-bold ${debtor.status === 'active' ? 'text-amber-400' : 'text-emerald-400'}`}>KES {debtor.amount.toLocaleString()}</p>
+                <p className={`text-xl font-bold ${debtor.status === 'active' ? 'text-[var(--color-warning)]' : 'text-[var(--color-success)]'}`}>KES {debtor.amount.toLocaleString()}</p>
                 {totalOwed > debtor.amount && <p className="text-[10px] text-[var(--text-muted)]">of KES {totalOwed.toLocaleString()} total</p>}
               </div>
             </div>
@@ -164,7 +164,7 @@ export default function Daftari() {
                           return (
                             <tr key={p._id} className="border-b border-[var(--border-color)] last:border-0">
                               <td className="py-1.5 pr-2 text-[var(--text-secondary)]" title={new Date(p._creationTime).toLocaleDateString() + ' ' + fmtTime(p._creationTime)}>{fmtTimeRelative(p._creationTime)}</td>
-                              <td className="py-1.5 px-2 text-right text-emerald-400 font-medium">-KES {p.amount.toLocaleString()}</td>
+                              <td className="py-1.5 px-2 text-right text-[var(--color-success)] font-medium">-KES {p.amount.toLocaleString()}</td>
                               <td className="py-1.5 pl-2 text-right text-[var(--text-secondary)] font-medium">KES {remaining.toLocaleString()}</td>
                             </tr>
                           );

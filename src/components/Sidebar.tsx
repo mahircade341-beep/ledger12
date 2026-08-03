@@ -80,7 +80,7 @@ export default function Sidebar() {
           </button>
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm"
-              style={{ background: 'var(--gradient-brand)', color: 'var(--btn-primary-text)' }}>
+              style={{ background: 'var(--gradient-aurora)', color: 'var(--btn-primary-text)' }}>
               D
             </div>
             <div className="flex flex-col">
@@ -103,7 +103,7 @@ export default function Sidebar() {
               )}
             </span>
           </button>
-          <button onClick={signOut} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-red-400 hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Sign Out" aria-label="Sign Out">
+          <button onClick={signOut} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--btn-ghost-hover-bg)] transition-all" title="Sign Out" aria-label="Sign Out">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
             </svg>
@@ -124,12 +124,12 @@ export default function Sidebar() {
         {/* ── V2 Sidebar Header ── */}
         <div className="hidden lg:flex items-center gap-3 px-5 py-5 border-b border-[var(--border-color)]">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-lg shadow-glow"
-            style={{ background: 'var(--gradient-brand)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}>
+            style={{ background: 'var(--gradient-aurora)', color: 'var(--btn-primary-text)', boxShadow: 'var(--btn-primary-shadow)' }}>
             D
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="font-bold text-[var(--text-primary)] truncate text-base">{storeName}</h1>
-            <p className="text-[11px] text-[var(--text-muted)] font-medium leading-tight">Retail Management · v2</p>
+            <p className="text-[11px] text-[var(--text-muted)] font-medium leading-tight">Retail Management · v3</p>
           </div>
         </div>
 
@@ -195,7 +195,7 @@ export default function Sidebar() {
           {/* User info */}
           <div className="flex items-center gap-3 px-1 py-0.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: 'var(--gradient-brand)', color: 'var(--btn-primary-text)' }}>
+              style={{ background: 'var(--gradient-aurora)', color: 'var(--btn-primary-text)' }}>
               {profile?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">

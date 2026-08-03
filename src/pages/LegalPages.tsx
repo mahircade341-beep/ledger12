@@ -251,7 +251,7 @@ function LegalShell({
               >
                 <span className="text-sm font-extrabold text-white">D</span>
               </div>
-              <span className="font-bold text-[var(--text-primary)]">DukaHub v2</span>
+              <span className="font-bold text-[var(--text-primary)]">DukaHub v3</span>
             </Link>
             <Link
               to="/"

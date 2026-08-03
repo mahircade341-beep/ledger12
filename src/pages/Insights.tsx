@@ -163,37 +163,37 @@ export default function Insights() {
 
       {/* V2 KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="stat-v2">
+        <div className="stat-v2 stat-v2-accent">
           <div className="flex items-center justify-between w-full">
             <span className="stat-label-v2">Gross Sales</span>
-            <span className={`text-xs font-medium ${salesGrowth >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{salesGrowth >= 0 ? '↑' : '↓'} {Math.abs(salesGrowth).toFixed(0)}%</span>
+            <span className={`text-xs font-medium ${salesGrowth >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{salesGrowth >= 0 ? '↑' : '↓'} {Math.abs(salesGrowth).toFixed(0)}%</span>
           </div>
-          <span className="stat-value-v2 text-emerald-400">KES {grossSales.toLocaleString()}</span>
+          <span className="stat-value-v2">KES {grossSales.toLocaleString()}</span>
           <span className="stat-desc-v2">{numTransactions} txns vs {prevNumTransactions} prev</span>
         </div>
         <div className="stat-v2">
           <span className="stat-label-v2">Avg. Ticket</span>
-          <span className="stat-value-v2 text-cyan-400">KES {avgTicket.toLocaleString()}</span>
+          <span className="stat-value-v2 text-[var(--color-info)]">KES {avgTicket.toLocaleString()}</span>
           <span className="stat-desc-v2">{period} average</span>
         </div>
         <div className="stat-v2">
-          <span className={`stat-label-v2 ${profitData.itemsMissingWholesale > 0 ? 'text-amber-400' : ''}`}>
+          <span className={`stat-label-v2 ${profitData.itemsMissingWholesale > 0 ? 'text-[var(--color-warning)]' : ''}`}>
             Conf. Profit
             {profitData.itemsMissingWholesale > 0 && <span className="badge-v2-warning ml-1 text-[10px] py-0.5">⚠</span>}
           </span>
-          <span className={`stat-value-v2 ${profitData.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {profitData.totalProfit.toLocaleString()}</span>
+          <span className={`stat-value-v2 ${profitData.totalProfit >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>KES {profitData.totalProfit.toLocaleString()}</span>
           <span className="stat-desc-v2">{profitData.margin.toFixed(1)}% margin</span>
         </div>
         <div className="stat-v2">
           <span className="stat-label-v2">Cost of Goods</span>
-          <span className="stat-value-v2 text-amber-400">KES {profitData.totalCost.toLocaleString()}</span>
+          <span className="stat-value-v2 text-[var(--color-warning)]">KES {profitData.totalCost.toLocaleString()}</span>
           <span className="stat-desc-v2">{profitData.totalItems} items sold</span>
         </div>
         <div className="stat-v2">
           <span className="stat-label-v2">Txns This {period.charAt(0).toUpperCase() + period.slice(1)}</span>
           <div className="flex items-end gap-2">
-            <span className="stat-value-v2 text-cyan-400">{numTransactions}</span>
-            <span className={`text-xs font-medium mb-1 ${txnGrowth >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{txnGrowth >= 0 ? '↑' : '↓'} {Math.abs(txnGrowth).toFixed(0)}%</span>
+            <span className="stat-value-v2 text-[var(--color-info)]">{numTransactions}</span>
+            <span className={`text-xs font-medium mb-1 ${txnGrowth >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{txnGrowth >= 0 ? '↑' : '↓'} {Math.abs(txnGrowth).toFixed(0)}%</span>
           </div>
           <span className="stat-desc-v2">Discounts: KES {totalDiscounts.toLocaleString()}</span>
         </div>
@@ -201,10 +201,10 @@ export default function Insights() {
 
       {profitData.itemsMissingWholesale > 0 && (
         <div className="alert-v2-warning">
-          <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+          <svg className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
           <div>
-            <p className="text-sm font-medium text-amber-400">Wholesale Prices Missing</p>
-            <p className="text-xs text-amber-400/70 mt-0.5">{profitData.itemsMissingWholesale} of {profitData.totalItems} items sold have no wholesale price set. Profit shown is for items with wholesale data only. Edit products in Stock to add wholesale prices.</p>
+            <p className="text-sm font-medium text-[var(--color-warning)]">Wholesale Prices Missing</p>
+            <p className="text-xs text-[var(--color-warning)] mt-0.5">{profitData.itemsMissingWholesale} of {profitData.totalItems} items sold have no wholesale price set. Profit shown is for items with wholesale data only. Edit products in Stock to add wholesale prices.</p>
           </div>
         </div>
       )}
@@ -215,9 +215,9 @@ export default function Insights() {
           <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 to-emerald-500/30 rounded-t-xl -mt-[1px] mx-auto" />
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Payment Breakdown</h2>
           <div className="space-y-3">
-            {[{ label: 'Cash', icon: <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, amount: expectedCash, count: cashTransactions.length, color: 'text-emerald-400' },
-              { label: 'M-Pesa', icon: <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>, amount: mpesaTotal, count: mpesaTransactions.length, color: 'text-cyan-400' },
-              { label: 'Debt (Credit Sales)', icon: <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>, amount: debtSalesTotal, count: debtTransactions.length, color: 'text-amber-400' },
+            {[{ label: 'Cash', icon: <svg className="w-4 h-4 text-[var(--color-success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, amount: expectedCash, count: cashTransactions.length, color: 'text-[var(--color-success)]' },
+              { label: 'M-Pesa', icon: <svg className="w-4 h-4 text-[var(--color-info)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>, amount: mpesaTotal, count: mpesaTransactions.length, color: 'text-[var(--color-info)]' },
+              { label: 'Debt (Credit Sales)', icon: <svg className="w-4 h-4 text-[var(--color-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>, amount: debtSalesTotal, count: debtTransactions.length, color: 'text-[var(--color-warning)]' },
             ].map(({ label, icon, amount, count, color }) => (
               <div key={label} className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl">
                 <span className="text-sm text-[var(--text-secondary)] flex items-center gap-2">{icon}{label}</span>
@@ -226,7 +226,7 @@ export default function Insights() {
             ))}
             <div className="divider-v2 !my-0" />
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[var(--accent-dim)] to-transparent rounded-xl">
-              <span className="text-sm font-semibold text-[var(--text-primary)]">Total Revenue</span><span className="text-lg font-bold text-cyan-400">KES {grossSales.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-[var(--text-primary)]">Total Revenue</span><span className="text-lg font-bold text-[var(--color-info)]">KES {grossSales.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -244,20 +244,20 @@ export default function Insights() {
             <span className="badge-v2-success">{profitData.margin.toFixed(1)}% Margin</span>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Gross Sales</span><span className="text-sm font-bold text-emerald-400">KES {grossSales.toLocaleString()}</span></div>
-            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Cost of Goods Sold</span><span className="text-sm font-bold text-amber-400">-KES {profitData.totalCost.toLocaleString()}</span></div>
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Gross Sales</span><span className="text-sm font-bold text-[var(--color-success)]">KES {grossSales.toLocaleString()}</span></div>
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Cost of Goods Sold</span><span className="text-sm font-bold text-[var(--color-warning)]">-KES {profitData.totalCost.toLocaleString()}</span></div>
             <div className="divider-v2 !my-0" />
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-500/5 to-transparent rounded-xl">
                 <div><span className="text-sm font-semibold text-[var(--text-primary)]">Confirmed Net Profit</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Based on products with wholesale prices</p></div>
-                <span className={`text-lg font-bold ${profitData.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <span className={`text-lg font-bold ${profitData.totalProfit >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
                   KES {profitData.totalProfit.toLocaleString()}
                 </span>
             </div>
             {profitData.itemsMissingWholesale > 0 && (
-              <div className="alert-v2-warning"><svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-amber-400">Incomplete Data</p><p className="text-xs text-amber-400/70 mt-0.5">{profitData.itemsMissingWholesale} item(s) lack wholesale prices. Set them in Stock for accurate profit tracking.</p></div></div>
+              <div className="alert-v2-warning"><svg className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-[var(--color-warning)]">Incomplete Data</p><p className="text-xs text-[var(--color-warning)] mt-0.5">{profitData.itemsMissingWholesale} item(s) lack wholesale prices. Set them in Stock for accurate profit tracking.</p></div></div>
             )}
             {profitData.totalProfit < 0 && profitData.itemsMissingWholesale === 0 && (
-              <div className="alert-v2 p-3 border-red-500/20 bg-red-500/5 flex items-start gap-2"><svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-red-400">Negative Profit</p><p className="text-xs text-red-400/70 mt-0.5">Wholesale costs exceed sales. Review your pricing.</p></div></div>
+              <div className="alert-v2 p-3 border-red-500/20 bg-red-500/5 flex items-start gap-2"><svg className="w-5 h-5 text-[var(--color-danger)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-[var(--color-danger)]">Negative Profit</p><p className="text-xs text-[var(--color-danger)] mt-0.5">Wholesale costs exceed sales. Review your pricing.</p></div></div>
             )}
           </div>
         </div>
@@ -276,20 +276,20 @@ export default function Insights() {
           </div>
           <p className="text-xs text-[var(--text-muted)] mb-3">Tracks physical cash and mobile money only. Credit/debt is tracked separately below.</p>
           <div className="space-y-3">
-            {openingBalance > 0 && <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Opening Balance</span><span className="text-sm font-bold text-emerald-400">KES {openingBalance.toLocaleString()}</span></div>}
-            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Cash Sales (today)</span><span className="text-sm font-bold text-emerald-400">KES {expectedCash.toLocaleString()}</span></div>
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-500/5 to-transparent rounded-xl border-l-2 border-emerald-500"><div><span className="text-sm text-[var(--text-secondary)]">Expected Cash in Drawer</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Opening + Cash Sales</p></div><span className="text-sm font-bold text-emerald-400">KES {totalExpectedCash.toLocaleString()}</span></div>
-            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">M-Pesa Collected</span><span className="text-sm font-bold text-cyan-400">KES {mpesaTotal.toLocaleString()}</span></div>
-            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Cash Out (Payouts)</span><span className="text-sm font-bold text-red-400">-KES {totalPayoutsAmt.toLocaleString()}</span></div>
+            {openingBalance > 0 && <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Opening Balance</span><span className="text-sm font-bold text-[var(--color-success)]">KES {openingBalance.toLocaleString()}</span></div>}
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Cash Sales (today)</span><span className="text-sm font-bold text-[var(--color-success)]">KES {expectedCash.toLocaleString()}</span></div>
+            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-500/5 to-transparent rounded-xl border-l-2 border-emerald-500"><div><span className="text-sm text-[var(--text-secondary)]">Expected Cash in Drawer</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Opening + Cash Sales</p></div><span className="text-sm font-bold text-[var(--color-success)]">KES {totalExpectedCash.toLocaleString()}</span></div>
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">M-Pesa Collected</span><span className="text-sm font-bold text-[var(--color-info)]">KES {mpesaTotal.toLocaleString()}</span></div>
+            <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl"><span className="text-sm text-[var(--text-secondary)]">Cash Out (Payouts)</span><span className="text-sm font-bold text-[var(--color-danger)]">-KES {totalPayoutsAmt.toLocaleString()}</span></div>
             <div className="divider-v2 !my-0" />
             <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl">
               <div><span className="text-sm font-semibold text-[var(--text-primary)]">Net Cash Position</span><p className="text-xs text-[var(--text-muted)] mt-0.5">Expected cash in drawer − Payouts</p></div>
-              <span className={`text-lg font-bold ${totalExpectedCash - totalPayoutsAmt >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {(totalExpectedCash - totalPayoutsAmt).toLocaleString()}</span>
+              <span className={`text-lg font-bold ${totalExpectedCash - totalPayoutsAmt >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>KES {(totalExpectedCash - totalPayoutsAmt).toLocaleString()}</span>
             </div>
             {totalExpectedCash - totalPayoutsAmt < 0 ? (
-              <div className="alert-v2 p-3 border-red-500/20 bg-red-500/5 flex items-start gap-2"><svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-red-400">Discrepancy Detected</p><p className="text-xs text-red-400/70 mt-0.5">Payouts exceed expected cash. Review entries.</p></div></div>
+              <div className="alert-v2 p-3 border-red-500/20 bg-red-500/5 flex items-start gap-2"><svg className="w-5 h-5 text-[var(--color-danger)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg><div><p className="text-sm font-medium text-[var(--color-danger)]">Discrepancy Detected</p><p className="text-xs text-[var(--color-danger)] mt-0.5">Payouts exceed expected cash. Review entries.</p></div></div>
             ) : numTransactions > 0 && (
-              <div className="alert-v2 p-3 border-emerald-500/20 bg-emerald-500/5 flex items-start gap-2"><svg className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div><p className="text-sm font-medium text-emerald-400">All Clear</p><p className="text-xs text-emerald-400/70 mt-0.5">Physical cash and M-Pesa reconcile.</p></div></div>
+              <div className="alert-v2 p-3 border-emerald-500/20 bg-emerald-500/5 flex items-start gap-2"><svg className="w-5 h-5 text-[var(--color-success)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div><p className="text-sm font-medium text-[var(--color-success)]">All Clear</p><p className="text-xs text-[var(--color-success)] mt-0.5">Physical cash and M-Pesa reconcile.</p></div></div>
             )}
           </div>
         </div>
@@ -310,16 +310,16 @@ export default function Insights() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/5 to-transparent rounded-xl border-l-2 border-blue-500">
               <div><span className="text-sm text-[var(--text-secondary)]">Total Outstanding Debt</span><p className="text-xs text-[var(--text-muted)] mt-0.5">From Daftari ledger</p></div>
-              <span className="text-lg font-bold text-blue-400">KES {totalOutstandingDebt.toLocaleString()}</span>
+              <span className="text-lg font-bold text-[var(--text-accent)]">KES {totalOutstandingDebt.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-[var(--bg-surface2)] rounded-xl">
               <span className="text-sm text-[var(--text-secondary)]">Credit Sales (this period)</span>
-              <span className="text-sm font-semibold text-amber-400">KES {debtSalesTotal.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-[var(--color-warning)]">KES {debtSalesTotal.toLocaleString()}</span>
             </div>
             {totalOutstandingDebt > 0 && (
               <div className="alert-v2-warning">
-                <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-                <div><p className="text-sm font-medium text-amber-400">Uncollected Revenue</p><p className="text-xs text-amber-400/70 mt-0.5">KES {totalOutstandingDebt.toLocaleString()} is owed by debtors. Visit Daftari to follow up.</p></div>
+                <svg className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                <div><p className="text-sm font-medium text-[var(--color-warning)]">Uncollected Revenue</p><p className="text-xs text-[var(--color-warning)] mt-0.5">KES {totalOutstandingDebt.toLocaleString()} is owed by debtors. Visit Daftari to follow up.</p></div>
               </div>
             )}
           </div>
@@ -346,12 +346,12 @@ export default function Insights() {
                 });
                 return (
                   <tr key={t._id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-surface2)]/50 transition-colors">
-                    <td className="py-2 pr-2 text-[var(--text-secondary)] text-xs" title={new Date(t._creationTime).toLocaleDateString() + ' ' + fmtTime(t._creationTime)}>{fmtTimeRelative(t._creationTime)}{t.debtorName && <span className="block text-[10px] text-amber-400/70">{t.debtorName}</span>}</td>
-                    <td className="py-2 px-2 text-right text-[var(--text-secondary)]">{t.items.length}{txMissing > 0 && <span className="text-[10px] text-amber-400 ml-1" title="Missing wholesale price">⚠</span>}</td>
+                    <td className="py-2 pr-2 text-[var(--text-secondary)] text-xs" title={new Date(t._creationTime).toLocaleDateString() + ' ' + fmtTime(t._creationTime)}>{fmtTimeRelative(t._creationTime)}{t.debtorName && <span className="block text-[10px] text-[var(--color-warning)]">{t.debtorName}</span>}</td>
+                    <td className="py-2 px-2 text-right text-[var(--text-secondary)]">{t.items.length}{txMissing > 0 && <span className="text-[10px] text-[var(--color-warning)] ml-1" title="Missing wholesale price">⚠</span>}</td>
                     <td className="py-2 px-2 text-right capitalize"><span className={`${t.paymentMethod === 'cash' ? 'badge-v2-success' : t.paymentMethod === 'mpesa' ? 'badge-v2-info' : 'badge-v2-warning'}`}>{t.paymentMethod === 'debt' && t.debtorName ? `${t.debtorName.slice(0, 8)}…` : t.paymentMethod}</span></td>
-                    <td className="py-2 px-2 text-right text-amber-400">{t.discount > 0 ? `KES ${t.discount.toLocaleString()}` : '—'}</td>
-                    <td className={`py-2 px-2 text-right ${txProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>KES {txProfit.toLocaleString()}{txMissing > 0 && <span className="text-[10px] text-amber-400 ml-1">*</span>}</td>
-                    <td className="py-2 px-2 text-right text-cyan-400 font-medium">KES {t.total.toLocaleString()}</td>
+                    <td className="py-2 px-2 text-right text-[var(--color-warning)]">{t.discount > 0 ? `KES ${t.discount.toLocaleString()}` : '—'}</td>
+                    <td className={`py-2 px-2 text-right ${txProfit >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>KES {txProfit.toLocaleString()}{txMissing > 0 && <span className="text-[10px] text-[var(--color-warning)] ml-1">*</span>}</td>
+                    <td className="py-2 px-2 text-right text-[var(--color-info)] font-medium">KES {t.total.toLocaleString()}</td>
                     <td className="py-2 pl-2 text-right">
                       {t.paymentMethod === 'debt' && t.debtorId && (
                         <button

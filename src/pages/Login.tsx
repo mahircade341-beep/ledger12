@@ -19,6 +19,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [consentError, setConsentError] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) navigate('/pos', { replace: true });
@@ -32,6 +34,12 @@ export default function Login() {
       return;
     }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
+    if (!agreeTerms) {
+      setConsentError(true);
+      setError('Please accept the Terms of Service and Privacy Policy to continue');
+      return;
+    }
+    setConsentError(false);
     setLoading(true);
     const result = await signUp(email.trim(), password, fullName.trim(), storeName.trim(), businessType);
     if (result.error) { setError(result.error); setLoading(false); return; }
@@ -58,6 +66,18 @@ export default function Login() {
     const result = await resetPassword(email.trim());
     if (result.error) { setError(result.error); } else { setSuccessMsg('Check your email for the reset link'); }
     setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    if (!agreeTerms) {
+      setConsentError(true);
+      setTab('signup');
+      setError('Please accept the Terms of Service and Privacy Policy before continuing');
+      return;
+    }
+    setConsentError(false);
+    await signInWithGoogle();
   };
 
   return (
@@ -114,7 +134,7 @@ export default function Login() {
               </div>
 
               {/* Google OAuth */}
-              <button type="button" onClick={signInWithGoogle}
+              <button type="button" onClick={handleGoogleSignIn}
                 className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border text-sm font-medium transition-all active:scale-[0.98]"
                 style={{
                   background: 'var(--bg-elevated)',
@@ -230,6 +250,25 @@ export default function Login() {
                   </div>
                   {error && <div className="alert-v2-error text-sm">{error}</div>}
                   {successMsg && <div className="alert-v2-success text-sm">{successMsg}</div>}
+                  <div className={`rounded-xl border p-3 transition-colors ${consentError ? 'border-red-500/60 bg-red-500/5' : 'border-[var(--border-color)] bg-[var(--item-bg)]'}`}>
+                    <label className="flex items-start gap-2.5 cursor-pointer select-none group">
+                      <input type="checkbox" checked={agreeTerms}
+                        onChange={(e) => { setAgreeTerms(e.target.checked); if (e.target.checked) setConsentError(false); }}
+                        className="mt-0.5 w-4 h-4 rounded shrink-0 cursor-pointer"
+                        style={{ accentColor: 'var(--accent-primary)' }} />
+                      <span className="text-xs text-[var(--text-secondary)] leading-relaxed group-hover:text-[var(--text-primary)] transition-colors">
+                        I agree to the{' '}
+                        <Link to="/terms" target="_blank" rel="noreferrer"
+                          className="text-[var(--accent-primary)] font-semibold hover:underline">Terms of Service</Link>{' '}
+                        and{' '}
+                        <Link to="/privacy" target="_blank" rel="noreferrer"
+                          className="text-[var(--accent-primary)] font-semibold hover:underline">Privacy Policy</Link>
+                      </span>
+                    </label>
+                    {consentError && (
+                      <p className="mt-1.5 text-xs text-red-400">You must accept the Terms and Privacy Policy to create an account.</p>
+                    )}
+                  </div>
                   <button type="submit" disabled={loading} className="btn-v2-primary w-full py-3">
                     {loading ? <div className="spinner-v2 mx-auto" /> : 'Create Account'}
                   </button>

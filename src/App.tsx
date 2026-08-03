@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import LockScreen from './components/LockScreen';
 import Layout from './components/Layout';
 import Landing from './pages/Landing';
+import { TermsPage, PrivacyPage } from './pages/LegalPages';
 import Login from './pages/Login';
 import POS from './pages/POS';
 import Stock from './pages/Stock';
@@ -103,6 +104,8 @@ export default function App() {
       {themeRipple && <div className="theme-ripple" />}
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/onboarding" element={<Onboarding />} />

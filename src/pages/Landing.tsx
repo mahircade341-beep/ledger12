@@ -7,7 +7,7 @@ import AnimatedBackground from '../components/AnimatedBackground';
 // wa.me requires the international format (Kenya: +254, drop leading 0)
 const SUPPORT_WA_NUMBER = '254143897900';
 const SUPPORT_WA_DISPLAY = '0143 897 900';
-const SUPPORT_EMAIL = 'support@dukahub.app';
+const SUPPORT_EMAIL = 'fahmanmanka25@gmail.com';
 
 // ── Feature data ──
 const FEATURES = [
@@ -99,6 +99,30 @@ const FAQS = [
   },
 ];
 
+// ── Data safety trust points ──
+const DATA_SAFETY = [
+  {
+    icon: '🔐',
+    title: 'Encrypted & locked down',
+    desc: 'Secure login and row-level security — only you can see your shop\u2019s data. Encrypted in transit, always.',
+  },
+  {
+    icon: '🏠',
+    title: 'Your data is yours',
+    desc: 'We never sell your data and never use it for ads. What you enter in DukaHub stays your business.',
+  },
+  {
+    icon: '📤',
+    title: 'Export or delete anytime',
+    desc: 'Take your products, sales, and debts with you — or delete everything when you close your account.',
+  },
+  {
+    icon: '🇰🇪',
+    title: 'Kenya Data Protection Act',
+    desc: 'We comply with the Kenya Data Protection Act, 2019 — and honor the rights it gives you over your data.',
+  },
+];
+
 function useRevealOnScroll() {
   const [revealed, setRevealed] = useState<string[]>([]);
   useEffect(() => {
@@ -134,7 +158,7 @@ export default function Landing() {
     }
     setContactError('');
     const text = [
-      '*New enquiry — dukahub.app*',
+      '*New enquiry — DukaHub support*',
       '',
       `👤 Name: ${contact.name.trim()}`,
       contact.phone.trim() ? `📱 Phone: ${contact.phone.trim()}` : '',
@@ -385,6 +409,35 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Data safety ── */}
+      <section id="data-safety" className="py-16 sm:py-24 border-t border-[var(--border-color)] bg-[var(--bg-primary)]/30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Your shop data is safe with us</h2>
+            <p className="mt-3 text-[var(--text-secondary)]">
+              Built on a simple promise: your business data belongs to you — and only you. Never sold, never shared for ads.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {DATA_SAFETY.map((d, i) => (
+              <div key={d.title} data-reveal={`ds${i}`}
+                className={`card-v2 p-6 transition-all duration-500 ${
+                  revealed.includes(`ds${i}`) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}>
+                <div className="text-2xl mb-3">{d.icon}</div>
+                <h3 className="font-bold text-sm mb-1.5">{d.title}</h3>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">{d.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link to="/privacy" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--accent-primary)] hover:opacity-80 transition-opacity">
+              Read our full Privacy Policy →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section id="faq" className="py-16 sm:py-24 border-t border-[var(--border-color)]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
@@ -596,8 +649,8 @@ export default function Landing() {
           <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
             <p>© {new Date().getFullYear()} DukaHub. Built for Kenyan retail.</p>
             <div className="flex items-center gap-4">
-              <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Privacy Policy</a>
+              <Link to="/terms" className="hover:text-[var(--text-primary)] transition-colors">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-[var(--text-primary)] transition-colors">Privacy Policy</Link>
             </div>
           </div>
         </div>

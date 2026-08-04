@@ -26,9 +26,11 @@ export default function TopBar() {
   return (
     <header className="studio-topbar fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-3 py-2.5" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="flex items-center gap-2">
-        <button onClick={() => navigate('/settings')} className="topbar-pill">
-          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.48 3.5a1.75 1.75 0 013.04 0l.79 1.37c.25.43.74.68 1.26.63l1.58-.15a1.75 1.75 0 011.68 2.4l-.58 1.48a1.5 1.5 0 00.66 1.9l1.37.8a1.75 1.75 0 01-.1 3l-1.46.6a1.5 1.5 0 00-.9 1.53l.2 1.57a1.75 1.75 0 01-2.33 1.83l-1.43-.6a1.5 1.5 0 00-1.58.28l-1.12 1.1a1.75 1.75 0 01-2.89-.85l-.52-1.49a1.5 1.5 0 00-1.26-1l-1.57-.1a1.75 1.75 0 01-1.45-2.62l.88-1.32a1.5 1.5 0 00-.3-1.98l-1.24-1a1.75 1.75 0 011.2-3.04l1.56.16c.51.05 1-.22 1.24-.68l.7-1.42zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
-          Free Plan
+        <button onClick={() => navigate('/settings')} className="store-pill" title="Open settings">
+          <span className="w-4 h-4 rounded-[5px] flex items-center justify-center text-[9px] font-extrabold text-[#090A0C] bg-white shrink-0">
+            {(storeName || 'D').charAt(0).toUpperCase()}
+          </span>
+          <span className="max-w-[90px] truncate">{storeName}</span>
         </button>
       </div>
       <h1 className="text-sm font-bold text-white truncate max-w-[140px] text-center">{pageTitle}</h1>

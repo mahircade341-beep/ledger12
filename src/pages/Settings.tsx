@@ -236,40 +236,6 @@ export default function Settings() {
         actions={saved && <span className="badge-v2-success animate-fade-in">Saved</span>}
       />
 
-      {/* Premium plans */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <svg className="w-4 h-4 text-[#FFD60A]" fill="currentColor" viewBox="0 0 24 24"><path d="M11.48 3.5a1.75 1.75 0 013.04 0l.79 1.37c.25.43.74.68 1.26.63l1.58-.15a1.75 1.75 0 011.68 2.4l-.58 1.48a1.5 1.5 0 00.66 1.9l1.37.8a1.75 1.75 0 01-.1 3l-1.46.6a1.5 1.5 0 00-.9 1.53l.2 1.57a1.75 1.75 0 01-2.33 1.83l-1.43-.6a1.5 1.5 0 00-1.58.28l-1.12 1.1a1.75 1.75 0 01-2.89-.85l-.52-1.49a1.5 1.5 0 00-1.26-1l-1.57-.1a1.75 1.75 0 01-1.45-2.62l.88-1.32a1.5 1.5 0 00-.3-1.98l-1.24-1a1.75 1.75 0 011.2-3.04l1.56.16c.51.05 1-.22 1.24-.68l.7-1.42zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
-            DukaHub Premium
-          </h2>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Plan status</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className={`plan-card ${true ? 'plan-card-recommended' : ''}`}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-extrabold text-white">Free</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-white px-2 py-0.5 rounded-full" style={{ background: 'linear-gradient(135deg,#FF3B30,#FF9500)' }}>Your plan</span>
-            </div>
-            <p className="text-2xl font-extrabold text-white">KES 0</p>
-            <p className="text-[11px] text-[var(--text-muted)] mt-0.5 mb-3">Everything you use today — unlimited products, POS, Daftari &amp; insights.</p>
-            <button disabled className="w-full py-2.5 rounded-xl text-sm font-bold text-white/60 bg-[var(--bg-surface2)] cursor-default">Current plan</button>
-          </div>
-          <div className="plan-card">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-extrabold text-white">Pro</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#FFD60A] px-2 py-0.5 rounded-full bg-[#FFD60A]/15 border border-[#FFD60A]/30">Coming soon</span>
-            </div>
-            <p className="text-2xl font-extrabold text-white">Coming <span className="text-[var(--text-muted)]">soon</span></p>
-            <p className="text-[11px] text-[var(--text-muted)] mt-0.5 mb-3">Priority sync, multi-device shops, CSV auto-exports and more — for power sellers.</p>
-            <button onClick={() => alert('DukaHub Pro is coming soon — we will announce it right here!')} className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#FF3B30,#FF9500)', boxShadow: '0 4px 16px rgba(255,59,48,0.35)' }}>
-              Notify me
-            </button>
-          </div>
-        </div>
-        <p className="text-[10px] text-[var(--text-muted)] text-center">Honest pricing — DukaHub stays free for Kenyan shops, forever.</p>
-      </div>
-
       {/* V10 Appearance card */}
       <div className="card-v2 border-blue-500/20">
         <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-blue-500/30 rounded-t-xl -mt-[1px] mx-auto" />

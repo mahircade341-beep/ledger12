@@ -7,7 +7,6 @@ import Landing from './pages/Landing';
 import { TermsPage, PrivacyPage } from './pages/LegalPages';
 import Login from './pages/Login';
 import POS from './pages/POS';
-import Stock from './pages/Stock';
 import Daftari from './pages/Daftari';
 import CashDrawer from './pages/CashDrawer';
 import Insights from './pages/Insights';
@@ -101,10 +100,6 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/inventory': {
     title: 'Inventory Management for Kenyan Shops · DukaHub',
     description: 'Track stock levels in real time, get low-stock alerts, and know exactly what to reorder with DukaHub inventory management.',
-  },
-  '/stock': {
-    title: 'Stock Management & Margins · DukaHub',
-    description: 'Manage products, wholesale prices and profit margins in one place. Simple stock management for Kenyan dukas.',
   },
   '/daftari': {
     title: 'Daftari — Debtor Ledger for Kenyan Shops · DukaHub',
@@ -226,7 +221,6 @@ export default function App() {
           <Route path="home" element={<Home />} />
           <Route path="pos" element={<POS />} />
           <Route path="inventory" element={<Inventory />} />
-          <Route path="stock" element={<Stock />} />
           <Route path="daftari" element={<Daftari />} />
           <Route path="cash-drawer" element={<CashDrawer />} />
           <Route path="insights" element={<Insights />} />

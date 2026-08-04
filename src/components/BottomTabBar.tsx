@@ -42,7 +42,6 @@ const moreItems = [
   { path: '/insights', label: 'Reports', icon: '📊', grad: 'from-[#FF375F] to-[#FF9F0A]' },
   { path: '/ai-insights', label: 'AI Insights', icon: '🤖', grad: 'from-[#0A84FF] to-[#5E5CE6]' },
   { path: '/analytics', label: 'Analytics', icon: '📈', grad: 'from-[#64D2FF] to-[#30D158]' },
-  { path: '/stock', label: 'Stock Mgmt', icon: '🏷️', grad: 'from-[#5E5CE6] to-[#BF5AF2]' },
   { path: '/settings', label: 'Settings', icon: '⚙️', grad: 'from-[#8E8E93] to-[#A1A1A6]' },
 ];
 
@@ -65,7 +64,7 @@ export default function BottomTabBar() {
     <>
       {/* ── Glass More sheet ── */}
       {sheetOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60] flex flex-col justify-end" onClick={() => setSheetOpen(false)}>
+        <div className="fixed inset-0 z-[60] flex flex-col justify-end" onClick={() => setSheetOpen(false)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in-v2" />
           <div
             className="relative rounded-t-3xl border-t border-[var(--border-strong)] animate-slide-up-v2 max-h-[80vh] overflow-y-auto"
@@ -104,7 +103,7 @@ export default function BottomTabBar() {
         </div>
       )}
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="bottom-nav-glass">
           <div className="flex items-center justify-around px-2 pt-1.5 pb-1.5">
             {tabs.map((tab) => {

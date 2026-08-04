@@ -44,7 +44,7 @@ export default function ToastAlerts() {
         type: 'critical',
         title: 'Out of Stock',
         message: `${outOfStock.length} product${outOfStock.length !== 1 ? 's are' : ' is'} out of stock`,
-        link: '/stock',
+        link: '/inventory',
       });
     } else if (lowStock.length > 0) {
       addToast({
@@ -52,7 +52,7 @@ export default function ToastAlerts() {
         type: 'stock',
         title: 'Low Stock Alert',
         message: `${lowStock.length} product${lowStock.length !== 1 ? 's are' : ' is'} running low (≤ ${threshold})`,
-        link: '/stock',
+        link: '/inventory',
       });
     }
 
@@ -83,7 +83,7 @@ export default function ToastAlerts() {
           type: 'critical',
           title: 'Out of Stock',
           message: `${outOfStock.length} product${outOfStock.length !== 1 ? 's are' : ' is'} out of stock`,
-          link: '/stock',
+          link: '/inventory',
         });
       }
     };

@@ -918,9 +918,9 @@
 }
 
 /* ============================================================
-   DUKAHUB STUDIO — pitch-black streaming-app aesthetic
-   (Spotify / Quranify inspired). Overrides the base palette so
-   every page re-themes through the shared CSS variables.
+   DUKAHUB STUDIO — pitch-black dark-mode aesthetic.
+   Overrides the base palette so every page re-themes through
+   the shared CSS variables.
    ============================================================ */
 :root, .dark {
   --bg-primary: #090A0C;
@@ -1104,7 +1104,7 @@
 .collection-pink { background: linear-gradient(135deg, #FF375F, #FF9F0A); }
 .collection-teal { background: linear-gradient(135deg, #64D2FF, #30D158); }
 
-/* ── Floating mini dock (quick action player) ── */
+/* ── Floating quick action dock ── */
 .mini-dock {
   background: rgba(28, 30, 34, 0.92);
   backdrop-filter: blur(24px) saturate(1.6);
@@ -1187,7 +1187,7 @@
   background-size: 40px 40px;
 }
 
-/* Fullscreen overlay player */
-.overlay-player {
+/* Fullscreen summary overlay */
+.overlay-summary {
   background: radial-gradient(120% 100% at 50% 0%, #1C1E22 0%, #090A0C 60%, #000 100%);
 }

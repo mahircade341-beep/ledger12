@@ -6,7 +6,7 @@ import PageHeader from '../components/PageHeader';
 
 export default function Inventory() {
   const { userId } = useAuth();
-  const { data: products, update, remove } = useLocalData('products');
+  const { data: products, add, update, remove } = useLocalData('products');
   const { data: transactions } = useLocalData('transactions');
   const { data: adjustments, add: addAdjustment } = useLocalData('stockAdjustments');
 
@@ -30,6 +30,7 @@ export default function Inventory() {
   const [editSupplierPhone, setEditSupplierPhone] = useState('');
   const [editImage, setEditImage] = useState('');
   const [editLoading, setEditLoading] = useState(false);
+  const [addMode, setAddMode] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // All core fields required — only dealer (supplier) info, barcode, and image are optional
@@ -88,6 +89,7 @@ export default function Inventory() {
   };
 
   const openEdit = (p: any) => {
+    setAddMode(false);
     setEditModal(p);
     setEditName(p.name);
     setEditQty(p.quantity);
@@ -100,40 +102,72 @@ export default function Inventory() {
     setEditImage(p.image || '');
   };
 
+  const openAdd = () => {
+    setAddMode(true);
+    setEditModal({} as any);
+    setEditName('');
+    setEditQty(0);
+    setEditWholesale(0);
+    setEditRetail(0);
+    setEditBarcode('');
+    setEditSupplier('');
+    setEditSupplierPhone('');
+    setEditImage('');
+  };
+
   const handleEditSave = async () => {
     if (!editModal || !editName.trim()) return;
     setEditLoading(true);
 
-    const prevQty = editModal.quantity || 0;
-    await update(editModal._id, {
+    const payload = {
       name: editName.trim(),
       quantity: editQty,
       wholesalePrice: editWholesale,
       retailPrice: editRetail,
-
       barcode: editBarcode,
       supplier: editSupplier,
       supplierPhone: editSupplierPhone,
       image: editImage || undefined,
-    } as any);
+    } as any;
 
-    // Log stock adjustment if quantity changed
-    const diff = editQty - prevQty;
-    if (diff !== 0 && userId) {
-      addAdjustment({
-        userId: userId as any,
-        productId: editModal._id,
-        productName: editName.trim(),
-        quantityChange: diff,
-        previousQuantity: prevQty,
-        newQuantity: editQty,
-        type: diff > 0 ? 'restock' : 'adjustment',
-        notes: diff > 0 ? 'Manual restock' : 'Manual reduction',
-      } as any);
+    if (addMode) {
+      // New product + initial stock
+      const newId = add({ userId: userId as any, ...payload } as any);
+      if (editQty > 0 && userId) {
+        addAdjustment({
+          userId: userId as any,
+          productId: newId,
+          productName: editName.trim(),
+          quantityChange: editQty,
+          previousQuantity: 0,
+          newQuantity: editQty,
+          type: 'restock',
+          notes: 'Initial stock',
+        } as any);
+      }
+    } else {
+      const prevQty = editModal.quantity || 0;
+      await update(editModal._id, payload);
+
+      // Log stock adjustment if quantity changed
+      const diff = editQty - prevQty;
+      if (diff !== 0 && userId) {
+        addAdjustment({
+          userId: userId as any,
+          productId: editModal._id,
+          productName: editName.trim(),
+          quantityChange: diff,
+          previousQuantity: prevQty,
+          newQuantity: editQty,
+          type: diff > 0 ? 'restock' : 'adjustment',
+          notes: diff > 0 ? 'Manual restock' : 'Manual reduction',
+        } as any);
+      }
     }
 
     setEditLoading(false);
     setEditModal(null);
+    setAddMode(false);
   };
 
   const handleImageEdit = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,10 +185,14 @@ export default function Inventory() {
     <div className="space-y-4">
       <PageHeader
         title="Catalog"
-        subtitle="Manage your products — edit, delete, and monitor stock levels"
+        subtitle="Manage your products — add, edit, delete, and monitor stock levels"
         accent="blue"
         actions={
           <>
+            <button onClick={openAdd} className="btn-v2-primary text-xs h-9">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+              Add Product
+            </button>
             {criticalCount > 0 && <span className="badge-v2-danger">{criticalCount} out of stock</span>}
             {lowStockCount > 0 && <span className="badge-v2-warning">{lowStockCount} low stock</span>}
           </>
@@ -438,8 +476,8 @@ export default function Inventory() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setEditModal(null)}>
           <div className="w-full max-w-lg glass-v2-strong rounded-2xl p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Edit Product</h2>
-              <button onClick={() => setEditModal(null)} className="btn-ghost p-1.5 hover:text-[var(--color-danger)] transition-colors" aria-label="Close">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">{addMode ? 'Add Product' : 'Edit Product'}</h2>
+              <button onClick={() => { setEditModal(null); setAddMode(false); }} className="btn-ghost p-1.5 hover:text-[var(--color-danger)] transition-colors" aria-label="Close">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -519,9 +557,9 @@ export default function Inventory() {
                       <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
                       Saving...
                     </span>
-                  ) : 'Save Changes'}
+                  ) : addMode ? 'Add Product' : 'Save Changes'}
                 </button>
-                <button onClick={() => setEditModal(null)} className="btn-v2-secondary">Cancel</button>
+                <button onClick={() => { setEditModal(null); setAddMode(false); }} className="btn-v2-secondary">Cancel</button>
               </div>
               {!editFieldsValid && (
                 <div className="alert-v2-warning mt-1">

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
 /**
- * Shared studio page header — consistent Spotify-style heading with a
- * vivid gradient accent, bold title, subtitle, and an actions slot.
+ * Shared studio page header — consistent dark-mode heading with a vivid
+ * gradient accent, bold title, subtitle, and an actions slot.
  */
 export default function PageHeader({
   title,

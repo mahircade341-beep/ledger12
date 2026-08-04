@@ -201,7 +201,22 @@ const PRIVACY_SECTIONS: LegalSection[] = [
   {
     title: '10. Cookies & Local Storage',
     body: [
-      'DukaHub uses local storage in your browser to remember preferences such as your theme and to keep the app fast. We do not use advertising trackers. If we introduce analytics in the future, we will update this policy first.',
+      'DukaHub uses local storage in your browser to remember preferences such as your theme and to keep the app fast.',
+    ],
+  },
+  {
+    title: '11. Analytics',
+    body: [
+      'DukaHub uses privacy-first, first-party analytics to understand how the app is used and improve it. We do not use Google Analytics, Facebook Pixel, or any third-party advertising trackers.',
+      'Our analytics system:',
+      [
+        'Tracks page views, feature usage, and ecommerce events (add to cart, purchase) in an anonymized way',
+        'Uses a random session identifier stored in your browser — no names, emails, IP addresses, or device fingerprints are recorded',
+        'Stores data in our own Supabase database (hosted in secure data centers), not shared with any third party',
+        'Keeps event data for 90 days, after which it is automatically removed',
+        'Is never used for advertising, retargeting, or behavioral profiling',
+      ],
+      'This approach is designed to comply with the Kenya Data Protection Act, 2019 — including the principles of data minimization, purpose limitation, and transparency. If you disable JavaScript in your browser, analytics will not run.',
     ],
   },
   {

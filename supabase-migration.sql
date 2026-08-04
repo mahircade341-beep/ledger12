@@ -157,6 +157,7 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   path TEXT DEFAULT '',
   referrer TEXT DEFAULT '',
   session_id TEXT DEFAULT '',
+  metadata JSONB DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;

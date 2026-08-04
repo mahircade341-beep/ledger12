@@ -6,7 +6,6 @@ type DataLayer = Record<string, unknown>;
 declare global {
   interface Window {
     dataLayer: DataLayer[];
-    sa_event?: (event: string, data?: DataLayer) => void;
   }
 }
 
@@ -54,8 +53,8 @@ interface BeginCheckoutParams {
 }
 
 /**
- * Stable per-browser session id. Used to dedupe page views without
- * storing any personal data (Kenya DPA-friendly).
+ * Stable per-browser session id. Used to dedupe page views.
+ * No personal data — Kenya DPA compliant.
  */
 let sessionId = '';
 try {
@@ -64,108 +63,80 @@ try {
     sessionId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     localStorage.setItem('dl-analytics-session', sessionId);
   }
-} catch {
-  // Private mode / storage blocked — analytics degrade gracefully
-}
+} catch {}
 
-function pushEvent(event: string, params: DataLayer) {
-  if (typeof window === 'undefined') return;
-
-  // 1) Standard dataLayer push (ready for GTM/GA4 later)
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event,
-    ecommerce: params,
-  });
-
-  // 2) Simple Analytics custom events (page views are tracked automatically
-  //    by the script — skip them to avoid double counting)
-  if (event !== 'page_view') {
-    try {
-      window.sa_event?.(event, params);
-    } catch {
-      // never block the UI on analytics
-    }
-  }
-
-  // 2) Persist to Supabase (fire-and-forget; never block the UI on analytics).
-  //    Only runs when the DB table exists (see supabase-migration.sql).
+/**
+ * Insert an event into the Supabase analytics_events table.
+ * Fire-and-forget — never blocks the UI.
+ */
+function insertEvent(event: string, path: string, metadata: Record<string, unknown> = {}) {
   try {
-    if (import.meta.env.VITE_SUPABASE_URL) {
-      void supabase.from('analytics_events').insert({
-        event,
-        path: window.location.pathname + window.location.search,
-        referrer: document.referrer || '',
-        session_id: sessionId,
-      });
-    }
+    if (!import.meta.env.VITE_SUPABASE_URL) return;
+    void supabase.from('analytics_events').insert({
+      event,
+      path,
+      referrer: document.referrer || '',
+      session_id: sessionId,
+      metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : null,
+    });
   } catch {
     // Analytics must never break the app
   }
 }
 
+/** Track a page view — deduplicated within the same session+path. */
+const viewedPaths = new Set<string>();
+
 export default function useAnalytics() {
   const trackPageView = useCallback((path: string) => {
-    pushEvent('page_view', { path });
+    // Dedupe: only count the first visit per session+path
+    const key = `${sessionId}:${path}`;
+    if (viewedPaths.has(key)) return;
+    viewedPaths.add(key);
+
+    // Push to dataLayer for future GA4
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'page_view', path });
+
+    // Insert to Supabase
+    insertEvent('page_view', path);
   }, []);
 
   const trackItemView = useCallback((product: ViewItemParams) => {
-    pushEvent('view_item', {
-      currency: 'KES',
-      value: product.price,
-      items: [
-        {
-          item_id: product.item_id,
-          item_name: product.item_name,
-          price: product.price,
-          item_category: product.item_category || 'General',
-          quantity: 1,
-        },
-      ],
+    insertEvent('view_item', window.location.pathname, {
+      item_id: product.item_id,
+      item_name: product.item_name,
+      price: product.price,
+      category: product.item_category || 'General',
     });
   }, []);
 
   const trackAddToCart = useCallback((params: AddToCartParams) => {
-    pushEvent('add_to_cart', {
-      currency: 'KES',
-      value: params.price * params.quantity,
-      items: [
-        {
-          item_id: params.item_id,
-          item_name: params.item_name,
-          price: params.price,
-          quantity: params.quantity,
-          item_category: params.item_category || 'General',
-        },
-      ],
+    insertEvent('add_to_cart', window.location.pathname, {
+      item_id: params.item_id,
+      item_name: params.item_name,
+      price: params.price,
+      quantity: params.quantity,
+      category: params.item_category || 'General',
     });
   }, []);
 
   const trackBeginCheckout = useCallback((params: BeginCheckoutParams) => {
-    pushEvent('begin_checkout', {
-      currency: 'KES',
+    insertEvent('begin_checkout', window.location.pathname, {
       value: params.value,
       coupon: params.coupon,
-      items: params.items.map((item) => ({
-        item_id: item.item_id,
-        item_name: item.item_name,
-        price: item.price,
-        quantity: item.quantity,
-      })),
+      items: params.items.map(i => ({ id: i.item_id, name: i.item_name, price: i.price, qty: i.quantity })),
     });
   }, []);
 
   const trackPurchase = useCallback((params: PurchaseParams) => {
-    pushEvent('purchase', {
+    insertEvent('purchase', window.location.pathname, {
       transaction_id: params.transaction_id,
-      currency: params.currency || 'KES',
       value: params.value,
-      tax: params.tax,
-      shipping: params.shipping,
-      coupon: params.coupon,
+      currency: params.currency || 'KES',
       payment_type: params.payment_type,
-      items: params.items,
-      ...(params.utm_data ? { utm_data: params.utm_data } : {}),
+      items: params.items.map(i => ({ id: i.item_id, name: i.item_name, price: i.price, qty: i.quantity })),
+      utm_data: params.utm_data,
     });
   }, []);
 

@@ -12,6 +12,7 @@ import Daftari from './pages/Daftari';
 import CashDrawer from './pages/CashDrawer';
 import Insights from './pages/Insights';
 import AiInsights from './pages/AiInsights';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import Inventory from './pages/Inventory';
 import Settings from './pages/Settings';
 import ResetPassword from './pages/ResetPassword';
@@ -78,6 +79,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/cash-drawer': 'Cash Drawer · DukaHub',
   '/insights': 'Insights & Reports · DukaHub',
   '/ai-insights': 'AI Insights · DukaHub',
+  '/analytics': 'Analytics · DukaHub',
   '/settings': 'Settings · DukaHub',
   '/reset-password': 'Reset Password · DukaHub',
   '/onboarding': 'Welcome · DukaHub',
@@ -156,6 +158,7 @@ export default function App() {
           <Route path="cash-drawer" element={<CashDrawer />} />
           <Route path="insights" element={<Insights />} />
           <Route path="ai-insights" element={<AiInsights />} />
+          <Route path="analytics" element={<AnalyticsDashboard />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

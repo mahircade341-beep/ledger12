@@ -1,14 +1,15 @@
 /**
- * groq.ts — Minimal Groq API client.
+ * groq.ts — Groq API client (server-side proxy).
  *
- * Calls the Groq cloud API (groq.com) for fast LLM inference.
- * Uses the user's personal API key from localStorage.
+ * Calls the Groq API through a Supabase Edge Function (groq-proxy),
+ * so the API key stays on the server and never reaches the browser.
  *
- * The key is stored in localStorage under 'groq-api-key' and
- * can be set/updated in the AI Insights page.
+ * The edge function must be deployed and the GROQ_API_KEY secret set:
+ *   supabase secrets set GROQ_API_KEY=your_key
+ *   supabase functions deploy groq-proxy
  */
 
-const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
+import { supabase } from './supabase';
 
 export interface GroqMessage {
   role: 'system' | 'user' | 'assistant';
@@ -20,27 +21,19 @@ export interface GroqStreamChunk {
   done: boolean;
 }
 
-/** Get the stored API key, or null if not set. */
-export function getGroqKey(): string | null {
-  try {
-    return localStorage.getItem('groq-api-key');
-  } catch {
-    return null;
-  }
-}
-
-/** Persist a Groq API key. */
-export function setGroqKey(key: string): void {
-  localStorage.setItem('groq-api-key', key);
-}
-
-/** Check if a key looks valid (non-empty, starts with 'gsk_'). */
-export function isValidGroqKey(key: string): boolean {
-  return key.length > 10 && key.startsWith('gsk_');
+/**
+ * Resolve the edge function URL.
+ * Uses the Supabase project URL from the client config.
+ */
+function getFunctionUrl(): string {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (!supabaseUrl) throw new Error('VITE_SUPABASE_URL is not set');
+  // Remove trailing slash and append /functions/v1/groq-proxy
+  return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/groq-proxy`;
 }
 
 /**
- * Stream a chat completion from Groq.
+ * Stream a chat completion from Groq via the Supabase edge function.
  * Yields { content, done } chunks as they arrive.
  * Throws on network or API errors.
  */
@@ -53,25 +46,23 @@ export async function* streamGroqChat(
     signal?: AbortSignal;
   }
 ): AsyncGenerator<GroqStreamChunk> {
-  const key = getGroqKey();
-  if (!key) throw new Error('Groq API key not set. Add your key in AI Insights settings.');
-
+  const url = getFunctionUrl();
   const model = options?.model || 'llama-3.3-70b-versatile';
   const temperature = options?.temperature ?? 0.7;
   const maxTokens = options?.maxTokens ?? 4096;
 
-  const response = await fetch(`${GROQ_API_BASE}/chat/completions`, {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${key}`,
+      // Forward the user's session for auth (the edge function can verify if needed)
+      Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
     },
     body: JSON.stringify({
-      model,
       messages,
+      model,
       temperature,
-      max_tokens: maxTokens,
-      stream: true,
+      maxTokens,
     }),
     signal: options?.signal,
   });
@@ -83,7 +74,13 @@ export async function* streamGroqChat(
     } catch {
       errorText = response.statusText;
     }
-    throw new Error(`Groq API error (${response.status}): ${errorText}`);
+    // Try to parse JSON error
+    try {
+      const parsed = JSON.parse(errorText);
+      throw new Error(parsed.error || `Groq API error (${response.status})`);
+    } catch {
+      throw new Error(`Groq API error (${response.status}): ${errorText}`);
+    }
   }
 
   const reader = response.body?.getReader();
@@ -99,7 +96,7 @@ export async function* streamGroqChat(
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      buffer = lines.pop() || '';
 
       for (const line of lines) {
         const trimmed = line.trim();

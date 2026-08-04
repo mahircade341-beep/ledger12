@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
-import { getGroqKey, setGroqKey, isValidGroqKey, streamGroqChat, type GroqMessage } from '../lib/groq';
+import { streamGroqChat, type GroqMessage } from '../lib/groq';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
   LineChart, Line, CartesianGrid, Legend
@@ -26,8 +26,6 @@ export default function AiInsights() {
   const { data: payouts } = useLocalData('payouts');
 
   const [period, setPeriod] = useState<ViewPeriod>('monthly');
-  const [apiKey, setApiKey] = useState(getGroqKey() || '');
-  const [showKeyInput, setShowKeyInput] = useState(!getGroqKey());
   const [analysis, setAnalysis] = useState<string>('');
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState('');
@@ -109,24 +107,20 @@ export default function AiInsights() {
   }, [products, filteredTransactions]);
 
   // ── Chart data ──
-
-  // Payment breakdown pie
   const paymentChartData = useMemo(() => [
     { name: 'Cash', value: cashTotal, color: '#10B981' },
     { name: 'M-Pesa', value: mpesaTotal, color: '#3B82F6' },
     { name: 'Debt', value: debtTotal, color: '#F59E0B' },
   ].filter(d => d.value > 0), [cashTotal, mpesaTotal, debtTotal]);
 
-  // Top products bar chart
   const topProductsChartData = useMemo(() =>
     topProducts.slice(0, 6).map(p => ({
-      name: p.name.length > 12 ? p.name.slice(0, 12) + '…' : p.name,
+      name: p.name.length > 12 ? p.name.slice(0, 12) + '\u2026' : p.name,
       Revenue: p.revenue,
       Profit: p.profit,
     })),
   [topProducts]);
 
-  // Sales trend: daily sales over the last 7/30 days
   const salesTrendData = useMemo(() => {
     if (transactions.length === 0) return [];
     const days = period === 'all' ? 30 : period === 'monthly' ? 30 : period === 'weekly' ? 7 : 1;
@@ -224,7 +218,7 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setError(err.message || 'Analysis failed. Check your API key and try again.');
+      setError(err.message || 'Analysis failed. The AI service may not be configured yet.');
     } finally {
       setStreaming(false);
       setAbortRef(null);
@@ -234,8 +228,7 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
 
   // ── Auto-analyze on load ──
   useEffect(() => {
-    const k = getGroqKey();
-    if (k && isValidGroqKey(k) && !autoAnalyzed && !streaming && !analysis) {
+    if (!autoAnalyzed && !streaming && !analysis) {
       setAutoAnalyzed(true);
       runAnalysis();
     }
@@ -254,24 +247,11 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
     setFollowUpLoading(false);
   };
 
-  // ── Save key ──
-  const handleSaveKey = () => {
-    if (!isValidGroqKey(apiKey)) {
-      setError('Invalid API key — must start with "gsk_" and be at least 10 characters');
-      return;
-    }
-    setGroqKey(apiKey);
-    setShowKeyInput(false);
-    setError('');
-  };
-
   useEffect(() => {
     if (analysisRef.current) {
       analysisRef.current.scrollTop = analysisRef.current.scrollHeight;
     }
   }, [analysis]);
-
-  const hasKey = getGroqKey() && isValidGroqKey(getGroqKey() || '');
 
   return (
     <div className="space-y-6">
@@ -279,7 +259,7 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">AI Insights</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Powered by Groq · Your shop analyzed by AI in seconds</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">Powered by Groq via Supabase Edge Functions · Your shop analyzed by AI in seconds</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-1">
@@ -287,161 +267,106 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
               <button key={p} onClick={() => setPeriod(p)} className={`tab-v2 ${period === p ? 'tab-v2-active' : ''} capitalize text-xs`}>{p}</button>
             ))}
           </div>
-          <button
-            onClick={() => setShowKeyInput(!showKeyInput)}
-            className="btn-v2-secondary text-xs h-8"
-            title="Groq API Key"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-            </svg>
-            {hasKey ? 'Key Set' : 'Set Key'}
-          </button>
         </div>
       </div>
 
-      {/* API Key Input */}
-      {showKeyInput && (
-        <div className="card-v2 border-amber-500/20">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                </svg>
-              </div>
-              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Groq API Key</h2>
-            </div>
-            {hasKey && (
-              <button onClick={() => { setShowKeyInput(false); }} className="btn-v2-ghost text-xs">Done</button>
-            )}
-          </div>
-          <p className="text-xs text-[var(--text-muted)] mb-3">
-            Enter your Groq API key to enable AI analysis. Get one free at{' '}
-            <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">console.groq.com/keys</a>.
-            Your key is stored locally on this device and never sent anywhere except Groq.
-          </p>
-          <div className="flex items-center gap-2">
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="input-v2 flex-1 text-sm font-mono"
-              placeholder="gsk_..."
-            />
-            <button onClick={handleSaveKey} className="btn-v2-primary text-xs h-9">Save Key</button>
-            {getGroqKey() && (
-              <button onClick={() => { setGroqKey(''); setApiKey(''); setShowKeyInput(true); }} className="btn-v2-secondary text-xs h-9">Remove</button>
-            )}
-          </div>
-          {error && <p className="text-xs text-[var(--color-danger)] mt-2">{error}</p>}
-        </div>
-      )}
-
       {/* Stats row */}
-      {!showKeyInput && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="stat-v2 stat-v2-accent">
-            <span className="stat-label-v2">Gross Sales</span>
-            <span className="stat-value-v2">KES {grossSales.toLocaleString()}</span>
-            <span className="stat-desc-v2">{numTransactions} transactions</span>
-          </div>
-          <div className="stat-v2">
-            <span className="stat-label-v2">Avg. Ticket</span>
-            <span className="stat-value-v2 text-[var(--color-info)]">KES {avgTicket.toLocaleString()}</span>
-            <span className="stat-desc-v2">{period} average</span>
-          </div>
-          <div className="stat-v2">
-            <span className="stat-label-v2">Profit</span>
-            <span className={`stat-value-v2 ${profitData.totalProfit >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>KES {profitData.totalProfit.toLocaleString()}</span>
-            <span className="stat-desc-v2">{profitData.margin.toFixed(1)}% margin</span>
-          </div>
-          <div className="stat-v2">
-            <span className="stat-label-v2">Outstanding Debt</span>
-            <span className="stat-value-v2 text-[var(--color-warning)]">KES {totalOutstandingDebt.toLocaleString()}</span>
-            <span className="stat-desc-v2">{debtors.filter((d: any) => d.status === 'active').length} debtors</span>
-          </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="stat-v2 stat-v2-accent">
+          <span className="stat-label-v2">Gross Sales</span>
+          <span className="stat-value-v2">KES {grossSales.toLocaleString()}</span>
+          <span className="stat-desc-v2">{numTransactions} transactions</span>
         </div>
-      )}
+        <div className="stat-v2">
+          <span className="stat-label-v2">Avg. Ticket</span>
+          <span className="stat-value-v2 text-[var(--color-info)]">KES {avgTicket.toLocaleString()}</span>
+          <span className="stat-desc-v2">{period} average</span>
+        </div>
+        <div className="stat-v2">
+          <span className="stat-label-v2">Profit</span>
+          <span className={`stat-value-v2 ${profitData.totalProfit >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>KES {profitData.totalProfit.toLocaleString()}</span>
+          <span className="stat-desc-v2">{profitData.margin.toFixed(1)}% margin</span>
+        </div>
+        <div className="stat-v2">
+          <span className="stat-label-v2">Outstanding Debt</span>
+          <span className="stat-value-v2 text-[var(--color-warning)]">KES {totalOutstandingDebt.toLocaleString()}</span>
+          <span className="stat-desc-v2">{debtors.filter((d: any) => d.status === 'active').length} debtors</span>
+        </div>
+      </div>
 
       {/* ── Charts Row ── */}
-      {!showKeyInput && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Payment Breakdown Pie */}
-          {paymentChartData.length > 0 && (
-            <div className="card-v2">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Payment Breakdown</h3>
-              <div className="flex items-center justify-center">
-                <ResponsiveContainer width="100%" height={180}>
-                  <PieChart>
-                    <Pie data={paymentChartData} cx="50%" cy="50%" innerRadius={45} outerRadius={70}
-                      paddingAngle={3} dataKey="value">
-                      {paymentChartData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} stroke="transparent" />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
-                      formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex items-center justify-center gap-4 mt-1 text-xs text-[var(--text-muted)]">
-                {paymentChartData.map(d => (
-                  <span key={d.name} className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full" style={{ background: d.color }} />
-                    {d.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Top Products Bar */}
-          {topProductsChartData.length > 0 && (
-            <div className="card-v2 lg:col-span-2">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Top Products by Revenue</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {paymentChartData.length > 0 && (
+          <div className="card-v2">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Payment Breakdown</h3>
+            <div className="flex items-center justify-center">
               <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={topProductsChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.3} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
-                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                <PieChart>
+                  <Pie data={paymentChartData} cx="50%" cy="50%" innerRadius={45} outerRadius={70}
+                    paddingAngle={3} dataKey="value">
+                    {paymentChartData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} stroke="transparent" />
+                    ))}
+                  </Pie>
                   <Tooltip
                     contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
                     formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
                   />
-                  <Legend wrapperStyle={{ fontSize: 10, color: 'var(--text-muted)' }} />
-                  <Bar dataKey="Revenue" fill="#10B981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Profit" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                </PieChart>
               </ResponsiveContainer>
             </div>
-          )}
+            <div className="flex items-center justify-center gap-4 mt-1 text-xs text-[var(--text-muted)]">
+              {paymentChartData.map(d => (
+                <span key={d.name} className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+                  {d.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
-          {/* Sales Trend Line */}
-          {salesTrendData.length > 1 && (
-            <div className="card-v2 lg:col-span-3">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Sales Trend</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={salesTrendData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.3} />
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
-                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
-                    formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
-                  />
-                  <Line type="monotone" dataKey="sales" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3, fill: '#8B5CF6' }}
-                    activeDot={{ r: 5, fill: '#8B5CF6' }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-      )}
+        {topProductsChartData.length > 0 && (
+          <div className="card-v2 lg:col-span-2">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Top Products by Revenue</h3>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={topProductsChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.3} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
+                  tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                <Tooltip
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
+                  formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
+                />
+                <Legend wrapperStyle={{ fontSize: 10, color: 'var(--text-muted)' }} />
+                <Bar dataKey="Revenue" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Profit" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {salesTrendData.length > 1 && (
+          <div className="card-v2 lg:col-span-3">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Sales Trend</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={salesTrendData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.3} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
+                  tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                <Tooltip
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
+                  formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
+                />
+                <Line type="monotone" dataKey="sales" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3, fill: '#8B5CF6' }}
+                  activeDot={{ r: 5, fill: '#8B5CF6' }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
 
       {/* AI Analysis Card */}
       <div className="card-v2 relative overflow-hidden">
@@ -466,139 +391,112 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
             )}
           </div>
           <div className="flex items-center gap-2">
-            {hasKey && !showKeyInput && (
-              <button
-                onClick={() => runAnalysis()}
-                disabled={streaming}
-                className="btn-v2-primary text-xs h-8"
-              >
-                {streaming ? (
-                  <span className="flex items-center gap-1.5">
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Analyzing
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                    </svg>
-                    Re-analyze
-                  </span>
-                )}
-              </button>
-            )}
+            <button
+              onClick={() => runAnalysis()}
+              disabled={streaming}
+              className="btn-v2-primary text-xs h-8"
+            >
+              {streaming ? (
+                <span className="flex items-center gap-1.5">
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Analyzing
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                  </svg>
+                  Re-analyze
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
-        {!hasKey ? (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-3">🧠</div>
-            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">AI-Powered Shop Analysis</h3>
-            <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto mb-4">
-              Get instant, actionable insights about your shop — top products, slow movers, profit warnings, pricing tips, and more. Analysis starts automatically once you add your key.
-            </p>
-            <button onClick={() => setShowKeyInput(true)} className="btn-v2-primary">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-              </svg>
-              Enter Your Groq API Key to Start
-            </button>
-            <p className="text-xs text-[var(--text-muted)] mt-3">
-              Free API key from <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">console.groq.com/keys</a>
+        {error && (
+          <div className="alert-v2-error mb-4">
+            <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {!error && !analysis && !streaming && (
+          <div className="text-center py-10">
+            <div className="text-4xl mb-3">📊</div>
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">Analyzing your shop...</h3>
+            <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+              The AI is generating insights — this takes a few seconds.
             </p>
           </div>
-        ) : (
-          <>
-            {!analysis && !streaming && (
-              <div className="text-center py-10">
-                <div className="text-4xl mb-3">📊</div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">Analyzing your shop...</h3>
-                <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-                  The AI is generating insights — this takes a few seconds.
-                </p>
-              </div>
-            )}
+        )}
 
-            {error && (
-              <div className="alert-v2-error mb-4">
-                <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
-                <span>{error}</span>
+        <div
+          ref={analysisRef}
+          className="prose prose-sm max-w-none overflow-y-auto max-h-[600px] pr-2 scrollbar-thin"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {analysis ? (
+            <div dangerouslySetInnerHTML={{ __html: analysis
+              .replace(/### (.*)/g, '<h3 class="text-base font-bold mt-5 mb-2" style="color:var(--text-primary)">$1</h3>')
+              .replace(/## (.*)/g, '<h2 class="text-lg font-bold mt-6 mb-3" style="color:var(--text-primary)">$1</h2>')
+              .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
+              .replace(/\n- (.*)/g, '<li class="text-sm ml-4" style="color:var(--text-secondary)">$1</li>')
+              .replace(/\n\n/g, '</p><p class="text-sm leading-relaxed mb-3" style="color:var(--text-secondary)">')
+              .replace(/^(.+)$/gm, (match) => {
+                if (match.startsWith('<') || match.startsWith('</p>')) return match;
+                return `<p class="text-sm leading-relaxed mb-3" style="color:var(--text-secondary)">${match}</p>`;
+              })
+            }} />
+          ) : streaming ? (
+            <div className="flex items-center gap-2 py-4">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-            )}
-
-            <div
-              ref={analysisRef}
-              className="prose prose-sm max-w-none overflow-y-auto max-h-[600px] pr-2 scrollbar-thin"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {analysis ? (
-                <div dangerouslySetInnerHTML={{ __html: analysis
-                  .replace(/### (.*)/g, '<h3 class="text-base font-bold mt-5 mb-2" style="color:var(--text-primary)">$1</h3>')
-                  .replace(/## (.*)/g, '<h2 class="text-lg font-bold mt-6 mb-3" style="color:var(--text-primary)">$1</h2>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
-                  .replace(/\n- (.*)/g, '<li class="text-sm ml-4" style="color:var(--text-secondary)">$1</li>')
-                  .replace(/\n\n/g, '</p><p class="text-sm leading-relaxed mb-3" style="color:var(--text-secondary)">')
-                  .replace(/^(.+)$/gm, (match) => {
-                    if (match.startsWith('<') || match.startsWith('</p>')) return match;
-                    return `<p class="text-sm leading-relaxed mb-3" style="color:var(--text-secondary)">${match}</p>`;
-                  })
-                }} />
-              ) : streaming ? (
-                <div className="flex items-center gap-2 py-4">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                  <span className="text-sm text-[var(--text-muted)]">Analyzing your shop data...</span>
-                </div>
-              ) : (
-                <div className="text-center py-6 text-sm text-[var(--text-muted)]">
-                  Click "Analyze Now" to get started
-                </div>
-              )}
+              <span className="text-sm text-[var(--text-muted)]">Analyzing your shop data...</span>
             </div>
+          ) : null}
+        </div>
 
-            {/* Follow-up question */}
-            {(analysis || streaming) && (
-              <div className="mt-4 pt-4 border-t border-[var(--border-color)]">
-                <form
-                  onSubmit={(e) => { e.preventDefault(); handleFollowUp(); }}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    ref={followUpRef}
-                    type="text"
-                    value={followUp}
-                    onChange={(e) => setFollowUp(e.target.value)}
-                    className="input-v2 flex-1 text-sm"
-                    placeholder="Ask a follow-up question..."
-                    disabled={streaming}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!followUp.trim() || followUpLoading || streaming}
-                    className="btn-v2-primary text-xs h-9 shrink-0"
-                  >
-                    {followUpLoading ? (
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                      </svg>
-                    )}
-                  </button>
-                </form>
-              </div>
-            )}
-          </>
+        {/* Follow-up question */}
+        {(analysis || streaming) && (
+          <div className="mt-4 pt-4 border-t border-[var(--border-color)]">
+            <form
+              onSubmit={(e) => { e.preventDefault(); handleFollowUp(); }}
+              className="flex items-center gap-2"
+            >
+              <input
+                ref={followUpRef}
+                type="text"
+                value={followUp}
+                onChange={(e) => setFollowUp(e.target.value)}
+                className="input-v2 flex-1 text-sm"
+                placeholder="Ask a follow-up question..."
+                disabled={streaming}
+              />
+              <button
+                type="submit"
+                disabled={!followUp.trim() || followUpLoading || streaming}
+                className="btn-v2-primary text-xs h-9 shrink-0"
+              >
+                {followUpLoading ? (
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                  </svg>
+                )}
+              </button>
+            </form>
+          </div>
         )}
       </div>
 
       {/* Top Products Card */}
-      {hasKey && topProducts.length > 0 && (
+      {topProducts.length > 0 && (
         <div className="card-v2">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
@@ -641,51 +539,49 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
       )}
 
       {/* Slow-Moving / Data Quality Card */}
-      {hasKey && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {slowMoving.length > 0 && (
-            <div className="card-v2 border-amber-500/20">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 12v3.75m-4.24 0l.75-1.5m8.98 0l.75 1.5M12 9.75l-1.5 3M12 9.75l1.5 3M8.25 3.75l3 3m3-3l-3 3M12 21.75V9.75" />
-                  </svg>
-                </div>
-                <h2 className="text-sm font-semibold text-[var(--text-primary)]">Slow-Moving Stock</h2>
-                <span className="badge-v2-warning text-[10px]">{slowMoving.length} items</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {slowMoving.length > 0 && (
+          <div className="card-v2 border-amber-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 12v3.75m-4.24 0l.75-1.5m8.98 0l.75 1.5M12 9.75l-1.5 3M12 9.75l1.5 3M8.25 3.75l3 3m3-3l-3 3M12 21.75V9.75" />
+                </svg>
               </div>
-              <p className="text-xs text-[var(--text-muted)] mb-2">Products in stock with no sales this period — review pricing or consider promotions.</p>
-              <div className="flex flex-wrap gap-1.5">
-                {slowMoving.slice(0, 15).map((p: any) => (
-                  <span key={p._id} className="text-xs px-2 py-1 rounded-md bg-[var(--item-bg)] border border-[var(--border-color)] text-[var(--text-secondary)]">
-                    {p.name} <span className="text-[var(--color-warning)]">({p.quantity} in stock)</span>
-                  </span>
-                ))}
-                {slowMoving.length > 15 && <span className="text-xs text-[var(--text-muted)] self-center">+{slowMoving.length - 15} more</span>}
-              </div>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Slow-Moving Stock</h2>
+              <span className="badge-v2-warning text-[10px]">{slowMoving.length} items</span>
             </div>
-          )}
+            <p className="text-xs text-[var(--text-muted)] mb-2">Products in stock with no sales this period — review pricing or consider promotions.</p>
+            <div className="flex flex-wrap gap-1.5">
+              {slowMoving.slice(0, 15).map((p: any) => (
+                <span key={p._id} className="text-xs px-2 py-1 rounded-md bg-[var(--item-bg)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                  {p.name} <span className="text-[var(--color-warning)]">({p.quantity} in stock)</span>
+                </span>
+              ))}
+              {slowMoving.length > 15 && <span className="text-xs text-[var(--text-muted)] self-center">+{slowMoving.length - 15} more</span>}
+            </div>
+          </div>
+        )}
 
-          {profitData.itemsMissing > 0 && (
-            <div className="card-v2 border-amber-500/20">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                  </svg>
-                </div>
-                <h2 className="text-sm font-semibold text-[var(--text-primary)]">Data Quality</h2>
-                <span className="badge-v2-warning text-[10px]">{profitData.itemsMissing} issues</span>
+        {profitData.itemsMissing > 0 && (
+          <div className="card-v2 border-amber-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
               </div>
-              <p className="text-xs text-[var(--text-muted)]">
-                {profitData.itemsMissing} of {profitData.totalItems} items sold are missing wholesale prices. Profit figures are incomplete.
-                <br />
-                <span className="text-[var(--color-warning)]">Fix: Set wholesale prices in Stock Management to get accurate profit analysis.</span>
-              </p>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Data Quality</h2>
+              <span className="badge-v2-warning text-[10px]">{profitData.itemsMissing} issues</span>
             </div>
-          )}
-        </div>
-      )}
+            <p className="text-xs text-[var(--text-muted)]">
+              {profitData.itemsMissing} of {profitData.totalItems} items sold are missing wholesale prices. Profit figures are incomplete.
+              <br />
+              <span className="text-[var(--color-warning)]">Fix: Set wholesale prices in Stock Management to get accurate profit analysis.</span>
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

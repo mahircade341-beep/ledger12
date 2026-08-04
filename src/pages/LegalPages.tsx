@@ -201,7 +201,7 @@ const PRIVACY_SECTIONS: LegalSection[] = [
   {
     title: '10. Cookies & Local Storage',
     body: [
-      'DukaHub uses local storage in your browser to remember preferences such as your theme and to keep the app fast (including offline caching as part of the installable PWA). We do not use advertising trackers. If we introduce analytics in the future, we will update this policy first.',
+      'DukaHub uses local storage in your browser to remember preferences such as your theme and to keep the app fast. We do not use advertising trackers. If we introduce analytics in the future, we will update this policy first.',
     ],
   },
   {

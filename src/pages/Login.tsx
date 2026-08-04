@@ -26,12 +26,6 @@ export default function Login() {
     if (isAuthenticated) navigate('/pos', { replace: true });
   }, [isAuthenticated, navigate]);
 
-  const requireOnline = (action: string): boolean => {
-    if (navigator.onLine) return true;
-    setError(`You need an internet connection to ${action}. Once your account is ready, DukaHub works fully offline — your sales and stock are saved on this device and backed up automatically when you're back online.`);
-    return false;
-  };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -46,7 +40,6 @@ export default function Login() {
       return;
     }
     setConsentError(false);
-    if (!requireOnline('create your account')) return;
     setLoading(true);
     const result = await signUp(email.trim(), password, fullName.trim(), storeName.trim(), businessType);
     if (result.error) { setError(result.error); setLoading(false); return; }
@@ -59,7 +52,6 @@ export default function Login() {
     e.preventDefault();
     setError('');
     if (!email.trim() || !password.trim()) { setError('Email and password are required'); return; }
-    if (!requireOnline('sign in')) return;
     setLoading(true);
     const result = await signIn(email.trim(), password);
     if (result.error) { setError(result.error); setLoading(false); return; }
@@ -70,7 +62,6 @@ export default function Login() {
     e.preventDefault();
     setError(''); setSuccessMsg('');
     if (!email.trim()) { setError('Enter your email address'); return; }
-    if (!requireOnline('reset your password')) return;
     setLoading(true);
     const result = await resetPassword(email.trim());
     if (result.error) { setError(result.error); } else { setSuccessMsg('Check your email for the reset link'); }
@@ -79,7 +70,6 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     setError('');
-    if (!requireOnline('continue with Google')) return;
     if (!agreeTerms) {
       setConsentError(true);
       setTab('signup');

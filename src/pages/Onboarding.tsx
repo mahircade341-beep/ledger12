@@ -35,10 +35,6 @@ export default function Onboarding() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!navigator.onLine) {
-      setError('You need an internet connection to finish setting up your account. Once it\'s ready, DukaHub works fully offline.');
-      return;
-    }
     setError('');
     if (!fullName.trim() || !storeName.trim()) {
       setError('Both fields are required');

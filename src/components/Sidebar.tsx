@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../App';
 import { useLocalData } from '../hooks/useLocalData';
-import { useSyncStatus } from '../hooks/useSyncStatus';
 import { syncNow } from '../lib/syncEngine';
 
 const navItems = [
@@ -51,31 +50,11 @@ export default function Sidebar() {
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { data: products } = useLocalData('products');
-  const sync = useSyncStatus();
   const navigate = useNavigate();
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= lowStockThreshold).length;
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
-
-  const handleSyncNow = () => {
-    if (navigator.onLine) syncNow();
-  };
-
-  const lastSyncLabel = sync.lastSyncedAt
-    ? new Date(sync.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : null;
-  const syncLabel = sync.syncing
-    ? 'Backing up…'
-    : !sync.online && sync.pending > 0
-      ? `Offline · ${sync.pending} change${sync.pending === 1 ? '' : 's'} pending`
-      : !sync.online
-        ? 'Offline — saved on device'
-        : sync.pending > 0
-          ? 'Backing up…'
-          : lastSyncLabel
-            ? `Backed up ${lastSyncLabel}`
-            : 'All backed up';
 
   // Swipe to open sidebar on mobile
   useEffect(() => {
@@ -225,31 +204,6 @@ export default function Sidebar() {
               <p className="text-[11px] text-[var(--nav-text-muted)] truncate font-medium">{profile?.email}</p>
             </div>
           </div>
-
-          {/* Sync status */}
-          <button
-            onClick={handleSyncNow}
-            title={navigator.onLine ? 'Sync now' : 'You are offline — changes are saved on this device'}
-            className="flex items-center gap-2 px-1 w-full text-left group">
-            <span className="relative flex w-2 h-2 shrink-0">
-              {sync.syncing ? (
-                <span className="relative inline-flex rounded-full w-2 h-2 bg-sky-400 animate-pulse" />
-              ) : sync.online && sync.pending === 0 ? (
-                <>
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40" />
-                  <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500 ring-1 ring-emerald-500/30" />
-                </>
-              ) : (
-                <>
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-40" />
-                  <span className="relative inline-flex rounded-full w-2 h-2 bg-amber-400 ring-1 ring-amber-400/30" />
-                </>
-              )}
-            </span>
-            <span className="text-[11px] text-[var(--nav-text-muted)] font-medium truncate group-hover:text-[var(--nav-title)] transition-colors">
-              {syncLabel}
-            </span>
-          </button>
         </div>
       </aside>
     </>

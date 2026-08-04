@@ -7,7 +7,6 @@ import ProductHeroImage from '../components/ProductHeroImage';
 import StickyAddCart from '../components/StickyAddCart';
 import BarcodeScanner from '../components/BarcodeScanner';
 import useCartPersistence from '../hooks/useCartPersistence';
-import { useSyncStatus } from '../hooks/useSyncStatus';
 
 interface ReceiptData {
   id: string;
@@ -26,7 +25,7 @@ export default function POS() {
 
   const { trackAddToCart, trackBeginCheckout, trackPurchase } = useAnalytics();
   const { appendToPayload } = useUtmTracker();
-  const { savedCart, saveCart, clearCart, isOffline } = useCartPersistence();
+  const { savedCart, saveCart, clearCart } = useCartPersistence();
 
   const [cart, setCart] = useState<any[]>(() => {
     // Load saved cart from localStorage on mount (only if there are stored items)
@@ -92,22 +91,6 @@ export default function POS() {
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  // ── Compact offline strip (reactive to connection changes) ──
-  const { online } = useSyncStatus();
-  const wasOfflineRef = useRef(online);
-  const [showOfflineBanner, setShowOfflineBanner] = useState(!online);
-  useEffect(() => {
-    if (online === wasOfflineRef.current) return;
-    wasOfflineRef.current = online;
-    if (online) {
-      // Just reconnected — brief "back online" flash
-      setShowOfflineBanner(true);
-      const t = setTimeout(() => setShowOfflineBanner(false), 3000);
-      return () => clearTimeout(t);
-    }
-    setShowOfflineBanner(true);
-    return () => {};
-  }, [online]);
 
   // ── Keyboard shortcuts ──
   useEffect(() => {
@@ -310,20 +293,6 @@ export default function POS() {
 
   return (
     <div className="space-y-4 pb-16 lg:pb-0">
-      {/* Compact offline strip */}
-      {showOfflineBanner && (
-        <div role="status" className="px-3 py-1.5 rounded-lg text-[11px] font-medium flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 text-[var(--color-warning)] animate-slide-up-v2">
-          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 010 12.728m-2.829-2.829a5 5 0 000-7.07m-4.243 4.243a1 1 0 010-1.414" />
-          </svg>
-          <span className="truncate">
-            {!online
-              ? 'Offline — sales saved on this device · auto-backup when online'
-              : 'Back online — syncing…'}
-          </span>
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
@@ -331,12 +300,6 @@ export default function POS() {
           <p className="text-xs text-[var(--text-muted)] mt-0.5">Process customer transactions</p>
         </div>
         <div className="flex items-center gap-2">
-          {!online && (
-            <span className="badge-v2-warning text-[10px] px-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1 inline-block animate-pulse" />
-              Offline
-            </span>
-          )}
           {isGod && <span className="badge-v2-info text-[10px] px-2">GOD MODE</span>}
           <span className="text-[10px] text-[var(--text-muted)] hidden md:block">F1-F8 Quick | F9 Sale | Esc</span>
         </div>

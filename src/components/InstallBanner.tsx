@@ -85,7 +85,7 @@ export default function InstallBanner() {
                 <div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">Install DukaHub</h3>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5 leading-relaxed">
-                    Install on your home screen for faster access, offline support, and a full-screen experience.
+                    Install on your home screen for faster access and a full-screen experience.
                   </p>
                 </div>
                 <button

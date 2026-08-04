@@ -83,7 +83,7 @@ const FAQS = [
   },
   {
     q: 'Do I need an internet connection to use it?',
-    a: 'No. DukaHub works offline — ring up sales and view your catalog even when the network drops. Everything syncs automatically once you\'re back online.',
+    a: 'Yes — DukaHub is a web app, so you need an internet connection to access it. It works on any device with a browser, and your data is always backed up to your account automatically.',
   },
   {
     q: 'Can I use it on my phone?',
@@ -234,7 +234,7 @@ export default function Landing() {
           </div>
 
           <p className="mt-5 text-xs text-[var(--text-muted)] animate-fade-in-v2">
-            Setup takes under 1 minute · Works offline · Your data stays yours · Free forever
+            Setup takes under 1 minute · Your data stays yours · Free forever
           </p>
 
           {/* ── Product mockup ── */}
@@ -403,7 +403,7 @@ export default function Landing() {
               <ul className="text-sm text-[var(--text-secondary)] space-y-2.5 mb-7 text-left max-w-xs mx-auto">
                 <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> Unlimited products &amp; transactions</li>
                 <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> POS, inventory, Daftari &amp; insights</li>
-                <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> Offline mode &amp; home-screen app</li>
+                <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> Home-screen app (installable PWA)</li>
                 <li className="flex items-center gap-2"><span className="text-[var(--color-success)]">✓</span> No credit card, ever</li>
               </ul>
               <Link to="/login?mode=signup" className="btn-v2-primary w-full py-3.5">

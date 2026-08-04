@@ -23,7 +23,7 @@ export default function Login() {
   const [consentError, setConsentError] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/pos', { replace: true });
+    if (isAuthenticated) navigate('/home', { replace: true });
   }, [isAuthenticated, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {

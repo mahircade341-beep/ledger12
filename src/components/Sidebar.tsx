@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../App';
 import { useLocalData } from '../hooks/useLocalData';
@@ -54,6 +54,19 @@ const navItems = [
   )},
 ];
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/home': 'Home',
+  '/pos': 'POS',
+  '/inventory': 'Catalog',
+  '/stock': 'Stock',
+  '/daftari': 'Daftari',
+  '/cash-drawer': 'Cash Drawer',
+  '/insights': 'Reports',
+  '/ai-insights': 'AI Insights',
+  '/analytics': 'Analytics',
+  '/settings': 'Settings',
+};
+
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
   const touchStartX = useRef(0);
@@ -61,10 +74,12 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const { data: products } = useLocalData('products');
   const navigate = useNavigate();
+  const location = useLocation();
   const lowStockThreshold = parseInt(localStorage.getItem('dl-low-stock-threshold') || '5');
   const lowStockCount = products.filter((p: any) => p.quantity > 0 && p.quantity <= lowStockThreshold).length;
   const criticalCount = products.filter((p: any) => p.quantity <= 0).length;
   const storeName = profile?.storeName || localStorage.getItem('dl-store-name') || 'DukaHub';
+  const pageTitle = ROUTE_TITLES[location.pathname] || storeName;
 
   // Swipe to open sidebar on mobile
   useEffect(() => {
@@ -81,27 +96,28 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── V10 Mobile Header ── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-chrome-nav flex items-center justify-between px-3 py-2.5 safe-bottom">
+      {/* ── Studio Mobile Top Bar ── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 studio-topbar flex items-center justify-between px-3 py-2.5" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="flex items-center gap-2">
-          <button onClick={() => setOpen(true)} className="p-2 rounded-xl text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-title)] transition-all">
+          <button onClick={() => setOpen(true)} className="p-2 rounded-xl text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] hover:text-white transition-all" aria-label="Open menu">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm"
-              style={{ background: 'var(--gradient-brand-mark)', color: 'var(--mark-text)' }}>
-              D
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-sm text-[var(--nav-title)] leading-tight truncate max-w-[110px]">{storeName}</span>
-              <span className="text-[10px] text-[var(--nav-text-muted)] font-medium leading-tight">Retail Management</span>
-            </div>
-          </div>
+          <button onClick={() => navigate('/settings')} className="topbar-pill">
+            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.48 3.5a1.75 1.75 0 013.04 0l.79 1.37c.25.43.74.68 1.26.63l1.58-.15a1.75 1.75 0 011.68 2.4l-.58 1.48a1.5 1.5 0 00.66 1.9l1.37.8a1.75 1.75 0 01-.1 3l-1.46.6a1.5 1.5 0 00-.9 1.53l.2 1.57a1.75 1.75 0 01-2.33 1.83l-1.43-.6a1.5 1.5 0 00-1.58.28l-1.12 1.1a1.75 1.75 0 01-2.89-.85l-.52-1.49a1.5 1.5 0 00-1.26-1l-1.57-.1a1.75 1.75 0 01-1.45-2.62l.88-1.32a1.5 1.5 0 00-.3-1.98l-1.24-1a1.75 1.75 0 011.2-3.04l1.56.16c.51.05 1-.22 1.24-.68l.7-1.42zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
+            Free Plan
+          </button>
         </div>
+        <h1 className="text-sm font-bold text-white truncate max-w-[130px] text-center">{pageTitle}</h1>
         <div className="flex items-center gap-0.5">
-          <button onClick={toggleTheme} className="theme-toggle-btn p-2 rounded-xl text-[var(--nav-text)] hover:text-[var(--nav-title)] hover:bg-[var(--nav-hover-bg)] transition-all" title="Toggle theme" aria-label="Toggle theme">
+          <button onClick={() => navigate('/ai-insights')} className="p-2 rounded-xl text-[var(--nav-text)] hover:bg-[var(--nav-hover-bg)] hover:text-white transition-all" title="AI Insights" aria-label="AI Insights">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+          <button onClick={toggleTheme} className="theme-toggle-btn p-2 rounded-xl text-[var(--nav-text)] hover:text-white hover:bg-[var(--nav-hover-bg)] transition-all" title="Toggle theme" aria-label="Toggle theme">
             <span className={`theme-toggle-icon ${theme === 'dark' ? 'entering-light' : 'entering-dark'}`}>
               {theme === 'dark' ? (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -114,7 +130,6 @@ export default function Sidebar() {
               )}
             </span>
           </button>
-
         </div>
       </div>
 

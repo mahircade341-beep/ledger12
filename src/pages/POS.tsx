@@ -289,7 +289,7 @@ export default function POS() {
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 
-  const isGod = profile?.email === 'fahmanmanka25@gmail.com';
+  const isGod = profile?.email === 'dukahub05@gmail.com';
 
   return (
     <div className="space-y-4 pb-16 lg:pb-0">

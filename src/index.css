@@ -916,3 +916,278 @@
   .receipt { position: absolute; left: 0; top: 0; width: 100%; max-width: 320px; margin: 0 auto; }
   @page { margin: 0.5in; size: 80mm 200mm auto; }
 }
+
+/* ============================================================
+   DUKAHUB STUDIO — pitch-black streaming-app aesthetic
+   (Spotify / Quranify inspired). Overrides the base palette so
+   every page re-themes through the shared CSS variables.
+   ============================================================ */
+:root, .dark {
+  --bg-primary: #090A0C;
+  --bg-surface: #121418;
+  --bg-surface2: #1C1E22;
+  --bg-surface3: #26282E;
+  --bg-elevated: rgba(28, 30, 34, 0.92);
+  --bg-card: rgba(18, 20, 24, 0.8);
+
+  --glass-bg: rgba(18, 20, 24, 0.6);
+  --glass-strong-bg: rgba(18, 20, 24, 0.9);
+  --glass-nav-bg: rgba(9, 10, 12, 0.9);
+  --glass-sidebar-bg: rgba(9, 10, 12, 0.96);
+  --glass-input-bg: rgba(28, 30, 34, 0.6);
+  --glass-modal-bg: rgba(12, 13, 15, 0.96);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+
+  --card-bg: rgba(18, 20, 24, 0.7);
+  --card-hover-bg: rgba(28, 30, 34, 0.88);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(255, 59, 48, 0.35);
+  --item-bg: rgba(28, 30, 34, 0.6);
+  --item-hover-bg: rgba(38, 40, 46, 0.8);
+
+  --btn-primary-bg: #FF3B30;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-shadow: 0 4px 16px rgba(255, 59, 48, 0.35);
+  --btn-primary-hover-shadow: 0 6px 24px rgba(255, 59, 48, 0.45);
+  --btn-secondary-text: #A1A1A6;
+  --btn-secondary-bg: rgba(38, 40, 46, 0.7);
+  --btn-secondary-hover-bg: rgba(48, 51, 58, 0.9);
+  --btn-ghost-hover-bg: rgba(255, 255, 255, 0.06);
+
+  --nav-hover-bg: rgba(255, 255, 255, 0.06);
+  --nav-active-bg: rgba(255, 59, 48, 0.14);
+  --nav-active-border: rgba(255, 59, 48, 0.35);
+  --nav-active-wash: linear-gradient(120deg, rgba(255,59,48,0.16), rgba(255,149,0,0.12) 45%, rgba(10,132,255,0.14));
+  --nav-title: #FFFFFF;
+  --nav-text: #A1A1A6;
+  --nav-text-active: #FF453A;
+  --nav-text-muted: #8E8E93;
+  --nav-border: rgba(255, 255, 255, 0.08);
+  --chrome-bg: rgba(9, 10, 12, 0.95);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1A6;
+  --text-muted: #8E8E93;
+  --text-inverse: #0A0A0B;
+  --text-accent: #0A84FF;
+
+  --color-success: #30D158;
+  --color-danger: #FF453A;
+  --color-warning: #FFD60A;
+  --color-info: #0A84FF;
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-hover: rgba(255, 59, 48, 0.4);
+  --border-focus: #FF3B30;
+  --border-input: rgba(255, 255, 255, 0.12);
+
+  --accent-primary: #FF453A;
+  --accent-secondary: #FF3B30;
+  --accent-dim: rgba(255, 59, 48, 0.12);
+  --accent-glow: rgba(255, 59, 48, 0.08);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.8);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 24px rgba(255, 59, 48, 0.15);
+
+  --overlay-bg: rgba(0, 0, 0, 0.72);
+  --grid-color: rgba(255, 255, 255, 0.03);
+  --body-bg: #090A0C;
+  --selection-bg: rgba(255, 59, 48, 0.3);
+  --selection-color: #FFFFFF;
+
+  --brand: #FF3B30;
+  --brand-light: #FF6961;
+  --brand-dark: #D70015;
+  --brand-deeper: #A60013;
+  --brand-glow: rgba(255, 59, 48, 0.15);
+  --brand-glow-strong: rgba(255, 59, 48, 0.28);
+  --color-trust: #0A84FF;
+
+  --gradient-brand: linear-gradient(135deg, #FF3B30, #FF9500);
+  --gradient-aurora: linear-gradient(120deg, #FF3B30 0%, #FF9500 45%, #0A84FF 100%);
+  --gradient-aurora-soft: linear-gradient(120deg, rgba(255,59,48,0.18), rgba(255,149,0,0.14) 45%, rgba(10,132,255,0.16));
+  --aurora-glow: radial-gradient(130% 130% at 30% 15%, rgba(255,59,48,0.16) 0%, rgba(255,149,0,0.12) 40%, rgba(10,132,255,0.12) 65%, transparent 72%);
+  --gradient-surface: linear-gradient(180deg, rgba(9,10,12,0) 0%, rgba(9,10,12,0.5) 100%);
+  --gradient-brand-mark: linear-gradient(120deg, #FF3B30 0%, #FF9500 50%, #0A84FF 100%);
+  --mark-text: #FFFFFF;
+}
+
+/* ── Studio top bar ── */
+.studio-topbar {
+  background: var(--chrome-bg);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid var(--nav-border);
+}
+
+/* High-contrast rounded pill (Premium / status) */
+.topbar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #FF3B30, #FF9500);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(255, 59, 48, 0.35);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+.topbar-pill:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(255, 59, 48, 0.45); }
+.topbar-pill:active { transform: scale(0.96); }
+
+/* ── Featured header card (16px radius, dark) ── */
+.featured-card {
+  background: linear-gradient(150deg, rgba(38, 40, 46, 0.9), rgba(18, 20, 24, 0.95));
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Circular avatar with white ring (favourites row) ── */
+.avatar-ring {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from 180deg, #FF3B30, #FF9500, #0A84FF, #30D158, #FF3B30);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+.avatar-ring > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* ── Collection / dash cards (vivid solid + gradient accents) ── */
+.collection-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 1.1rem;
+  overflow: hidden;
+  min-height: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  cursor: pointer;
+}
+.collection-card:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55); }
+.collection-card:active { transform: scale(0.98); }
+.collection-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.collection-card p { color: rgba(255, 255, 255, 0.75); font-size: 0.72rem; font-weight: 600; margin-top: 0.2rem; }
+.collection-orange { background: linear-gradient(135deg, #FF3B30, #FF9500); }
+.collection-blue { background: linear-gradient(135deg, #0A84FF, #5E5CE6); }
+.collection-purple { background: linear-gradient(135deg, #BF5AF2, #5E5CE6); }
+.collection-green { background: linear-gradient(135deg, #30D158, #00C7BE); }
+.collection-pink { background: linear-gradient(135deg, #FF375F, #FF9F0A); }
+.collection-teal { background: linear-gradient(135deg, #64D2FF, #30D158); }
+
+/* ── Floating mini dock (quick action player) ── */
+.mini-dock {
+  background: rgba(28, 30, 34, 0.92);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ── Glass bottom nav (mobile) ── */
+.bottom-nav-glass {
+  background: rgba(9, 10, 12, 0.86);
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Segment picker (Day / Week / Month / 3M) ── */
+.segment-picker {
+  display: flex;
+  background: rgba(28, 30, 34, 0.9);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+}
+.segment-picker button {
+  flex: 1;
+  padding: 0.5rem 0.9rem;
+  border-radius: 9px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.segment-picker button:hover { color: var(--text-primary); }
+.segment-picker button.active {
+  background: linear-gradient(135deg, #FF3B30, #FF9500);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(255, 59, 48, 0.35);
+}
+
+/* ── Settings chevron row ── */
+.chevron-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.9rem 0.25rem;
+  border-radius: 12px;
+  transition: background 0.15s ease;
+  cursor: pointer;
+  text-align: left;
+}
+.chevron-row:hover { background: var(--nav-hover-bg); }
+.chevron-row:active { background: var(--nav-active-bg); }
+
+/* ── Pricing plan cards ── */
+.plan-card {
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  transition: all 0.2s ease;
+}
+.plan-card-recommended {
+  border: 2px solid #FF3B30;
+  box-shadow: 0 0 0 1px rgba(255, 59, 48, 0.4), 0 10px 32px rgba(255, 59, 48, 0.18);
+  background: linear-gradient(170deg, rgba(255, 59, 48, 0.12), var(--card-bg) 55%);
+}
+
+/* ── Dark chart grid ── */
+.chart-grid-dark {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Fullscreen overlay player */
+.overlay-player {
+  background: radial-gradient(120% 100% at 50% 0%, #1C1E22 0%, #090A0C 60%, #000 100%);
+}

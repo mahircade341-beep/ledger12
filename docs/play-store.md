@@ -59,6 +59,8 @@ In Android Studio:
 5. **Data safety form:** state that financial/sales data is stored, encrypted in
    transit (HTTPS), not shared with third parties, and deletable by the user
    (account deletion = data removal).
+   **Ads:** select **No** — the app does not show any ads. (No advertising
+   SDK is bundled and no device/advertising identifiers are collected.)
 6. **Privacy policy:** link to your live `/privacy` page.
 7. When the listing is complete, submit for review. First review usually takes a
    few days.

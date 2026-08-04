@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import AnimatedBackground from '../components/AnimatedBackground';
 
 // ── Shared legal content ──
-const LAST_UPDATED = 'August 3, 2026';
+const LAST_UPDATED = 'August 4, 2026';
 
 interface LegalSection {
   title: string;
@@ -22,7 +22,7 @@ const TERMS_SECTIONS: LegalSection[] = [
       'DukaHub is a retail management tool that helps shop owners record sales, track inventory, manage M-Pesa and cash payments, issue receipts, and follow up on credit (Daftari) debts.',
       'You can reach us at:',
       [
-        '📧 Email: fahmanmanka25@gmail.com',
+        '📧 Email: dukahub05@gmail.com',
         '💬 WhatsApp: 0143 897 900',
         '📍 Nairobi, Kenya · Mon–Sat, 8am–8pm',
       ],
@@ -109,7 +109,7 @@ const TERMS_SECTIONS: LegalSection[] = [
     body: [
       'Questions about these Terms? We are happy to help:',
       [
-        '📧 Email: fahmanmanka25@gmail.com',
+        '📧 Email: dukahub05@gmail.com',
         '💬 WhatsApp: 0143 897 900',
       ],
     ],
@@ -148,7 +148,7 @@ const PRIVACY_SECTIONS: LegalSection[] = [
         'Respond to your support requests',
         'Comply with legal obligations',
       ],
-      'We do not sell your personal or business data, and we do not use it to show you third-party ads.',
+      'We do not sell your personal or business data, and we never use your shop\u2019s sales, stock, or customer records to target ads at you.',
       'Our legal bases for processing, as set out in Section 25 of the Kenya Data Protection Act, 2019, are: your consent; the performance of the service contract you enter into when you create an account; compliance with legal obligations; and our legitimate interests in keeping the service secure and functional. We do not process "sensitive personal data" (as defined by the Act) and will never do so without your explicit consent.',
     ],
   },
@@ -189,7 +189,7 @@ const PRIVACY_SECTIONS: LegalSection[] = [
         'Receive your data in a structured, portable format and transfer it to another service',
         'Not be subject to automated decision-making that significantly affects you',
       ],
-      'To exercise any of these rights, contact us at fahmanmanka25@gmail.com and we will respond within the timelines set by the Act. If you are not satisfied with our response, you may lodge a complaint with the Office of the Data Protection Commissioner (ODPC) under Section 72 of the Act.',
+      'To exercise any of these rights, contact us at dukahub05@gmail.com and we will respond within the timelines set by the Act. If you are not satisfied with our response, you may lodge a complaint with the Office of the Data Protection Commissioner (ODPC) under Section 72 of the Act.',
     ],
   },
   {
@@ -207,7 +207,7 @@ const PRIVACY_SECTIONS: LegalSection[] = [
   {
     title: '11. Analytics',
     body: [
-      'DukaHub uses privacy-first, first-party analytics to understand how the app is used and improve it. We do not use Google Analytics, Facebook Pixel, or any third-party advertising trackers.',
+      'DukaHub uses privacy-first, first-party analytics to understand how the app is used and improve it. We do not use Google Analytics or Facebook Pixel, and our analytics data is never shared with any third party.',
       'Our analytics system:',
       [
         'Tracks page views, feature usage, and ecommerce events (add to cart, purchase) in an anonymized way',
@@ -220,17 +220,17 @@ const PRIVACY_SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: '11. Changes to This Policy',
+    title: '12. Changes to This Policy',
     body: [
       'We may update this Privacy Policy from time to time. The latest version will always be available at this page with an updated "last updated" date. Significant changes will be announced by email or in-app.',
     ],
   },
   {
-    title: '12. Contact',
+    title: '13. Contact',
     body: [
       'For any privacy questions or requests:',
       [
-        '📧 Email: fahmanmanka25@gmail.com',
+        '📧 Email: dukahub05@gmail.com',
         '💬 WhatsApp: 0143 897 900',
         '📍 Nairobi, Kenya',
       ],

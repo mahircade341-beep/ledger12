@@ -7,7 +7,7 @@ import AnimatedBackground from '../components/AnimatedBackground';
 // wa.me requires the international format (Kenya: +254, drop leading 0)
 const SUPPORT_WA_NUMBER = '254143897900';
 const SUPPORT_WA_DISPLAY = '0143 897 900';
-const SUPPORT_EMAIL = 'fahmanmanka25@gmail.com';
+const SUPPORT_EMAIL = 'dukahub05@gmail.com';
 
 // ── Feature data ──
 const FEATURES = [
@@ -79,7 +79,7 @@ const STEPS = [
 const FAQS = [
   {
     q: 'Is DukaHub really free?',
-    a: 'Yes — DukaHub is free for Kenyan shop owners, forever. No trial period, no credit card, no hidden fees. We keep it free because we believe every duka deserves modern tools.',
+    a: 'Yes — DukaHub is free for Kenyan shop owners, forever. No trial period, no credit card, no hidden fees. We never sell your data, and you own every record you create.',
   },
   {
     q: 'Do I need an internet connection to use it?',
@@ -109,7 +109,7 @@ const DATA_SAFETY = [
   {
     icon: '🏠',
     title: 'Your data is yours',
-    desc: 'We never sell your data and never use it for ads. What you enter in DukaHub stays your business.',
+    desc: 'We never sell your data. Your sales records are yours alone — DukaHub is free because we believe every duka deserves modern tools, not because of your data.',
   },
   {
     icon: '📤',
@@ -413,7 +413,7 @@ export default function Landing() {
               <Link to="/login?mode=signup" className="btn-v2-primary w-full py-3.5">
                 Create your free shop
               </Link>
-              <p className="text-[11px] text-[var(--text-muted)] mt-3">We make money the honest way — through optional paid upgrades later, never by selling your shop data.</p>
+              <p className="text-[11px] text-[var(--text-muted)] mt-3">DukaHub stays free for Kenyan shops. We never sell your shop data.</p>
             </div>
           </div>
         </div>
@@ -425,7 +425,7 @@ export default function Landing() {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Your shop data is safe with us</h2>
             <p className="mt-3 text-[var(--text-secondary)]">
-              Built on a simple promise: your business data belongs to you — and only you. Never sold, never shared for ads.
+              Built on a simple promise: your business data belongs to you — and only you. Never sold, never shared.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">

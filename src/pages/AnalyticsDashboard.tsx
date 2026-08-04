@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 interface AnalyticsRow {
   id: string;
@@ -12,7 +13,14 @@ interface AnalyticsRow {
   created_at: string;
 }
 
-type StatPeriod = '24h' | '7d' | '30d';
+type StatPeriod = '24h' | '7d' | '30d' | '90d';
+
+const PERIODS: { key: StatPeriod; label: string }[] = [
+  { key: '24h', label: 'Day' },
+  { key: '7d', label: 'Week' },
+  { key: '30d', label: 'Month' },
+  { key: '90d', label: '3M' },
+];
 
 function fmtTime(ts: number) {
   const pref = localStorage.getItem('dl-time-format') || '12h';
@@ -25,7 +33,7 @@ export default function AnalyticsDashboard() {
   const [rows, setRows] = useState<AnalyticsRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<StatPeriod>('7d');
-  const isAdmin = profile?.email === 'fahmanmanka25@gmail.com';
+  const isAdmin = profile?.email === 'dukahub05@gmail.com';
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -34,7 +42,8 @@ export default function AnalyticsDashboard() {
     let since: Date;
     if (period === '24h') { since = new Date(now); since.setHours(since.getHours() - 24); }
     else if (period === '7d') { since = new Date(now); since.setDate(since.getDate() - 7); }
-    else { since = new Date(now); since.setDate(since.getDate() - 30); }
+    else if (period === '30d') { since = new Date(now); since.setDate(since.getDate() - 30); }
+    else { since = new Date(now); since.setDate(since.getDate() - 90); }
 
     supabase
       .from('analytics_events')
@@ -79,22 +88,54 @@ export default function AnalyticsDashboard() {
     });
     const topReferrers = Array.from(refCount.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    // Events over time (last 7 days)
-    const dayMap = new Map<string, number>();
+    // Events over time — buckets follow the selected period
+    const dailyEvents: { date: string; count: number }[] = [];
     const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now); d.setDate(d.getDate() - i);
-      dayMap.set(d.toLocaleDateString('en-KE', { weekday: 'short' }), 0);
+    const fmt = (d: Date) => d.toLocaleDateString('en-KE', { weekday: 'short' });
+    if (period === '24h') {
+      // Hourly buckets for the last 24h
+      const hourMap = new Map<string, number>();
+      for (let i = 23; i >= 0; i--) {
+        const d = new Date(now); d.setHours(d.getHours() - i, 0, 0, 0);
+        hourMap.set(d.getHours().toString(), 0);
+      }
+      rows.forEach(r => {
+        const h = new Date(r.created_at).getHours().toString();
+        if (hourMap.has(h)) hourMap.set(h, (hourMap.get(h) || 0) + 1);
+      });
+      dailyEvents.push(...Array.from(hourMap.entries()).map(([h, count]) => ({ date: `${h}:00`, count })));
+    } else if (period === '90d') {
+      // Weekly buckets (last 13 weeks)
+      const weekMap = new Map<string, number>();
+      for (let i = 12; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i * 7);
+        weekMap.set(fmt(d), 0);
+      }
+      rows.forEach(r => {
+        const d = new Date(r.created_at);
+        const diff = Math.floor((now.getTime() - d.getTime()) / (7 * 86400000));
+        const key = fmt(new Date(now.getTime() - Math.min(diff, 12) * 7 * 86400000));
+        if (weekMap.has(key)) weekMap.set(key, (weekMap.get(key) || 0) + 1);
+      });
+      dailyEvents.push(...Array.from(weekMap.entries()).map(([date, count]) => ({ date, count })));
+    } else {
+      // Daily buckets (7d / 30d)
+      const days = period === '7d' ? 7 : 30;
+      const dayMap = new Map<string, number>();
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i);
+        dayMap.set(fmt(d), 0);
+      }
+      rows.forEach(r => {
+        const d = new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short' });
+        if (dayMap.has(d)) dayMap.set(d, (dayMap.get(d) || 0) + 1);
+      });
+      dailyEvents.push(...Array.from(dayMap.entries()).map(([date, count]) => ({ date, count })));
     }
-    rows.forEach(r => {
-      const d = new Date(r.created_at).toLocaleDateString('en-KE', { weekday: 'short' });
-      if (dayMap.has(d)) dayMap.set(d, (dayMap.get(d) || 0) + 1);
-    });
-    const dailyEvents = Array.from(dayMap.entries()).map(([date, count]) => ({ date, count }));
     const maxDaily = Math.max(...dailyEvents.map(d => d.count), 1);
 
     return { pageViews, uniqueSessions, purchases: purchases.length, totalRevenue, addToCarts, conversionRate, topPages, topReferrers, dailyEvents, maxDaily };
-  }, [rows]);
+  }, [rows, period]);
 
   if (!isAdmin) {
     return (
@@ -117,9 +158,9 @@ export default function AnalyticsDashboard() {
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">Privacy-first · No personal data · Kenya DPA compliant</p>
         </div>
-        <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-1">
-          {(['24h', '7d', '30d'] as const).map((p) => (
-            <button key={p} onClick={() => setPeriod(p)} className={`tab-v2 ${period === p ? 'tab-v2-active' : ''} text-xs`}>{p}</button>
+        <div className="segment-picker">
+          {PERIODS.map((p) => (
+            <button key={p.key} onClick={() => setPeriod(p.key)} className={period === p.key ? 'active' : ''}>{p.label}</button>
           ))}
         </div>
       </div>
@@ -165,25 +206,33 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
 
-          {/* Daily Events Chart (pure CSS bar chart — no extra deps) */}
+          {/* Daily Events — minimalist line chart on dark grid */}
           {stats.dailyEvents.length > 0 && (
-            <div className="card-v2">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Daily Events (last 7 days)</h3>
-              <div className="flex items-end gap-2 h-28">
-                {stats.dailyEvents.map((d) => {
-                  const pct = (d.count / stats.maxDaily) * 100;
-                  return (
-                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="text-[10px] text-[var(--text-muted)] font-medium">{d.count}</span>
-                      <div className="w-full rounded-t-md transition-all duration-300" style={{
-                        height: `${Math.max(pct, 4)}%`,
-                        background: 'var(--gradient-brand)',
-                        opacity: d.count > 0 ? 0.7 + (pct / 100) * 0.3 : 0.2,
-                      }} />
-                      <span className="text-[10px] text-[var(--text-muted)] truncate w-full text-center">{d.date}</span>
-                    </div>
-                  );
-                })}
+            <div className="card-v2 chart-grid-dark">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Activity</h3>
+                <span className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">events</span>
+              </div>
+              <div className="h-44">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stats.dailyEvents} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
+                    <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fill: '#8E8E93', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} dy={6} />
+                    <YAxis tick={{ fill: '#8E8E93', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{
+                        background: '#1C1E22',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: 12,
+                        fontSize: 12,
+                        color: '#fff',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+                      }}
+                      labelStyle={{ color: '#8E8E93', fontWeight: 600 }}
+                    />
+                    <Line type="monotone" dataKey="count" stroke="#FF453A" strokeWidth={2.5} dot={{ r: 3, fill: '#FF453A', strokeWidth: 0 }} activeDot={{ r: 5, fill: '#FF9500' }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
           )}

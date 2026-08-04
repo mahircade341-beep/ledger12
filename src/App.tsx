@@ -15,6 +15,7 @@ import AiInsights from './pages/AiInsights';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import Inventory from './pages/Inventory';
 import Settings from './pages/Settings';
+import Home from './pages/Home';
 import ResetPassword from './pages/ResetPassword';
 import Onboarding from './pages/Onboarding';
 import useAnalytics from './hooks/useAnalytics';
@@ -88,6 +89,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/privacy': {
     title: 'Privacy Policy · DukaHub',
     description: 'How DukaHub protects your shop data — encrypted login, row-level security, and full data ownership. Compliant with the Kenya Data Protection Act.',
+  },
+  '/home': {
+    title: 'Home · DukaHub Shop Dashboard',
+    description: 'Your DukaHub dashboard — today\u2019s sales, low stock alerts, debtors, and quick access to POS, inventory, Daftari and AI insights.',
   },
   '/pos': {
     title: 'Point of Sale (POS) for Kenyan Shops · DukaHub',
@@ -217,6 +222,8 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route index element={<Navigate to="/home" replace />} />
+          <Route path="home" element={<Home />} />
           <Route path="pos" element={<POS />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="stock" element={<Stock />} />

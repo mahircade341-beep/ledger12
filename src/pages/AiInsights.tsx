@@ -2,8 +2,14 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
 import { getGroqKey, setGroqKey, isValidGroqKey, streamGroqChat, type GroqMessage } from '../lib/groq';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+  LineChart, Line, CartesianGrid, Legend
+} from 'recharts';
 
 type ViewPeriod = 'daily' | 'weekly' | 'monthly' | 'all';
+
+const CHART_COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
 function fmtTime(ts: number) {
   const pref = localStorage.getItem('dl-time-format') || '12h';
@@ -28,6 +34,7 @@ export default function AiInsights() {
   const [abortRef, setAbortRef] = useState<AbortController | null>(null);
   const [followUp, setFollowUp] = useState('');
   const [followUpLoading, setFollowUpLoading] = useState(false);
+  const [autoAnalyzed, setAutoAnalyzed] = useState(false);
   const analysisRef = useRef<HTMLDivElement>(null);
   const followUpRef = useRef<HTMLInputElement>(null);
 
@@ -94,12 +101,50 @@ export default function AiInsights() {
     return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
   }, [filteredTransactions, products]);
 
-  // Slow-moving products (in stock, never sold this period)
+  // Slow-moving products
   const slowMoving = useMemo(() => {
     const soldNames = new Set<string>();
     filteredTransactions.forEach((tx: any) => (tx.items || []).forEach((item: any) => soldNames.add(item.name)));
     return products.filter((p: any) => !soldNames.has(p.name) && p.quantity > 0).slice(0, 20);
   }, [products, filteredTransactions]);
+
+  // ── Chart data ──
+
+  // Payment breakdown pie
+  const paymentChartData = useMemo(() => [
+    { name: 'Cash', value: cashTotal, color: '#10B981' },
+    { name: 'M-Pesa', value: mpesaTotal, color: '#3B82F6' },
+    { name: 'Debt', value: debtTotal, color: '#F59E0B' },
+  ].filter(d => d.value > 0), [cashTotal, mpesaTotal, debtTotal]);
+
+  // Top products bar chart
+  const topProductsChartData = useMemo(() =>
+    topProducts.slice(0, 6).map(p => ({
+      name: p.name.length > 12 ? p.name.slice(0, 12) + '…' : p.name,
+      Revenue: p.revenue,
+      Profit: p.profit,
+    })),
+  [topProducts]);
+
+  // Sales trend: daily sales over the last 7/30 days
+  const salesTrendData = useMemo(() => {
+    if (transactions.length === 0) return [];
+    const days = period === 'all' ? 30 : period === 'monthly' ? 30 : period === 'weekly' ? 7 : 1;
+    const map = new Map<string, number>();
+    const now = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      const key = d.toLocaleDateString('en-KE', { day: 'numeric', month: 'short' });
+      map.set(key, 0);
+    }
+    transactions.forEach((t: any) => {
+      const d = new Date(t._creationTime);
+      if (period !== 'all' && d < start) return;
+      const key = d.toLocaleDateString('en-KE', { day: 'numeric', month: 'short' });
+      if (map.has(key)) map.set(key, (map.get(key) || 0) + t.total);
+    });
+    return Array.from(map.entries()).map(([date, sales]) => ({ date, sales }));
+  }, [transactions, period, start]);
 
   // ── Build system prompt ──
   const buildSystemPrompt = (): string => {
@@ -155,7 +200,6 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
     setError('');
     setStreaming(true);
 
-    // Abort any previous request
     if (abortRef) abortRef.abort();
     const controller = new AbortController();
     setAbortRef(controller);
@@ -185,7 +229,18 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
       setStreaming(false);
       setAbortRef(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysis, abortRef, period, filteredTransactions, products, debtors, filteredPayouts, topProducts, slowMoving, profitData, grossSales, numTransactions, avgTicket, cashTotal, mpesaTotal, debtTotal, totalDiscounts, totalPayouts, totalOutstandingDebt]);
+
+  // ── Auto-analyze on load ──
+  useEffect(() => {
+    const k = getGroqKey();
+    if (k && isValidGroqKey(k) && !autoAnalyzed && !streaming && !analysis) {
+      setAutoAnalyzed(true);
+      runAnalysis();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAnalyzed, streaming, analysis]);
 
   // ── Follow-up question ──
   const handleFollowUp = async () => {
@@ -309,6 +364,85 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
         </div>
       )}
 
+      {/* ── Charts Row ── */}
+      {!showKeyInput && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Payment Breakdown Pie */}
+          {paymentChartData.length > 0 && (
+            <div className="card-v2">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Payment Breakdown</h3>
+              <div className="flex items-center justify-center">
+                <ResponsiveContainer width="100%" height={180}>
+                  <PieChart>
+                    <Pie data={paymentChartData} cx="50%" cy="50%" innerRadius={45} outerRadius={70}
+                      paddingAngle={3} dataKey="value">
+                      {paymentChartData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} stroke="transparent" />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
+                      formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex items-center justify-center gap-4 mt-1 text-xs text-[var(--text-muted)]">
+                {paymentChartData.map(d => (
+                  <span key={d.name} className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+                    {d.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Top Products Bar */}
+          {topProductsChartData.length > 0 && (
+            <div className="card-v2 lg:col-span-2">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Top Products by Revenue</h3>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={topProductsChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.3} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
+                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
+                    formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 10, color: 'var(--text-muted)' }} />
+                  <Bar dataKey="Revenue" fill="#10B981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Profit" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Sales Trend Line */}
+          {salesTrendData.length > 1 && (
+            <div className="card-v2 lg:col-span-3">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Sales Trend</h3>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={salesTrendData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" opacity={0.3} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
+                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 12 }}
+                    formatter={(value: any) => `KES ${Number(value).toLocaleString()}`}
+                  />
+                  <Line type="monotone" dataKey="sales" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3, fill: '#8B5CF6' }}
+                    activeDot={{ r: 5, fill: '#8B5CF6' }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* AI Analysis Card */}
       <div className="card-v2 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, #10B981, #3B82F6, #8B5CF6)' }} />
@@ -348,7 +482,7 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                     </svg>
-                    Analyze Now
+                    Re-analyze
                   </span>
                 )}
               </button>
@@ -361,7 +495,7 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
             <div className="text-4xl mb-3">🧠</div>
             <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">AI-Powered Shop Analysis</h3>
             <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto mb-4">
-              Get instant, actionable insights about your shop — top products, slow movers, profit warnings, pricing tips, and more.
+              Get instant, actionable insights about your shop — top products, slow movers, profit warnings, pricing tips, and more. Analysis starts automatically once you add your key.
             </p>
             <button onClick={() => setShowKeyInput(true)} className="btn-v2-primary">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -378,9 +512,9 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
             {!analysis && !streaming && (
               <div className="text-center py-10">
                 <div className="text-4xl mb-3">📊</div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">Ready to analyze</h3>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">Analyzing your shop...</h3>
                 <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-                  Click <strong>Analyze Now</strong> to get AI-powered insights on your shop's performance, top products, risks, and quick wins.
+                  The AI is generating insights — this takes a few seconds.
                 </p>
               </div>
             )}

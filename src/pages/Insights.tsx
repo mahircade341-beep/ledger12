@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
+import PageHeader from '../components/PageHeader';
 
 type ViewPeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -142,24 +143,24 @@ export default function Insights() {
 
   return (
     <div className="space-y-6">
-      {/* V10 header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Insights</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Sales analytics, profit &amp; anti-theft auditing</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-1">
-            {(['daily', 'weekly', 'monthly'] as const).map((p) => (
-              <button key={p} onClick={() => setPeriod(p)} className={`tab-v2 ${period === p ? 'tab-v2-active' : ''} capitalize`}>{p}</button>
-            ))}
-          </div>
-          <button onClick={exportCSV} className="btn-v2-secondary text-xs h-9">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            Export CSV
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Insights"
+        subtitle="Sales analytics, profit &amp; anti-theft auditing"
+        accent="pink"
+        actions={
+          <>
+            <div className="segment-picker">
+              {(['daily', 'weekly', 'monthly'] as const).map((p) => (
+                <button key={p} onClick={() => setPeriod(p)} className={period === p ? 'active' : ''} style={{ textTransform: 'capitalize' }}>{p}</button>
+              ))}
+            </div>
+            <button onClick={exportCSV} className="btn-v2-secondary text-xs h-9">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              Export CSV
+            </button>
+          </>
+        }
+      />
 
       {/* V10 KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">

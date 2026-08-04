@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
 import { streamGroqChat, type GroqMessage } from '../lib/groq';
+import PageHeader from '../components/PageHeader';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
   LineChart, Line, CartesianGrid, Legend
@@ -255,20 +256,18 @@ ${filteredTransactions.slice(-5).map((t: any) => `- ${new Date(t._creationTime).
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">AI Insights</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Powered by Groq via Supabase Edge Functions · Your shop analyzed by AI in seconds</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 bg-[var(--bg-surface2)] rounded-lg p-1">
+      <PageHeader
+        title="AI Insights"
+        subtitle="Powered by Groq · Your shop analyzed by AI in seconds"
+        accent="pink"
+        actions={
+          <div className="segment-picker">
             {(['daily', 'weekly', 'monthly', 'all'] as const).map((p) => (
-              <button key={p} onClick={() => setPeriod(p)} className={`tab-v2 ${period === p ? 'tab-v2-active' : ''} capitalize text-xs`}>{p}</button>
+              <button key={p} onClick={() => setPeriod(p)} className={period === p ? 'active' : ''} style={{ textTransform: 'capitalize' }}>{p}</button>
             ))}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

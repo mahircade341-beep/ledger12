@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
+import PageHeader from '../components/PageHeader';
 
 interface DebtorRecord { _id: string; _creationTime: number; userId: string; name: string; phone?: string; amount: number; notes?: string; status: 'active' | 'cleared'; }
 
@@ -69,14 +70,14 @@ export default function Daftari() {
 
   return (
     <div className="space-y-6">
-      {/* V10 header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Daftari</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage debtors and track partial payments</p>
-        </div>
-        <button onClick={() => setShowForm(!showForm)} className="btn-v2-primary text-xs h-9">{showForm ? 'Cancel' : '+ New Debtor'}</button>
-      </div>
+      <PageHeader
+        title="Daftari"
+        subtitle="Manage debtors and track partial payments"
+        accent="purple"
+        actions={
+          <button onClick={() => setShowForm(!showForm)} className="btn-v2-primary text-xs h-9">{showForm ? 'Cancel' : '+ New Debtor'}</button>
+        }
+      />
 
       {/* V10 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

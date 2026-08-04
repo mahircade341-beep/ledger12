@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocalData } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
+import PageHeader from '../components/PageHeader';
 
 export default function CashDrawer() {
   const { userId } = useAuth();
@@ -46,13 +47,11 @@ export default function CashDrawer() {
 
   return (
     <div className="space-y-6">
-      {/* V10 header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Cash Drawer</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Track payouts, restocks, and expenses</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Cash Drawer"
+        subtitle="Track payouts, restocks, and expenses"
+        accent="green"
+      />
 
       {/* V10 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

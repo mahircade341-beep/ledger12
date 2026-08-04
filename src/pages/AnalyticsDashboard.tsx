@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import PageHeader from '../components/PageHeader';
 
 interface AnalyticsRow {
   id: string;
@@ -140,7 +141,7 @@ export default function AnalyticsDashboard() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
+        <PageHeader title="Analytics" subtitle="Privacy-first · No personal data · Kenya DPA compliant" accent="blue" />
         <div className="card-v2 text-center py-12">
           <div className="text-4xl mb-3">🔒</div>
           <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1.5">Admin only</h3>
@@ -152,18 +153,18 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Analytics</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Privacy-first · No personal data · Kenya DPA compliant</p>
-        </div>
-        <div className="segment-picker">
-          {PERIODS.map((p) => (
-            <button key={p.key} onClick={() => setPeriod(p.key)} className={period === p.key ? 'active' : ''}>{p.label}</button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Analytics"
+        subtitle="Privacy-first · No personal data · Kenya DPA compliant"
+        accent="blue"
+        actions={
+          <div className="segment-picker">
+            {PERIODS.map((p) => (
+              <button key={p.key} onClick={() => setPeriod(p.key)} className={period === p.key ? 'active' : ''}>{p.label}</button>
+            ))}
+          </div>
+        }
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-16">

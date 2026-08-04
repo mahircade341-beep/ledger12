@@ -2,6 +2,7 @@ import { useState, useRef, useMemo } from 'react';
 import { useLocalData, fileToDataURL } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
 import BarcodeScanner from '../components/BarcodeScanner';
+import PageHeader from '../components/PageHeader';
 
 export default function Stock() {
   const { userId } = useAuth();
@@ -114,12 +115,12 @@ export default function Stock() {
     <div className="space-y-6">
       {/* V10 Header with stats */}
       <div>
-        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Stock Input</h1>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">Add new products or restock existing inventory</p>
-          </div>
-        </div>
+        <PageHeader
+          title="Stock Input"
+          subtitle="Add new products or restock existing inventory"
+          accent="green"
+          className="mb-3"
+        />
         {/* V10 Stat cards */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="stat-v2">

@@ -6,6 +6,7 @@ import useUtmTracker from '../hooks/useUtmTracker';
 import ProductHeroImage from '../components/ProductHeroImage';
 import StickyAddCart from '../components/StickyAddCart';
 import BarcodeScanner from '../components/BarcodeScanner';
+import PageHeader from '../components/PageHeader';
 import useCartPersistence from '../hooks/useCartPersistence';
 
 interface ReceiptData {
@@ -293,17 +294,17 @@ export default function POS() {
 
   return (
     <div className="space-y-4 pb-16 lg:pb-0">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Point of Sale</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Process customer transactions</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {isGod && <span className="badge-v2-info text-[10px] px-2">GOD MODE</span>}
-          <span className="text-[10px] text-[var(--text-muted)] hidden md:block">F1-F8 Quick | F9 Sale | Esc</span>
-        </div>
-      </div>
+      <PageHeader
+        title="Point of Sale"
+        subtitle="Process customer transactions — keyboard first"
+        accent="orange"
+        actions={
+          <>
+            {isGod && <span className="badge-v2-info text-[10px] px-2">GOD MODE</span>}
+            <span className="text-[10px] text-[var(--text-muted)] hidden md:block">F1-F8 Quick · F9 Sale · Esc</span>
+          </>
+        }
+      />
 
       {/* Daily Sales Summary */}
       {todayCount > 0 && (

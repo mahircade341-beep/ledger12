@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTheme } from '../App';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocalData, genId } from '../hooks/useLocalData';
+import PageHeader from '../components/PageHeader';
 
 function fmtTime(ts: number) {
   const pref = localStorage.getItem('dl-time-format') || '12h';
@@ -228,14 +229,12 @@ export default function Settings() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      {/* V10 header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Settings</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage app preferences and data</p>
-        </div>
-        {saved && <span className="badge-v2-success animate-fade-in">Saved</span>}
-      </div>
+      <PageHeader
+        title="Settings"
+        subtitle="Manage app preferences and data"
+        accent="purple"
+        actions={saved && <span className="badge-v2-success animate-fade-in">Saved</span>}
+      />
 
       {/* Premium plans */}
       <div className="space-y-3">

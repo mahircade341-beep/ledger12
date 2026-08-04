@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { useLocalData, fileToDataURL } from '../hooks/useLocalData';
 import { useAuth } from '../contexts/AuthContext';
 import BarcodeScanner from '../components/BarcodeScanner';
+import PageHeader from '../components/PageHeader';
 
 export default function Inventory() {
   const { userId } = useAuth();
@@ -148,17 +149,17 @@ export default function Inventory() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Inventory</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage your products — edit, delete, and monitor stock levels</p>
-        </div>
-        <div className="flex items-center gap-1.5">
-          {criticalCount > 0 && <span className="badge-v2-danger">{criticalCount} out of stock</span>}
-          {lowStockCount > 0 && <span className="badge-v2-warning">{lowStockCount} low stock</span>}
-        </div>
-      </div>
+      <PageHeader
+        title="Catalog"
+        subtitle="Manage your products — edit, delete, and monitor stock levels"
+        accent="blue"
+        actions={
+          <>
+            {criticalCount > 0 && <span className="badge-v2-danger">{criticalCount} out of stock</span>}
+            {lowStockCount > 0 && <span className="badge-v2-warning">{lowStockCount} low stock</span>}
+          </>
+        }
+      />
 
       {/* Low-Stock Alert Banner */}
       {lowStockCount > 0 && (

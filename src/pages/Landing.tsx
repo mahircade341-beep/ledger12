@@ -218,8 +218,9 @@ export default function Landing() {
             <span className="bg-gradient-to-r from-[var(--color-success)] to-[var(--color-info)] bg-clip-text text-transparent">shilling</span>.
           </h1>
           <p className="mt-5 text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed animate-spring-up" style={{ animationDelay: '80ms' }}>
-            Ring up sales in seconds, watch stock and profit update live, and reconcile
-            every shilling — from your phone or laptop. Built for how Kenyan dukas actually run.
+            DukaHub is the free POS system and shop management app for Kenyan dukas.
+            Ring up sales in seconds, track stock and profit live, and reconcile
+            every shilling — M-Pesa, cash or Daftari credit — from your phone or laptop.
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 animate-spring-up" style={{ animationDelay: '160ms' }}>
@@ -316,7 +317,10 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Everything a modern duka needs</h2>
-            <p className="mt-3 text-[var(--text-secondary)]">Faster at the counter, sharper on profit insights — everything below runs on your phone or laptop.</p>
+            <p className="mt-3 text-[var(--text-secondary)]">
+              A free point-of-sale, stock management, Daftari credit ledger and cash drawer
+              audit in one app — faster at the counter, sharper on profit insights, on your phone or laptop.
+            </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (

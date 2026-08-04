@@ -3,12 +3,23 @@
 
 User-agent: *
 Allow: /
+
+# Public pages (indexable)
 Allow: /login
 Allow: /terms
 Allow: /privacy
 
-Disallow: /reset-password
+# App pages behind sign-in — no indexable content, save crawl budget
+Disallow: /pos
+Disallow: /inventory
+Disallow: /stock
+Disallow: /daftari
+Disallow: /cash-drawer
+Disallow: /insights
+Disallow: /ai-insights
+Disallow: /analytics
 Disallow: /settings
+Disallow: /reset-password
 Disallow: /onboarding
 
 Sitemap: https://dukahub12.vercel.app/sitemap.xml

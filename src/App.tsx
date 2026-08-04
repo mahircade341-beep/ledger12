@@ -65,37 +65,103 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <LockScreen>{children}</LockScreen>;
 }
 
-// Per-route document titles: fixes the static single title so tabs, history,
-// and search results show the actual page name.
-const ROUTE_TITLES: Record<string, string> = {
-  '/': 'DukaHub — POS & Retail Management for Kenyan Shops',
-  '/login': 'Sign In · DukaHub',
-  '/terms': 'Terms of Service · DukaHub',
-  '/privacy': 'Privacy Policy · DukaHub',
-  '/pos': 'Point of Sale · DukaHub',
-  '/inventory': 'Inventory · DukaHub',
-  '/stock': 'Stock Management · DukaHub',
-  '/daftari': 'Daftari (Debtors) · DukaHub',
-  '/cash-drawer': 'Cash Drawer · DukaHub',
-  '/insights': 'Insights & Reports · DukaHub',
-  '/ai-insights': 'AI Insights · DukaHub',
-  '/analytics': 'Analytics · DukaHub',
-  '/settings': 'Settings · DukaHub',
-  '/reset-password': 'Reset Password · DukaHub',
-  '/onboarding': 'Welcome · DukaHub',
+// Per-route SEO metadata: titles + descriptions so tabs, history, social shares,
+// and rendered search results show accurate page name and keyword-rich copy.
+interface RouteMeta {
+  title: string;
+  description: string;
+}
+
+const ROUTE_META: Record<string, RouteMeta> = {
+  '/': {
+    title: 'DukaHub — Free POS & Inventory App for Kenyan Shops',
+    description: 'Free POS, inventory & Daftari debtor ledger for Kenyan shops. Track every shilling — sales, stock, M-Pesa & cash — from your phone. No card required.',
+  },
+  '/login': {
+    title: 'Sign In · DukaHub',
+    description: 'Sign in to DukaHub to manage your shop — POS, inventory, Daftari and sales insights. Free for Kenyan shops, no card required.',
+  },
+  '/terms': {
+    title: 'Terms of Service · DukaHub',
+    description: 'The terms that govern your use of DukaHub, the free POS and retail management app for Kenyan shops.',
+  },
+  '/privacy': {
+    title: 'Privacy Policy · DukaHub',
+    description: 'How DukaHub protects your shop data — encrypted login, row-level security, and full data ownership. Compliant with the Kenya Data Protection Act.',
+  },
+  '/pos': {
+    title: 'Point of Sale (POS) for Kenyan Shops · DukaHub',
+    description: 'Fast, keyboard-first point of sale for Kenyan shops. Barcode scanning, instant receipts, and automatic stock deduction at every sale.',
+  },
+  '/inventory': {
+    title: 'Inventory Management for Kenyan Shops · DukaHub',
+    description: 'Track stock levels in real time, get low-stock alerts, and know exactly what to reorder with DukaHub inventory management.',
+  },
+  '/stock': {
+    title: 'Stock Management & Margins · DukaHub',
+    description: 'Manage products, wholesale prices and profit margins in one place. Simple stock management for Kenyan dukas.',
+  },
+  '/daftari': {
+    title: 'Daftari — Debtor Ledger for Kenyan Shops · DukaHub',
+    description: 'Track customers who buy on credit, record payments, and keep a full Daftari history of who owes you — no more torn notebook pages.',
+  },
+  '/cash-drawer': {
+    title: 'Cash Drawer Audit · DukaHub',
+    description: 'Reconcile your cash drawer automatically — M-Pesa, cash and float. Every shilling accounted for, every day.',
+  },
+  '/insights': {
+    title: 'Sales Insights & Reports · DukaHub',
+    description: 'Daily sales, profit margins and cash audits without spreadsheets. Know what you actually earned with DukaHub insights.',
+  },
+  '/ai-insights': {
+    title: 'AI Shop Analysis · DukaHub',
+    description: 'Get plain-language AI insights about your shop — top products, slow-moving stock, profit trends, and what to fix first.',
+  },
+  '/analytics': {
+    title: 'Shop Analytics Dashboard · DukaHub',
+    description: 'Analytics dashboard for your Kenyan shop: sales trends, revenue and performance — every shilling, in one view.',
+  },
+  '/settings': {
+    title: 'Settings · DukaHub',
+    description: 'Manage your DukaHub shop settings, profile and preferences.',
+  },
+  '/reset-password': {
+    title: 'Reset Password · DukaHub',
+    description: 'Reset your DukaHub account password securely and get back to running your shop.',
+  },
+  '/onboarding': {
+    title: 'Welcome to DukaHub',
+    description: 'Set up your DukaHub shop in under a minute — free forever, no card required.',
+  },
 };
 
 /**
  * SeoTracker — fires a page_view on every route change (dataLayer + Supabase)
- * and keeps document.title in sync with the current page.
+ * and keeps document.title + meta description in sync with the current page
+ * so search engines and social crawlers see per-page metadata.
  */
 function SeoTracker() {
   const location = useLocation();
   const { trackPageView } = useAnalytics();
 
   useEffect(() => {
-    const title = ROUTE_TITLES[location.pathname] || ROUTE_TITLES['/'];
-    if (document.title !== title) document.title = title;
+    const meta = ROUTE_META[location.pathname] || ROUTE_META['/'];
+
+    if (document.title !== meta.title) document.title = meta.title;
+
+    let descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!descEl) {
+      descEl = document.createElement('meta');
+      descEl.name = 'description';
+      document.head.appendChild(descEl);
+    }
+    if (descEl.content !== meta.description) descEl.content = meta.description;
+
+    const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    const ogDesc = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
+    if (ogTitle) ogTitle.content = meta.title;
+    if (ogDesc) ogDesc.content = meta.description;
+
     trackPageView(location.pathname + location.search);
   }, [location.pathname, location.search, trackPageView]);
 
